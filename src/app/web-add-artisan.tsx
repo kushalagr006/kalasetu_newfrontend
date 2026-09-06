@@ -164,25 +164,6 @@ export default function WebAddArtisanScreen() {
 
           {/* Right Header Controls */}
           <View style={styles.headerRightActions}>
-            {/* Language Switcher */}
-            <View style={styles.langSegmentContainer}>
-              <TouchableOpacity
-                style={[styles.langSegmentBtn, selectedLang === 'hi' && styles.langSegmentBtnActive]}
-                onPress={() => setSelectedLang('hi')}
-              >
-                <Text style={[styles.langSegmentText, selectedLang === 'hi' && styles.langSegmentTextActive]}>
-                  हिंदी
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.langSegmentBtn, selectedLang === 'en' && styles.langSegmentBtnActive]}
-                onPress={() => setSelectedLang('en')}
-              >
-                <Text style={[styles.langSegmentText, selectedLang === 'en' && styles.langSegmentTextActive]}>
-                  En
-                </Text>
-              </TouchableOpacity>
-            </View>
 
             {/* Notification Bell */}
             <TouchableOpacity style={styles.notificationBellBtn}>
@@ -236,7 +217,7 @@ export default function WebAddArtisanScreen() {
 
                   {/* 2. नया कारीगर जोड़ें (Active) */}
                   <TouchableOpacity style={[styles.sidebarNavItem, styles.sidebarNavItemActive]}>
-                    <Ionicons name="person-add" size={18} color="#2E7D32" style={{ marginRight: 12 }} />
+                    <Ionicons name="person-add" size={18} color="#3B6029" style={{ marginRight: 12 }} />
                     <Text style={[styles.sidebarNavText, styles.sidebarNavTextActive]}>{t.addArtisan}</Text>
                   </TouchableOpacity>
 
@@ -298,7 +279,7 @@ export default function WebAddArtisanScreen() {
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
                   <TouchableOpacity onPress={() => router.push('/web-helper')} activeOpacity={0.7}>
-                    <Text style={[styles.breadcrumbText, { color: '#2E7D32', fontWeight: 'bold' }]}>
+                    <Text style={[styles.breadcrumbText, { color: '#3B6029', fontWeight: 'bold' }]}>
                       {isHindi ? 'डैशबोर्ड' : 'Dashboard'}
                     </Text>
                   </TouchableOpacity>
@@ -311,7 +292,7 @@ export default function WebAddArtisanScreen() {
 
               {/* Data Security Badge Box */}
               <View style={styles.dataSecurityCard}>
-                <Ionicons name="shield-checkmark" size={24} color="#2E7D32" style={{ marginRight: 10 }} />
+                <Ionicons name="shield-checkmark" size={24} color="#3B6029" style={{ marginRight: 10 }} />
                 <View>
                   <Text style={styles.dataSecurityTitle}>{t.dataSecurityTitle}</Text>
                   <Text style={styles.dataSecuritySub}>{t.dataSecuritySub}</Text>
@@ -369,7 +350,7 @@ export default function WebAddArtisanScreen() {
                     <Text style={styles.fieldLabelText}>{t.photoLabel}</Text>
                     <View style={styles.photoDashedBox}>
                       <View style={styles.cameraIconCircle}>
-                        <Ionicons name="camera-outline" size={24} color="#2E7D32" />
+                        <Ionicons name="camera-outline" size={24} color="#3B6029" />
                       </View>
                       <Text style={styles.uploadPhotoBtnText}>{t.uploadPhotoBtn}</Text>
                       <Text style={styles.uploadPhotoLimitText}>{t.uploadPhotoLimit}</Text>
@@ -506,14 +487,14 @@ export default function WebAddArtisanScreen() {
                 {/* Benefits Card */}
                 <View style={styles.benefitsCard}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
-                    <Ionicons name="people-outline" size={20} color="#2E7D32" style={{ marginRight: 8 }} />
+                    <Ionicons name="people-outline" size={20} color="#3B6029" style={{ marginRight: 8 }} />
                     <Text style={styles.benefitsCardTitle}>{t.benefitsTitle}</Text>
                   </View>
 
                   {/* Item 1 */}
                   <View style={styles.benefitItemRow}>
                     <View style={styles.benefitIconCircle}>
-                      <Ionicons name="person-outline" size={16} color="#2E7D32" />
+                      <Ionicons name="person-outline" size={16} color="#3B6029" />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.benefitItemTitle}>{t.benefit1Title}</Text>
@@ -524,7 +505,7 @@ export default function WebAddArtisanScreen() {
                   {/* Item 2 */}
                   <View style={styles.benefitItemRow}>
                     <View style={styles.benefitIconCircle}>
-                      <Ionicons name="bag-handle-outline" size={16} color="#2E7D32" />
+                      <Ionicons name="bag-handle-outline" size={16} color="#3B6029" />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.benefitItemTitle}>{t.benefit2Title}</Text>
@@ -535,7 +516,7 @@ export default function WebAddArtisanScreen() {
                   {/* Item 3 */}
                   <View style={styles.benefitItemRow}>
                     <View style={styles.benefitIconCircle}>
-                      <Ionicons name="shield-checkmark-outline" size={16} color="#2E7D32" />
+                      <Ionicons name="shield-checkmark-outline" size={16} color="#3B6029" />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.benefitItemTitle}>{t.benefit3Title}</Text>
@@ -664,7 +645,7 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#3B6029',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 8,
@@ -717,7 +698,7 @@ const styles = StyleSheet.create({
   subBrandTagText: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: '#2E7D32',
+    color: '#3B6029',
   },
   sidebarTopGroup: {
     gap: 4,
@@ -747,7 +728,7 @@ const styles = StyleSheet.create({
     color: '#444444',
   },
   sidebarNavTextActive: {
-    color: '#2E7D32',
+    color: '#3B6029',
     fontWeight: 'bold',
   },
   sidebarHelpCard: {
@@ -770,7 +751,7 @@ const styles = StyleSheet.create({
   },
   sidebarHelpOutlineBtn: {
     borderWidth: 1,
-    borderColor: '#2E7D32',
+    borderColor: '#3B6029',
     borderRadius: 6,
     paddingVertical: 4,
     alignItems: 'center',
@@ -778,7 +759,7 @@ const styles = StyleSheet.create({
   sidebarHelpOutlineBtnText: {
     fontSize: 11,
     fontWeight: 'bold',
-    color: '#2E7D32',
+    color: '#3B6029',
   },
 
   /* Scroll Body */
@@ -824,7 +805,7 @@ const styles = StyleSheet.create({
   dataSecurityTitle: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#2E7D32',
+    color: '#3B6029',
   },
   dataSecuritySub: {
     fontSize: 11,
@@ -856,7 +837,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stepCircleActive: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#3B6029',
   },
   stepCircleInactive: {
     backgroundColor: '#E0E0E0',
@@ -884,7 +865,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   stepLineActive: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#3B6029',
   },
   stepLineInactive: {
     backgroundColor: '#E0E0E0',
@@ -946,7 +927,7 @@ const styles = StyleSheet.create({
   uploadPhotoBtnText: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#2E7D32',
+    color: '#3B6029',
   },
   uploadPhotoLimitText: {
     fontSize: 10,
@@ -1068,7 +1049,7 @@ const styles = StyleSheet.create({
   },
   cancelOutlineBtn: {
     borderWidth: 1,
-    borderColor: '#2E7D32',
+    borderColor: '#3B6029',
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 24,
@@ -1076,10 +1057,10 @@ const styles = StyleSheet.create({
   cancelOutlineBtnText: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#2E7D32',
+    color: '#3B6029',
   },
   proceedSolidBtn: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#3B6029',
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 24,
@@ -1105,7 +1086,7 @@ const styles = StyleSheet.create({
   benefitsCardTitle: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: '#2E7D32',
+    color: '#3B6029',
   },
   benefitItemRow: {
     flexDirection: 'row',

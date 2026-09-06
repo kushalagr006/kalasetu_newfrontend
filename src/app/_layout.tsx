@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme, View, Image, StyleSheet, StatusBar } from 'react-native';
+import { View, Image, StyleSheet, StatusBar } from 'react-native';
 import { Slot } from 'expo-router';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [isAppReady, setIsAppReady] = useState(false);
 
   useEffect(() => {
@@ -39,11 +37,7 @@ export default function RootLayout() {
     );
   }
 
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Slot />
-    </ThemeProvider>
-  );
+  return <Slot />;
 }
 
 const styles = StyleSheet.create({

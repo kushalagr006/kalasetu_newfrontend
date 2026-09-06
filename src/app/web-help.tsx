@@ -62,7 +62,7 @@ export default function WebHelpPortalScreen() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= 850;
 
-  const [selectedLang, setSelectedLang] = useState<LangCode>((params.lang as LangCode) || 'hi');
+  const [selectedLang, setSelectedLang] = useState<LangCode>((params.lang as LangCode) || 'en');
   const [searchQuery, setSearchQuery] = useState('');
   const [openFaqId, setOpenFaqId] = useState<string | null>('1');
 
@@ -91,13 +91,6 @@ export default function WebHelpPortalScreen() {
           </View>
 
           <View style={styles.headerRightGroup}>
-            <TouchableOpacity
-              style={styles.langBtn}
-              onPress={() => setSelectedLang(isHindi ? 'en' : 'hi')}
-            >
-              <Ionicons name="globe-outline" size={14} color="#C65A28" style={{ marginRight: 4 }} />
-              <Text style={styles.langBtnText}>{isHindi ? 'English' : 'हिंदी'}</Text>
-            </TouchableOpacity>
 
             <View style={styles.helplineBadge}>
               <Ionicons name="call" size={16} color="#3B6029" style={{ marginRight: 6 }} />

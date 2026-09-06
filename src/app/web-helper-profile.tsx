@@ -121,24 +121,6 @@ export default function WebHelperProfileScreen() {
           </TouchableOpacity>
 
           <View style={styles.headerRightActions}>
-            <View style={styles.langSegmentContainer}>
-              <TouchableOpacity
-                style={[styles.langSegmentBtn, selectedLang === 'hi' && styles.langSegmentBtnActive]}
-                onPress={() => setSelectedLang('hi')}
-              >
-                <Text style={[styles.langSegmentText, selectedLang === 'hi' && styles.langSegmentTextActive]}>
-                  हिंदी
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.langSegmentBtn, selectedLang === 'en' && styles.langSegmentBtnActive]}
-                onPress={() => setSelectedLang('en')}
-              >
-                <Text style={[styles.langSegmentText, selectedLang === 'en' && styles.langSegmentTextActive]}>
-                  En
-                </Text>
-              </TouchableOpacity>
-            </View>
 
             <TouchableOpacity style={styles.notificationBellBtn}>
               <Ionicons name="notifications-outline" size={20} color="#333333" />

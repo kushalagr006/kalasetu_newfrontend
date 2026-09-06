@@ -183,25 +183,6 @@ export default function WebHelperDashboardScreen() {
 
           {/* Right Header Controls (Notification Bell & User Badge) */}
           <View style={styles.headerRightActions}>
-            {/* Language Switcher */}
-            <View style={styles.langSegmentContainer}>
-              <TouchableOpacity
-                style={[styles.langSegmentBtn, selectedLang === 'hi' && styles.langSegmentBtnActive]}
-                onPress={() => setSelectedLang('hi')}
-              >
-                <Text style={[styles.langSegmentText, selectedLang === 'hi' && styles.langSegmentTextActive]}>
-                  हिंदी
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.langSegmentBtn, selectedLang === 'en' && styles.langSegmentBtnActive]}
-                onPress={() => setSelectedLang('en')}
-              >
-                <Text style={[styles.langSegmentText, selectedLang === 'en' && styles.langSegmentTextActive]}>
-                  En
-                </Text>
-              </TouchableOpacity>
-            </View>
 
             {/* Notification Bell */}
             <TouchableOpacity style={styles.notificationBellBtn}>

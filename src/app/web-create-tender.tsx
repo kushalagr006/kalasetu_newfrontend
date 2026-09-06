@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useGlobalLang, LangCode } from '@/utils/languageStore';
+import { GovtSidebar, GovtTopHeader } from '@/components/GovtLayout';
 
 type SupplyType = 'goods' | 'service' | 'both';
 
@@ -60,183 +61,12 @@ export default function WebCreateTenderScreen() {
       <View style={styles.container}>
         <View style={styles.mainLayoutRow}>
           {/* 1. Unified Left Sidebar Navigation */}
-          {isDesktop && (
-            <View style={styles.sidebarCol}>
-              <View style={styles.sidebarTopGroup}>
-                {/* Brand Logo Header */}
-                <View style={styles.sidebarBrandRow}>
-                  <Image
-                    source={require('@/assets/images/logo_icon.png')}
-                    style={styles.sidebarLogoImage}
-                    resizeMode="contain"
-                  />
-                </View>
-
-                {/* Sidebar Navigation Items */}
-                <View style={styles.sidebarMenuGroup}>
-                  {/* 1. डैशबोर्ड */}
-                  <TouchableOpacity
-                    style={styles.sidebarNavItem}
-                    onPress={() => router.push('/web-govt')}
-                  >
-                    <Ionicons name="home-outline" size={18} color="#555555" style={{ marginRight: 12 }} />
-                    <Text style={styles.sidebarNavText}>{isHindi ? 'डैशबोर्ड' : 'Dashboard'}</Text>
-                  </TouchableOpacity>
-
-                  {/* 2. नया टेंडर बनाएं (Active) */}
-                  <TouchableOpacity style={[styles.sidebarNavItem, styles.sidebarNavItemActive]}>
-                    <Ionicons name="add-circle" size={18} color="#E65100" style={{ marginRight: 12 }} />
-                    <Text style={[styles.sidebarNavText, styles.sidebarNavTextActive]}>
-                      {isHindi ? 'नया टेंडर बनाएं' : 'Create New Tender'}
-                    </Text>
-                  </TouchableOpacity>
-
-                  {/* 3. एक्टिव टेंडर */}
-                  <TouchableOpacity
-                    style={styles.sidebarNavItem}
-                    onPress={() => router.push('/web-active-tenders')}
-                  >
-                    <Ionicons name="document-text-outline" size={18} color="#555555" style={{ marginRight: 12 }} />
-                    <Text style={styles.sidebarNavText}>{isHindi ? 'एक्टिव टेंडर' : 'Active Tenders'}</Text>
-                  </TouchableOpacity>
-
-                  {/* 4. मेरे टेंडर */}
-                  <TouchableOpacity
-                    style={styles.sidebarNavItem}
-                    onPress={() => router.push('/web-my-tenders')}
-                  >
-                    <Ionicons name="folder-outline" size={18} color="#555555" style={{ marginRight: 12 }} />
-                    <Text style={styles.sidebarNavText}>{isHindi ? 'मेरे टेंडर' : 'My Tenders'}</Text>
-                  </TouchableOpacity>
-
-                  {/* 5. बिड प्राप्त */}
-                  <TouchableOpacity
-                    style={styles.sidebarNavItem}
-                    onPress={() => router.push('/web-bids-received')}
-                  >
-                    <Ionicons name="people-outline" size={18} color="#555555" style={{ marginRight: 12 }} />
-                    <Text style={styles.sidebarNavText}>{isHindi ? 'बिड प्राप्त' : 'Bids Received'}</Text>
-                  </TouchableOpacity>
-
-                  {/* 6. पुरस्कारित टेंडर */}
-                  <TouchableOpacity
-                    style={styles.sidebarNavItem}
-                    onPress={() => router.push('/web-awarded-tenders')}
-                  >
-                    <Ionicons name="trophy-outline" size={18} color="#555555" style={{ marginRight: 12 }} />
-                    <Text style={styles.sidebarNavText}>{isHindi ? 'पुरस्कारित टेंडर' : 'Awarded Tenders'}</Text>
-                  </TouchableOpacity>
-
-                  {/* 7. सूचनाएं */}
-                  <TouchableOpacity
-                    style={styles.sidebarNavItem}
-                    onPress={() => router.push('/web-notifications')}
-                  >
-                    <Ionicons name="notifications-outline" size={18} color="#555555" style={{ marginRight: 12 }} />
-                    <Text style={styles.sidebarNavText}>{isHindi ? 'सूचनाएं' : 'Notifications'}</Text>
-                    <View style={styles.sidebarBadge}>
-                      <Text style={styles.sidebarBadgeText}>2</Text>
-                    </View>
-                  </TouchableOpacity>
-
-                  {/* 8. संदेश */}
-                  <TouchableOpacity
-                    style={styles.sidebarNavItem}
-                    onPress={() => router.push('/web-messages')}
-                  >
-                    <Ionicons name="chatbubble-ellipses-outline" size={18} color="#555555" style={{ marginRight: 12 }} />
-                    <Text style={styles.sidebarNavText}>{isHindi ? 'संदेश' : 'Messages'}</Text>
-                  </TouchableOpacity>
-
-                  {/* 9. सेटिंग्स */}
-                  <TouchableOpacity
-                    style={styles.sidebarNavItem}
-                    onPress={() => router.push('/web-settings')}
-                  >
-                    <Ionicons name="settings-outline" size={18} color="#555555" style={{ marginRight: 12 }} />
-                    <Text style={styles.sidebarNavText}>{isHindi ? 'सेटिंग्स' : 'Settings'}</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* Bottom Sidebar Controls */}
-              <View style={styles.sidebarBottomGroup}>
-                <TouchableOpacity
-                  style={styles.sidebarNavItem}
-                  onPress={() => router.push('/web-profile')}
-                >
-                  <Ionicons name="person-outline" size={18} color="#555555" style={{ marginRight: 12 }} />
-                  <Text style={styles.sidebarNavText}>{isHindi ? 'प्रोफाइल' : 'Profile'}</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.sidebarNavItem}
-                  onPress={() => router.push('/web-login')}
-                >
-                  <Ionicons name="log-out-outline" size={18} color="#555555" style={{ marginRight: 12 }} />
-                  <Text style={styles.sidebarNavText}>{isHindi ? 'लॉगआउट' : 'Logout'}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
+          {isDesktop && <GovtSidebar activeKey="tenders" />}
 
           {/* 2. Main Content Area */}
           <View style={styles.contentCol}>
             {/* Header Bar */}
-            <View style={styles.headerBar}>
-              <TouchableOpacity style={styles.menuToggleBtn}>
-                <Ionicons name="menu" size={24} color="#1A1A1A" />
-              </TouchableOpacity>
-
-              <View style={styles.headerRightGroup}>
-                {/* 1-Click Language Switcher (Segmented Toggle) */}
-                <View style={styles.langSegmentContainer}>
-                  <Ionicons name="globe-outline" size={16} color="#E65100" style={{ marginRight: 6 }} />
-                  <TouchableOpacity
-                    style={[styles.langSegmentBtn, selectedLang === 'hi' && styles.langSegmentBtnActive]}
-                    onPress={() => setSelectedLang('hi')}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={[styles.langSegmentText, selectedLang === 'hi' && styles.langSegmentTextActive]}>
-                      हिंदी
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[styles.langSegmentBtn, selectedLang === 'en' && styles.langSegmentBtnActive]}
-                    onPress={() => setSelectedLang('en')}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={[styles.langSegmentText, selectedLang === 'en' && styles.langSegmentTextActive]}>
-                      English
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                {/* Notification Bell */}
-                <TouchableOpacity
-                  style={styles.notifBtn}
-                  onPress={() => router.push('/web-notifications')}
-                >
-                  <Ionicons name="notifications-outline" size={22} color="#444444" />
-                  <View style={styles.notifBadge}>
-                    <Text style={styles.notifBadgeText}>2</Text>
-                  </View>
-                </TouchableOpacity>
-
-                {/* State Govt Badge */}
-                <View style={styles.govtDeptBadge}>
-                  <View style={styles.govtEmblemCircle}>
-                    <Ionicons name="shield" size={14} color="#FFFFFF" />
-                  </View>
-                  <View>
-                    <Text style={styles.govtDeptName}>{isHindi ? 'छत्तीसगढ़ शासन' : 'Govt of Chhattisgarh'}</Text>
-                    <Text style={styles.govtStateSubtitle}>{isHindi ? 'खरीद विभाग' : 'Procurement Dept'}</Text>
-                  </View>
-                  <Ionicons name="chevron-down" size={14} color="#777777" style={{ marginLeft: 6 }} />
-                </View>
-              </View>
-            </View>
+            <GovtTopHeader />
 
             {/* Scrollable Form Content */}
             <ScrollView
@@ -765,7 +595,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#3B6029',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 8,

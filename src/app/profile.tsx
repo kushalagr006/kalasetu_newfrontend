@@ -4,16 +4,15 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Image,
   ScrollView,
   StatusBar,
   Platform,
+  Alert,
   Modal,
   FlatList,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons, Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 
 type LangCode = 'hi' | 'en';
@@ -26,293 +25,248 @@ const LANGUAGES: { code: LangCode; label: string }[] = [
 
 const TRANSLATIONS: Record<LangCode, {
   headerTitle: string;
-  artisanName: string;
-  artisanCraft: string;
-  artisanLocation: string;
-  storeNameLabel: string;
-  storeNameVal: string;
-  joinedLabel: string;
-  joinedVal: string;
-  menuPersonal: string;
-  menuShop: string;
-  menuBank: string;
-  menuNotifications: string;
-  menuHelp: string;
-  menuAbout: string;
+  shgName: string;
+  location: string;
+  members: string;
+  joined: string;
+  editBtn: string;
+  contactHeader: string;
+  phoneLabel: string;
+  emailLabel: string;
+  addressLabel: string;
+  addressVal: string;
+  shgHeader: string;
+  craftLabel: string;
+  craftVal: string;
+  memberCountLabel: string;
+  aboutLabel: string;
+  aboutVal: string;
   logoutBtn: string;
-  logoutAlertTitle: string;
-  logoutAlertMsg: string;
+  logoutTitle: string;
+  logoutMsg: string;
+  cancel: string;
   navHome: string;
   navProducts: string;
   navCustomers: string;
   navProfile: string;
   modalTitle: string;
-  notificationAlert: string;
 }> = {
   hi: {
-    headerTitle: 'मेरा प्रोफाइल',
-    artisanName: 'सुनीता देवी',
-    artisanCraft: 'मिट्टी के बर्तन कलाकार',
-    artisanLocation: 'खुरई, मध्य प्रदेश',
-    storeNameLabel: 'स्टोर नाम',
-    storeNameVal: 'सुनीता क्राफ्टस',
-    joinedLabel: 'जुड़े हुए',
-    joinedVal: '15 मई 2024',
-    menuPersonal: 'व्यक्तिगत जानकारी',
-    menuShop: 'मेरी दुकान',
-    menuBank: 'बैंक और भुगतान जानकारी',
-    menuNotifications: 'सूचनाएँ',
-    menuHelp: 'सहायता और सहयोग',
-    menuAbout: 'ऐप के बारे में',
-    logoutBtn: 'लॉग आउट',
-    logoutAlertTitle: 'लॉग आउट करें?',
-    logoutAlertMsg: 'क्या आप सचमुच ऐप से लॉग आउट करना चाहते हैं?',
+    headerTitle: 'प्रोफ़ाइल',
+    shgName: 'सुनीता देवी (कारीगर)',
+    location: 'रामपुर, धमतरी',
+    members: 'कारीगर सदस्य',
+    joined: 'जुड़ी: मई 2025',
+    editBtn: 'संपादित करें',
+    contactHeader: 'संपर्क जानकारी',
+    phoneLabel: 'मोबाइल नंबर',
+    emailLabel: 'ईमेल (यदि है)',
+    addressLabel: 'पूरा पता',
+    addressVal: 'रामपुर गांव, धमतरी,\nछत्तीसगढ़ - 493773',
+    shgHeader: 'प्रोफ़ाइल विवरण',
+    craftLabel: 'हस्तशिल्प प्रकार',
+    craftVal: 'हैंडिक्राफ्ट आइटम',
+    memberCountLabel: 'अनुभव',
+    aboutLabel: 'हमारे बारे में',
+    aboutVal: 'हम सुंदर और गुणवत्तापूर्ण हस्तनिर्मित उत्पाद बनाते हैं।',
+    logoutBtn: 'लॉग आउट (Log Out)',
+    logoutTitle: 'लॉग आउट करें?',
+    logoutMsg: 'क्या आप सचमुच ऐप से लॉग आउट करना चाहते हैं?',
+    cancel: 'रद्द करें',
     navHome: 'होम',
     navProducts: 'उत्पाद',
     navCustomers: 'ग्राहक',
-    navProfile: 'प्रोफाइल',
+    navProfile: 'प्रोफ़ाइल',
     modalTitle: 'भाषा चुनें / Select Language',
-    notificationAlert: 'आपकी 2 नई सूचनाएं मिली हैं!',
   },
   en: {
-    headerTitle: 'My Profile',
-    artisanName: 'Sunita Devi',
-    artisanCraft: 'Pottery Craft Artist',
-    artisanLocation: 'Khurai, Madhya Pradesh',
-    storeNameLabel: 'Store Name',
-    storeNameVal: 'Sunita Crafts',
-    joinedLabel: 'Joined On',
-    joinedVal: '15 May 2024',
-    menuPersonal: 'Personal Information',
-    menuShop: 'My Shop',
-    menuBank: 'Bank & Payment Info',
-    menuNotifications: 'Notifications',
-    menuHelp: 'Help & Support',
-    menuAbout: 'About App',
+    headerTitle: 'Profile',
+    shgName: 'Sunita Devi (Artisan)',
+    location: 'Rampur, Dhamtari',
+    members: 'Artisan Member',
+    joined: 'Joined May 2025',
+    editBtn: 'Edit Profile',
+    contactHeader: 'Contact Information',
+    phoneLabel: 'Mobile Number',
+    emailLabel: 'Email (Optional)',
+    addressLabel: 'Full Address',
+    addressVal: 'Rampur Village, Dhamtari,\nChhattisgarh - 493773',
+    shgHeader: 'Profile Details',
+    craftLabel: 'Craft Type',
+    craftVal: 'Handicraft Items',
+    memberCountLabel: 'Experience',
+    aboutLabel: 'About Us',
+    aboutVal: 'We craft beautiful, high-quality handmade products.',
     logoutBtn: 'Log Out',
-    logoutAlertTitle: 'Log Out?',
-    logoutAlertMsg: 'Are you sure you want to log out of the app?',
+    logoutTitle: 'Log Out?',
+    logoutMsg: 'Are you sure you want to log out?',
+    cancel: 'Cancel',
     navHome: 'Home',
     navProducts: 'Products',
     navCustomers: 'Customers',
     navProfile: 'Profile',
     modalTitle: 'Select Language / भाषा चुनें',
-    notificationAlert: 'You have 2 new notifications!',
   },
 };
 
 export default function ProfileScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ lang?: string }>();
-
   const initialLang: LangCode = (params.lang as LangCode) || 'hi';
+
   const [selectedLang, setSelectedLang] = useState<LangCode>(initialLang);
   const [isLangModalVisible, setIsLangModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('profile');
 
   const t = TRANSLATIONS[selectedLang];
-
-  const handleLogout = () => {
-    Alert.alert(
-      t.logoutAlertTitle,
-      t.logoutAlertMsg,
-      [
-        { text: selectedLang === 'hi' ? 'रद्द करें' : 'Cancel', style: 'cancel' },
-        {
-          text: t.logoutBtn,
-          style: 'destructive',
-          onPress: () => router.replace('/'),
-        },
-      ],
-      { cancelable: true }
-    );
-  };
-
-  const handleMenuPress = (menuName: string) => {
-    alert(`${menuName} ${selectedLang === 'hi' ? 'सेक्शन खुल रहा है...' : 'section opening...'}`);
-  };
+  const currentLangLabel = LANGUAGES.find((l) => l.code === selectedLang)?.label || 'हिंदी';
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" translucent={false} />
       <View style={styles.container}>
+        {/* Top Header Row */}
+        <View style={styles.headerRow}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.headerTitle}>{t.headerTitle}</Text>
+            <TouchableOpacity
+              style={styles.langSelector}
+              onPress={() => setIsLangModalVisible(true)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.langText}>{currentLangLabel}</Text>
+              <Ionicons name="chevron-down" size={14} color="#2C2C2C" />
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            style={styles.notificationButton}
+            onPress={() => router.push({ pathname: '/notifications', params: { lang: selectedLang } })}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="notifications-outline" size={26} color="#1A1A1A" />
+            <View style={styles.redBadgeDot} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Scrollable Body Content */}
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Header Row: Title & Notification Bell */}
-          <View style={styles.headerRow}>
-            <Text style={styles.headerTitle}>{t.headerTitle}</Text>
-
-            <TouchableOpacity
-              style={styles.notificationButton}
-              onPress={() => router.push({ pathname: '/notifications', params: { lang: selectedLang } })}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="notifications-outline" size={26} color="#1A1A1A" />
-              <View style={styles.redBadgeDot} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Artisan Profile Card */}
-          <TouchableOpacity style={styles.profileCard} activeOpacity={0.9}>
-            {/* Top Artisan Info Section */}
-            <View style={styles.profileMainRow}>
-              <View style={styles.avatarWrapper}>
-                <Image
-                  source={require('@/assets/images/pottery_avatar.png')}
-                  style={styles.avatarImage}
-                  resizeMode="cover"
-                />
-                <View style={styles.cameraBadgeCircle}>
-                  <Ionicons name="camera" size={12} color="#FFFFFF" />
-                </View>
+          {/* Top Profile Hero Card */}
+          <View style={styles.profileHeroCard}>
+            <View style={styles.heroTopRow}>
+              <View style={styles.womenAvatarGroupCircle}>
+                <Ionicons name="people" size={38} color="#3B6029" />
               </View>
 
-              <View style={styles.artisanTextContainer}>
-                <Text style={styles.artisanName}>{t.artisanName}</Text>
-                <Text style={styles.artisanCraft}>{t.artisanCraft}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.shgTitleText}>{t.shgName}</Text>
 
-                <View style={styles.locationRow}>
-                  <Ionicons name="location-outline" size={14} color="#555555" style={{ marginRight: 4 }} />
-                  <Text style={styles.artisanLocation}>{t.artisanLocation}</Text>
+                <View style={styles.infoMetaRow}>
+                  <Ionicons name="location-outline" size={14} color="#3B6029" />
+                  <Text style={styles.infoMetaText}>{t.location}</Text>
                 </View>
-              </View>
 
-              <Ionicons name="chevron-forward" size={20} color="#777777" />
-            </View>
-
-            <View style={styles.cardDividerLine} />
-
-            {/* Bottom Store & Joined Metrics */}
-            <View style={styles.profileSubMetricsRow}>
-              {/* Store Name */}
-              <View style={styles.subMetricItem}>
-                <View style={styles.subMetricIconCircle}>
-                  <Ionicons name="storefront-outline" size={20} color="#3B6029" />
+                <View style={styles.infoMetaRow}>
+                  <Ionicons name="people-outline" size={14} color="#3B6029" />
+                  <Text style={styles.infoMetaText}>{t.members}</Text>
                 </View>
-                <View>
-                  <Text style={styles.subMetricLabel}>{t.storeNameLabel}</Text>
-                  <Text style={styles.subMetricVal}>{t.storeNameVal}</Text>
-                </View>
-              </View>
 
-              <View style={styles.subMetricVerticalDivider} />
-
-              {/* Joined On */}
-              <View style={styles.subMetricItem}>
-                <View style={styles.subMetricIconCircle}>
-                  <Ionicons name="calendar-outline" size={20} color="#3B6029" />
-                </View>
-                <View>
-                  <Text style={styles.subMetricLabel}>{t.joinedLabel}</Text>
-                  <Text style={styles.subMetricVal}>{t.joinedVal}</Text>
+                <View style={styles.infoMetaRow}>
+                  <Ionicons name="calendar-outline" size={14} color="#3B6029" />
+                  <Text style={styles.infoMetaText}>{t.joined}</Text>
                 </View>
               </View>
             </View>
-          </TouchableOpacity>
 
-          {/* Account Settings Menu Card */}
-          <View style={styles.menuContainerCard}>
-            {/* 1. Personal Information */}
-            <TouchableOpacity
-              style={styles.menuItemRow}
-              onPress={() => handleMenuPress(t.menuPersonal)}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="person-outline" size={22} color="#3B6029" style={styles.menuIcon} />
-              <Text style={styles.menuItemText}>{t.menuPersonal}</Text>
-              <Ionicons name="chevron-forward" size={18} color="#777777" />
-            </TouchableOpacity>
-
-            <View style={styles.menuDividerLine} />
-
-            {/* 2. My Shop */}
-            <TouchableOpacity
-              style={styles.menuItemRow}
-              onPress={() => handleMenuPress(t.menuShop)}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="storefront-outline" size={22} color="#3B6029" style={styles.menuIcon} />
-              <Text style={styles.menuItemText}>{t.menuShop}</Text>
-              <Ionicons name="chevron-forward" size={18} color="#777777" />
-            </TouchableOpacity>
-
-            <View style={styles.menuDividerLine} />
-
-            {/* 3. Bank & Payment Info */}
-            <TouchableOpacity
-              style={styles.menuItemRow}
-              onPress={() => handleMenuPress(t.menuBank)}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="business-outline" size={22} color="#3B6029" style={styles.menuIcon} />
-              <Text style={styles.menuItemText}>{t.menuBank}</Text>
-              <Ionicons name="chevron-forward" size={18} color="#777777" />
-            </TouchableOpacity>
-
-            <View style={styles.menuDividerLine} />
-
-            {/* 4. Notifications */}
-            <TouchableOpacity
-              style={styles.menuItemRow}
-              onPress={() => handleMenuPress(t.menuNotifications)}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="notifications-outline" size={22} color="#3B6029" style={styles.menuIcon} />
-              <Text style={styles.menuItemText}>{t.menuNotifications}</Text>
-              <Ionicons name="chevron-forward" size={18} color="#777777" />
-            </TouchableOpacity>
-
-            <View style={styles.menuDividerLine} />
-
-            {/* 5. Help & Support */}
-            <TouchableOpacity
-              style={styles.menuItemRow}
-              onPress={() => handleMenuPress(t.menuHelp)}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="help-circle-outline" size={22} color="#3B6029" style={styles.menuIcon} />
-              <Text style={styles.menuItemText}>{t.menuHelp}</Text>
-              <Ionicons name="chevron-forward" size={18} color="#777777" />
-            </TouchableOpacity>
-
-            <View style={styles.menuDividerLine} />
-
-            {/* 6. About App */}
-            <TouchableOpacity
-              style={styles.menuItemRow}
-              onPress={() => handleMenuPress(t.menuAbout)}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="information-circle-outline" size={22} color="#3B6029" style={styles.menuIcon} />
-              <Text style={styles.menuItemText}>{t.menuAbout}</Text>
-              <Ionicons name="chevron-forward" size={18} color="#777777" />
+            <TouchableOpacity style={styles.editProfileBtn} activeOpacity={0.8}>
+              <Ionicons name="pencil-outline" size={15} color="#3B6029" />
+              <Text style={styles.editProfileBtnText}>{t.editBtn}</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Logout Button */}
+          {/* संपर्क जानकारी Section */}
+          <Text style={styles.sectionHeaderTitle}>{t.contactHeader}</Text>
+          <View style={styles.infoCardBox}>
+            <View style={styles.infoRowItem}>
+              <Ionicons name="call-outline" size={20} color="#3B6029" style={styles.rowIcon} />
+              <Text style={styles.rowLabelText}>{t.phoneLabel}</Text>
+              <Text style={styles.rowValueText}>+91 98765 43210</Text>
+            </View>
+
+            <View style={styles.rowDividerLine} />
+
+            <View style={styles.infoRowItem}>
+              <Ionicons name="mail-outline" size={20} color="#3B6029" style={styles.rowIcon} />
+              <Text style={styles.rowLabelText}>{t.emailLabel}</Text>
+              <Text style={styles.rowValueText}>sakhi.shg@gmail.com</Text>
+            </View>
+
+            <View style={styles.rowDividerLine} />
+
+            <View style={styles.infoRowItem}>
+              <Ionicons name="location-outline" size={20} color="#3B6029" style={styles.rowIcon} />
+              <Text style={styles.rowLabelText}>{t.addressLabel}</Text>
+              <Text style={styles.rowValueAddressText}>{t.addressVal}</Text>
+            </View>
+          </View>
+
+          {/* SHG विवरण Section */}
+          <Text style={styles.sectionHeaderTitle}>{t.shgHeader}</Text>
+          <View style={styles.infoCardBox}>
+            <View style={styles.infoRowItem}>
+              <Ionicons name="basket-outline" size={20} color="#3B6029" style={styles.rowIcon} />
+              <Text style={styles.rowLabelText}>{t.craftLabel}</Text>
+              <Text style={styles.rowValueText}>{t.craftVal}</Text>
+            </View>
+
+            <View style={styles.rowDividerLine} />
+
+            <View style={styles.infoRowItem}>
+              <Ionicons name="people-outline" size={20} color="#3B6029" style={styles.rowIcon} />
+              <Text style={styles.rowLabelText}>{t.memberCountLabel}</Text>
+              <Text style={styles.rowValueText}>12</Text>
+            </View>
+
+            <View style={styles.rowDividerLine} />
+
+            <View style={styles.infoRowItem}>
+              <Ionicons name="information-circle-outline" size={20} color="#3B6029" style={styles.rowIcon} />
+              <Text style={styles.rowLabelText}>{t.aboutLabel}</Text>
+              <Text style={styles.rowValueBodyText}>{t.aboutVal}</Text>
+            </View>
+          </View>
+
+          {/* Log Out Button */}
           <TouchableOpacity
-            style={styles.logoutButton}
-            onPress={handleLogout}
-            activeOpacity={0.8}
+            style={styles.logoutBtn}
+            onPress={() => {
+              if (Platform.OS === 'web') {
+                if (window.confirm(t.logoutMsg)) {
+                  router.replace('/');
+                }
+              } else {
+                Alert.alert(
+                  t.logoutTitle,
+                  t.logoutMsg,
+                  [
+                    { text: t.cancel, style: 'cancel' },
+                    { text: t.logoutBtn, style: 'destructive', onPress: () => router.replace('/') },
+                  ]
+                );
+              }
+            }}
+            activeOpacity={0.85}
           >
-            <Feather name="log-out" size={20} color="#E53935" style={{ marginRight: 8 }} />
-            <Text style={styles.logoutText}>{t.logoutBtn}</Text>
+            <Ionicons name="log-out-outline" size={20} color="#D32F2F" style={{ marginRight: 8 }} />
+            <Text style={styles.logoutBtnText}>{t.logoutBtn}</Text>
           </TouchableOpacity>
-
-          {/* Village Line Art Background Overlay */}
-          <View style={styles.sketchWrapper}>
-            <Image
-              source={require('@/assets/images/village_sketch.png')}
-              style={styles.sketchImage}
-              resizeMode="contain"
-            />
-          </View>
         </ScrollView>
 
-        {/* Bottom Navigation Bar (4 Tabs) */}
+        {/* Floating Bottom Navigation Bar (4 Tabs) */}
         <View style={styles.bottomNavContainer}>
           {/* Tab 1: Home */}
           <TouchableOpacity
@@ -350,12 +304,58 @@ export default function ProfileScreen() {
             onPress={() => setActiveTab('profile')}
             activeOpacity={0.7}
           >
-            <Ionicons name="person" size={22} color="#3B6029" />
-            <Text style={[styles.navTabText, styles.navTabTextActive]}>
+            <Ionicons name="person" size={22} color="#1976D2" />
+            <Text style={[styles.navTabText, styles.navTabTextActiveProfile]}>
               {t.navProfile}
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Language Selection Modal */}
+        <Modal
+          visible={isLangModalVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setIsLangModalVisible(false)}
+        >
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setIsLangModalVisible(false)}
+          >
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>{t.modalTitle}</Text>
+              <FlatList
+                data={LANGUAGES}
+                keyExtractor={(item) => item.code}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[
+                      styles.langOptionItem,
+                      selectedLang === item.code ? styles.langOptionSelected : null,
+                    ]}
+                    onPress={() => {
+                      setSelectedLang(item.code);
+                      setIsLangModalVisible(false);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.langOptionText,
+                        selectedLang === item.code ? styles.langOptionTextSelected : null,
+                      ]}
+                    >
+                      {item.label}
+                    </Text>
+                    {selectedLang === item.code && (
+                      <Ionicons name="checkmark" size={20} color="#3B6029" />
+                    )}
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          </TouchableOpacity>
+        </Modal>
       </View>
     </SafeAreaView>
   );
@@ -370,25 +370,39 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAF8F5',
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 24,
-  },
-  /* Header Row */
+
+  /* Top Header Row */
   headerRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight ? 8 : 12) : 8,
     paddingBottom: 16,
   },
+  headerLeft: {
+    gap: 4,
+  },
   headerTitle: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#3B6029',
+    color: '#1A1A1A',
+  },
+  langSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EFEFEA',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    gap: 4,
+    marginTop: 2,
+  },
+  langText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#2C2C2C',
   },
   notificationButton: {
     width: 44,
@@ -410,174 +424,150 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: '#FF3B30',
   },
-  /* Artisan Profile Card */
-  profileCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    marginHorizontal: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#F0EFEA',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-  },
-  profileMainRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  avatarWrapper: {
-    position: 'relative',
-    marginRight: 14,
-  },
-  avatarImage: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-  },
-  cameraBadgeCircle: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#3B6029',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
-  },
-  artisanTextContainer: {
+
+  /* Scrollable Body */
+  scrollView: {
     flex: 1,
   },
-  artisanName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1A1A1A',
-    marginBottom: 2,
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+    gap: 14,
   },
-  artisanCraft: {
-    fontSize: 14,
-    color: '#555555',
-    marginBottom: 4,
+
+  /* Profile Hero Card */
+  profileHeroCard: {
+    backgroundColor: '#F0F7ED',
+    borderRadius: 20,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#E2E0D8',
+    gap: 12,
   },
-  locationRow: {
+  heroTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 14,
   },
-  artisanLocation: {
-    fontSize: 13,
-    color: '#555555',
-  },
-  cardDividerLine: {
-    height: 1,
-    backgroundColor: '#F2F1EC',
-    marginBottom: 14,
-  },
-  profileSubMetricsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-  },
-  subMetricItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  subMetricIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#F5ECE6',
+  womenAvatarGroupCircle: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: '#EAF2E8',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 10,
   },
-  subMetricLabel: {
-    fontSize: 11,
-    color: '#777777',
-    marginBottom: 1,
-  },
-  subMetricVal: {
-    fontSize: 13,
+  shgTitleText: {
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#1A1A1A',
+    marginBottom: 4,
   },
-  subMetricVerticalDivider: {
-    width: 1,
-    height: 32,
-    backgroundColor: '#F0EFEA',
+  infoMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 2,
   },
-  /* Account Settings Menu Card */
-  menuContainerCard: {
+  infoMetaText: {
+    fontSize: 12,
+    color: '#3B6029',
+  },
+  editProfileBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'flex-end',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#3B6029',
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    gap: 6,
+    marginTop: -10,
+  },
+  editProfileBtnText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#3B6029',
+  },
+
+  /* Section Title */
+  sectionHeaderTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#3B6029',
+    marginTop: 4,
+  },
+
+  /* Info Card Box Container */
+  infoCardBox: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    paddingVertical: 6,
-    marginHorizontal: 20,
-    marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#F0EFEA',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
+    borderColor: '#EBEBEB',
+    paddingVertical: 4,
   },
-  menuItemRow: {
+  infoRowItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 14,
     paddingHorizontal: 16,
   },
-  menuIcon: {
-    marginRight: 14,
+  rowIcon: {
+    marginRight: 12,
   },
-  menuItemText: {
+  rowLabelText: {
+    fontSize: 13,
+    color: '#555555',
     flex: 1,
-    fontSize: 16,
-    fontWeight: '500',
+  },
+  rowValueText: {
+    fontSize: 13,
+    fontWeight: 'bold',
     color: '#1A1A1A',
   },
-  menuDividerLine: {
-    height: 1,
-    backgroundColor: '#F5F4EF',
-    marginLeft: 52,
+  rowValueAddressText: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#1A1A1A',
+    textAlign: 'right',
+    lineHeight: 18,
   },
+  rowValueBodyText: {
+    fontSize: 12,
+    color: '#333333',
+    flex: 1.5,
+    textAlign: 'right',
+    lineHeight: 16,
+  },
+  rowDividerLine: {
+    height: 1,
+    backgroundColor: '#F0F0F0',
+    marginHorizontal: 16,
+  },
+
   /* Logout Button */
-  logoutButton: {
+  logoutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFF5F5',
-    borderWidth: 1,
-    borderColor: '#FFE0E0',
-    borderRadius: 16,
-    height: 52,
-    marginHorizontal: 20,
-    marginBottom: 20,
+    backgroundColor: '#FFEBEE',
+    borderWidth: 1.5,
+    borderColor: '#FFCDD2',
+    borderRadius: 14,
+    paddingVertical: 14,
+    marginTop: 10,
+    marginBottom: 4,
   },
-  logoutText: {
-    fontSize: 16,
+  logoutBtnText: {
+    fontSize: 15,
     fontWeight: 'bold',
-    color: '#E53935',
+    color: '#D32F2F',
   },
-  /* Sketch Overlay */
-  sketchWrapper: {
-    width: '100%',
-    height: 100,
-    marginTop: 4,
-    overflow: 'hidden',
-  },
-  sketchImage: {
-    width: '100%',
-    height: '100%',
-    opacity: 0.6,
-  },
-  /* Bottom Navigation Bar */
+
+  /* Floating Bottom Navigation Bar */
   bottomNavContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -607,8 +597,54 @@ const styles = StyleSheet.create({
     marginTop: 3,
     fontWeight: '500',
   },
-  navTabTextActive: {
-    color: '#3B6029',
+  navTabTextActiveProfile: {
+    color: '#1976D2',
     fontWeight: 'bold',
+  },
+
+  /* Modal Styles */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    width: '100%',
+    maxWidth: 320,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1A1A1A',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  langOptionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+    backgroundColor: '#FAF8F5',
+  },
+  langOptionSelected: {
+    backgroundColor: '#F0F7ED',
+    borderWidth: 1,
+    borderColor: '#3B6029',
+  },
+  langOptionText: {
+    fontSize: 16,
+    color: '#333333',
+  },
+  langOptionTextSelected: {
+    fontWeight: 'bold',
+    color: '#3B6029',
   },
 });

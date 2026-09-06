@@ -187,27 +187,6 @@ export default function LoginScreen() {
               <Text style={styles.primaryButtonText}>{t.button}</Text>
               <Feather name="arrow-right" size={22} color="#FFFFFF" style={{ marginLeft: 8 }} />
             </TouchableOpacity>
-
-            {/* Divider 'या' / 'OR' */}
-            <View style={styles.orDividerRow}>
-              <View style={styles.orLine} />
-              <Text style={styles.orText}>{t.or}</Text>
-              <View style={styles.orLine} />
-            </View>
-
-            {/* Special SHG Women Card */}
-            <TouchableOpacity style={styles.shgCard} activeOpacity={0.88}>
-              <Image
-                source={require('@/assets/images/shg_women.png')}
-                style={styles.shgAvatar}
-                resizeMode="cover"
-              />
-              <View style={styles.shgTextContainer}>
-                <Text style={styles.shgTitle}>{t.shgTitle}</Text>
-                <Text style={styles.shgSubtitle}>{t.shgSubtitle}</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={22} color="#3B6029" />
-            </TouchableOpacity>
           </View>
 
           {/* Footer Features & Trust Badges */}

@@ -2,22 +2,16 @@ import { useState, useEffect } from 'react';
 
 export type LangCode = 'hi' | 'en';
 
-let currentGlobalLang: LangCode = 'hi';
+let currentGlobalLang: LangCode = typeof window !== 'undefined' ? 'en' : 'hi';
 const listeners: Array<(lang: LangCode) => void> = [];
 
-// Load initial language from localStorage on web platform
-if (typeof window !== 'undefined' && window.localStorage) {
-  try {
-    const saved = localStorage.getItem('kalasetu_lang');
-    if (saved === 'hi' || saved === 'en') {
-      currentGlobalLang = saved;
-    }
-  } catch (e) {
-    // Ignore storage restrictions
-  }
+// Website is strictly English
+if (typeof window !== 'undefined') {
+  currentGlobalLang = 'en';
 }
 
 export function getGlobalLang(): LangCode {
+  if (typeof window !== 'undefined') return 'en';
   return currentGlobalLang;
 }
 

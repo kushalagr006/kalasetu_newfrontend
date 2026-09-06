@@ -76,7 +76,7 @@ const TRANSLATIONS: Record<LangCode, {
 
 export default function OtpScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ phone?: string; lang?: string }>();
+  const params = useLocalSearchParams<{ phone?: string; lang?: string; role?: string }>();
   
   const rawPhone = params.phone || '98765 43210';
   const initialLang: LangCode = (params.lang as LangCode) || 'hi';
@@ -120,7 +120,11 @@ export default function OtpScreen() {
     // Auto-submit if all 6 digits entered
     if (newOtp.every((d) => d !== '')) {
       setTimeout(() => {
-        router.replace({ pathname: '/home', params: { lang: selectedLang } });
+        if (params.role === 'shg') {
+          router.replace('/shg-platform' as any);
+        } else {
+          router.replace({ pathname: '/home', params: { lang: selectedLang } });
+        }
       }, 150);
     }
   };
