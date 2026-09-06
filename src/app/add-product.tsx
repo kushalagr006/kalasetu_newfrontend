@@ -12,8 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-
-type LangCode = 'hi' | 'en';
+import { useGlobalLang, LangCode } from '@/utils/languageStore';
 
 const LANGUAGES: { code: LangCode; label: string }[] = [
   { code: 'hi', label: 'हिंदी' },
@@ -22,139 +21,138 @@ const LANGUAGES: { code: LangCode; label: string }[] = [
 
 const TRANSLATIONS: Record<LangCode, {
   headerTitle: string;
-  headerSub: string;
-  choice1Title: string;
-  choice1Sub1: string;
-  choice1Sub2: string;
-  choice2Title: string;
-  choice2Sub1: string;
-  choice2Sub2: string;
-  tip1: string;
-  tip2: string;
+  camHint: string;
+  camSub: string;
+  shutterText: string;
+  nextBtn: string;
   modalTitle: string;
 }> = {
   hi: {
     headerTitle: 'नया उत्पाद जोड़ें',
-    headerSub: 'अपना उत्पाद जोड़ने का तरीका चुनें',
-    choice1Title: 'आवाज़ से',
-    choice1Sub1: 'बोलकर जानकारी दें',
-    choice1Sub2: 'हम भर देंगे',
-    choice2Title: 'लिखकर',
-    choice2Sub1: 'टेक्स्ट में जानकारी भरें',
-    choice2Sub2: 'और उत्पाद जोड़ें',
-    tip1: 'दोनों तरीकों से उत्पाद जोड़ना आसान है।',
-    tip2: 'आप अपनी सुविधा के अनुसार चुनें।',
+    camHint: 'उत्पाद को कैमरे के सामने रखें',
+    camSub: '(भविष्य में यहाँ लाइव कैमरा/expo-image-picker एकीकृत होगा)',
+    shutterText: 'फोटो खींचें',
+    nextBtn: 'आगे बढ़ें (Next) →',
     modalTitle: 'भाषा चुनें / Select Language',
   },
   en: {
     headerTitle: 'Add New Product',
-    headerSub: 'Choose how to add your product',
-    choice1Title: 'By Voice',
-    choice1Sub1: 'Speak product details',
-    choice1Sub2: 'We will fill for you',
-    choice2Title: 'By Writing',
-    choice2Sub1: 'Fill in details in text',
-    choice2Sub2: 'and add product',
-    tip1: 'Adding products is easy with both methods.',
-    tip2: 'Choose according to your convenience.',
+    camHint: 'Position product in center of frame',
+    camSub: '(Future integration with live expo-image-picker camera)',
+    shutterText: 'Snap Photo',
+    nextBtn: 'Next →',
     modalTitle: 'Select Language / भाषा चुनें',
   },
 };
 
-export default function AddProductScreen() {
+export default function AddProductCameraScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ lang?: string }>();
-  const initialLang: LangCode = (params.lang as LangCode) || 'hi';
+  const [globalLang] = useGlobalLang();
 
-  const [selectedLang, setSelectedLang] = useState<LangCode>(initialLang);
+  const selectedLang: LangCode =
+    (params.lang as LangCode) || (globalLang === 'en' ? 'en' : 'hi');
   const [isLangModalVisible, setIsLangModalVisible] = useState(false);
 
-  const t = TRANSLATIONS[selectedLang];
+  const t = TRANSLATIONS[selectedLang] || TRANSLATIONS.hi;
   const currentLangLabel = LANGUAGES.find((l) => l.code === selectedLang)?.label || 'हिंदी';
 
-  const handleVoiceOption = () => {
-    router.push({ pathname: '/add-product-voice', params: { lang: selectedLang } });
+  const [hasSnapped, setHasSnapped] = useState(false);
+
+  const handleSnapPhoto = () => {
+    setHasSnapped(true);
   };
 
-  const handleTextOption = () => {
-    router.push({ pathname: '/add-product-text', params: { lang: selectedLang } });
+  const handleNext = () => {
+    // Navigate to Description options (Voice vs Write) page
+    router.push({
+      pathname: '/add-product-details',
+      params: { lang: selectedLang },
+    });
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#3B6029" translucent={false} />
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" translucent={false} />
       <View style={styles.container}>
         {/* Top Header Bar */}
-        <View style={styles.topGreenHeader}>
+        <View style={styles.headerRow}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
             activeOpacity={0.7}
           >
-            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+            <Ionicons name="chevron-back" size={26} color="#1A1A1A" />
           </TouchableOpacity>
 
-          <View style={styles.headerTitleCenter}>
-            <Text style={styles.headerTitle}>{t.headerTitle}</Text>
-            <Text style={styles.headerSubtitle}>{t.headerSub}</Text>
-          </View>
+          <Text style={styles.headerTitle}>{t.headerTitle}</Text>
 
-          {/* Language Switcher Pill */}
+          {/* Language Selector Pill */}
           <TouchableOpacity
             style={styles.langSelectorBtn}
             onPress={() => setIsLangModalVisible(true)}
             activeOpacity={0.8}
           >
-            <Ionicons name="globe-outline" size={13} color="#3B6029" />
+            <Ionicons name="globe-outline" size={13} color="#2C2C2C" />
             <Text style={styles.langSelectorText}>{currentLangLabel}</Text>
-            <Ionicons name="chevron-down" size={11} color="#3B6029" />
+            <Ionicons name="chevron-down" size={11} color="#2C2C2C" />
           </TouchableOpacity>
         </View>
 
-        {/* Scrollable Choice Content */}
+        {/* Camera Main Body */}
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Card 1: आवाज़ से */}
-          <TouchableOpacity
-            style={styles.choiceCard}
-            onPress={handleVoiceOption}
-            activeOpacity={0.88}
-          >
-            <View style={styles.iconCircle}>
-              <Ionicons name="mic" size={38} color="#3B6029" />
+          {/* Central Camera Viewfinder Card */}
+          <View style={styles.cameraViewfinderCard}>
+            {/* Viewfinder Top Bar */}
+            <View style={styles.viewfinderTopRow}>
+              <Ionicons name="flash-off-outline" size={20} color="#666" />
+              <View style={styles.liveIndicator}>
+                <View style={styles.redDot} />
+                <Text style={styles.liveText}>CAMERA</Text>
+              </View>
+              <Ionicons name="camera-reverse-outline" size={22} color="#666" />
             </View>
 
-            <Text style={styles.choiceTitle}>{t.choice1Title}</Text>
-            <Text style={styles.choiceSubtitle}>{t.choice1Sub1}</Text>
-            <Text style={styles.choiceSubtitle}>{t.choice1Sub2}</Text>
-          </TouchableOpacity>
-
-          {/* Card 2: लिखकर */}
-          <TouchableOpacity
-            style={styles.choiceCard}
-            onPress={handleTextOption}
-            activeOpacity={0.88}
-          >
-            <View style={styles.iconCircle}>
-              <Ionicons name="pencil" size={34} color="#3B6029" />
+            {/* Central Camera Icon & Graphic */}
+            <View style={styles.cameraGraphicBox}>
+              <View style={styles.cameraCircleOuter}>
+                <Ionicons
+                  name={hasSnapped ? "checkmark-circle" : "camera"}
+                  size={64}
+                  color="#3B6029"
+                />
+              </View>
+              <Text style={styles.camHintText}>
+                {hasSnapped
+                  ? selectedLang === 'hi' ? 'फोटो सफलतापूर्वक खींची गई!' : 'Photo Captured Successfully!'
+                  : t.camHint}
+              </Text>
+              <Text style={styles.camSubText}>{t.camSub}</Text>
             </View>
 
-            <Text style={styles.choiceTitle}>{t.choice2Title}</Text>
-            <Text style={styles.choiceSubtitle}>{t.choice2Sub1}</Text>
-            <Text style={styles.choiceSubtitle}>{t.choice2Sub2}</Text>
-          </TouchableOpacity>
-
-          {/* Bottom Tip Banner */}
-          <View style={styles.tipRow}>
-            <Ionicons name="bulb-outline" size={28} color="#3B6029" style={styles.bulbIcon} />
-            <View style={styles.tipTextGroup}>
-              <Text style={styles.tipText}>{t.tip1}</Text>
-              <Text style={styles.tipText}>{t.tip2}</Text>
-            </View>
+            {/* Shutter Button */}
+            <TouchableOpacity
+              style={[styles.shutterButton, hasSnapped && styles.shutterButtonCaptured]}
+              onPress={handleSnapPhoto}
+              activeOpacity={0.8}
+            >
+              <View style={styles.shutterInnerCircle} />
+            </TouchableOpacity>
+            <Text style={styles.shutterText}>{t.shutterText}</Text>
           </View>
+
+          {/* Next Button */}
+          <TouchableOpacity
+            style={styles.nextButton}
+            onPress={handleNext}
+            activeOpacity={0.88}
+          >
+            <Text style={styles.nextButtonText}>{t.nextBtn}</Text>
+          </TouchableOpacity>
         </ScrollView>
 
         {/* Language Selection Modal */}
@@ -181,7 +179,6 @@ export default function AddProductScreen() {
                       selectedLang === item.code ? styles.langOptionSelected : null,
                     ]}
                     onPress={() => {
-                      setSelectedLang(item.code);
                       setIsLangModalVisible(false);
                     }}
                   >
@@ -210,122 +207,175 @@ export default function AddProductScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#3B6029',
+    backgroundColor: '#FAF8F5',
   },
   container: {
     flex: 1,
     backgroundColor: '#FAF8F5',
   },
-
-  /* Header Bar */
-  topGreenHeader: {
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#3B6029',
+    paddingHorizontal: 20,
     paddingVertical: 14,
-    paddingHorizontal: 16,
+    backgroundColor: '#FAF8F5',
   },
   backButton: {
-    padding: 4,
-  },
-  headerTitleCenter: {
-    flex: 1,
-    alignItems: 'center',
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    marginLeft: -8,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FFFFFF',
-    textAlign: 'center',
-  },
-  headerSubtitle: {
-    fontSize: 11,
-    color: '#EAF2E8',
-    marginTop: 2,
-    textAlign: 'center',
+    color: '#0A0A0A',
   },
   langSelectorBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E0D8',
     borderRadius: 16,
     paddingVertical: 4,
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     gap: 4,
   },
   langSelectorText: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#3B6029',
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#2C2C2C',
   },
-
-  /* Scrollable Body Content */
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 24,
+    paddingTop: 10,
     paddingBottom: 32,
-    gap: 18,
   },
-
-  /* Choice Cards */
-  choiceCard: {
-    width: '100%',
-    backgroundColor: '#F0F7ED',
+  /* Camera Viewfinder Card */
+  cameraViewfinderCard: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     borderWidth: 1.5,
     borderColor: '#E2E0D8',
-    paddingVertical: 32,
-    paddingHorizontal: 24,
+    padding: 20,
     alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 24,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
   },
-  iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+  viewfinderTopRow: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  liveIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0F7ED',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    gap: 6,
+  },
+  redDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#D32F2F',
+  },
+  liveText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#3B6029',
+    letterSpacing: 0.5,
+  },
+  cameraGraphicBox: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    width: '100%',
+  },
+  cameraCircleOuter: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     backgroundColor: '#EAF2E8',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
+    borderWidth: 3,
+    borderColor: '#D0E2CC',
   },
-  choiceTitle: {
-    fontSize: 24,
+  camHintText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1A1A1A',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  camSubText: {
+    fontSize: 12,
+    color: '#777777',
+    textAlign: 'center',
+    lineHeight: 18,
+    paddingHorizontal: 10,
+  },
+  shutterButton: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 4,
+    borderColor: '#3B6029',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    marginBottom: 6,
+    elevation: 4,
+  },
+  shutterButtonCaptured: {
+    borderColor: '#2E4C20',
+    backgroundColor: '#EAF2E8',
+  },
+  shutterInnerCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#3B6029',
+  },
+  shutterText: {
+    fontSize: 13,
     fontWeight: 'bold',
     color: '#3B6029',
     marginBottom: 8,
   },
-  choiceSubtitle: {
-    fontSize: 14,
-    color: '#555555',
-    textAlign: 'center',
-    lineHeight: 20,
+  /* Next Button */
+  nextButton: {
+    height: 54,
+    backgroundColor: '#3B6029',
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+    shadowColor: '#3B6029',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
   },
-
-  /* Tip Banner */
-  tipRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginTop: 10,
-    paddingHorizontal: 8,
-    gap: 12,
+  nextButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
-  bulbIcon: {
-    marginTop: 2,
-  },
-  tipTextGroup: {
-    flex: 1,
-  },
-  tipText: {
-    fontSize: 13,
-    color: '#555555',
-    lineHeight: 20,
-  },
-
-  /* Modal Styles */
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
