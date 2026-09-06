@@ -142,6 +142,13 @@ export default function MyCustomersScreen() {
     setChatInputText('');
   };
 
+  const handleVoiceMicTap = () => {
+    const spokenText = isHindi
+      ? 'नमस्ते! आपका ऑर्डर तैयार हो रहा है और कल तक डिस्पैच कर दिया जाएगा।'
+      : 'Hello! Your order is being prepared and will be dispatched by tomorrow.';
+    setChatInputText(spokenText);
+  };
+
   const filteredCustomers = CUSTOMERS_DATA.filter((cust) => {
     const name = isHindi ? cust.nameHi : cust.nameEn;
     const loc = isHindi ? cust.locationHi : cust.locationEn;
@@ -327,9 +334,17 @@ export default function MyCustomersScreen() {
 
             {/* Chat Input Bar */}
             <View style={styles.chatInputContainer}>
+              <TouchableOpacity
+                style={styles.chatMicBtn}
+                onPress={handleVoiceMicTap}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="mic" size={20} color="#3B6029" />
+              </TouchableOpacity>
+
               <TextInput
                 style={styles.chatTextInput}
-                placeholder={isHindi ? 'संदेश लिखें...' : 'Type a message...'}
+                placeholder={isHindi ? 'बोलें या संदेश लिखें...' : 'Speak or type message...'}
                 placeholderTextColor="#888"
                 value={chatInputText}
                 onChangeText={setChatInputText}
@@ -573,6 +588,15 @@ const styles = StyleSheet.create({
     borderColor: '#E5E3DC',
     paddingHorizontal: 14,
     paddingVertical: 10,
+  },
+  chatMicBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#EBF6EE',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
   },
   chatTextInput: {
     flex: 1,

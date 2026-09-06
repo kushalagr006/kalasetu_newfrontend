@@ -316,34 +316,6 @@ export default function AppLoginScreen() {
             </View>
           </View>
 
-          {/* Or Divider */}
-          <View style={styles.orDividerRow}>
-            <View style={styles.orLine} />
-            <Text style={styles.orText}>{t.or}</Text>
-            <View style={styles.orLine} />
-          </View>
-
-          {/* SHG Card */}
-          <TouchableOpacity
-            style={styles.shgCard}
-            onPress={() =>
-              router.push({
-                pathname: '/app-register',
-                params: { lang: selectedLang, role: 'shg' },
-              })
-            }
-            activeOpacity={0.9}
-          >
-            <View style={styles.shgAvatarCircle}>
-              <Ionicons name="people" size={26} color="#3B6029" />
-            </View>
-            <View style={styles.shgTextContainer}>
-              <Text style={styles.shgTitle}>{t.shgTitle}</Text>
-              <Text style={styles.shgSubtitle}>{t.shgSubtitle}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#3B6029" />
-          </TouchableOpacity>
-
           {/* Footer Features & Trust Badges */}
           <View style={styles.trustFooter}>
             <View style={styles.trustItem}>
