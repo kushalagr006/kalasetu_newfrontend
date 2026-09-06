@@ -37,6 +37,28 @@ const TRANSLATIONS: Record<LangCode, {
   alertError: string;
   alertSuccess: string;
   modalTitle: string;
+  newRegisterPrompt: string;
+  newRegisterLink: string;
+  regModalTitle: string;
+  regModalSub: string;
+  fullNameLabel: string;
+  fullNamePlaceholder: string;
+  mobileLabel: string;
+  mobilePlaceholder: string;
+  aadhaarLabel: string;
+  aadhaarPlaceholder: string;
+  panLabel: string;
+  panPlaceholder: string;
+  gstinLabel: string;
+  gstinPlaceholder: string;
+  categoryLabel: string;
+  categories: { key: string; label: string }[];
+  regSubmitBtn: string;
+  errFullName: string;
+  errMobile: string;
+  errAadhaar: string;
+  errPan: string;
+  closeText: string;
 }> = {
   hi: {
     tagline: 'आपकी कला, आपकी पहचान',
@@ -52,6 +74,34 @@ const TRANSLATIONS: Record<LangCode, {
     alertError: 'कृपया 10 अंकों का वैध मोबाइल नंबर दर्ज करें।',
     alertSuccess: 'ओटीपी भेजा गया:',
     modalTitle: 'भाषा चुनें / Select Language',
+    newRegisterPrompt: 'नया खाता बनाएं? ',
+    newRegisterLink: 'यहाँ रजिस्ट्रेशन करें',
+    regModalTitle: 'नया कारीगर रजिस्ट्रेशन (Artisan Registration)',
+    regModalSub: 'कलासेतु से जुड़ने के लिए अपना पहचान विवरण भरें',
+    fullNameLabel: 'पूरा नाम *',
+    fullNamePlaceholder: 'अपना पूरा नाम दर्ज करें',
+    mobileLabel: 'मोबाइल नंबर *',
+    mobilePlaceholder: '10 अंकों का मोबाइल नंबर',
+    aadhaarLabel: 'आधार कार्ड नंबर *',
+    aadhaarPlaceholder: '12-अंकों का आधार नंबर दर्ज करें',
+    panLabel: 'पैन कार्ड नंबर (PAN Card) *',
+    panPlaceholder: '10-अंकों का PAN नंबर (जैसे ABCDE1234F)',
+    gstinLabel: 'जीएसटीआईएन नंबर (GSTIN - ऐच्छिक)',
+    gstinPlaceholder: '15-अंकों का GSTIN दर्ज करें (यदि उपलब्ध हो)',
+    categoryLabel: 'श्रेणी / वर्ग (Category) *',
+    categories: [
+      { key: 'individual', label: 'व्यक्तिगत कलाकार / कारीगर' },
+      { key: 'shg', label: 'महिला स्व-सहायता समूह (Woman SHG)' },
+      { key: 'sc_st', label: 'अनुसूचित जाति / जनजाति (SC/ST)' },
+      { key: 'obc', label: 'अन्य पिछड़ा वर्ग (OBC)' },
+      { key: 'pwd', label: 'दिव्यांगजन (PWD)' },
+    ],
+    regSubmitBtn: 'आगे बढ़ें (Next) →',
+    errFullName: 'कृपया अपना पूरा नाम दर्ज करें।',
+    errMobile: 'कृपया 10 अंकों का वैध मोबाइल नंबर दर्ज करें।',
+    errAadhaar: 'कृपया 12 अंकों का वैध आधार कार्ड नंबर दर्ज करें।',
+    errPan: 'कृपया 10 अंकों का वैध पैन कार्ड नंबर दर्ज करें।',
+    closeText: 'बंद करें',
   },
   en: {
     tagline: 'Your Art, Your Identity',
@@ -67,6 +117,34 @@ const TRANSLATIONS: Record<LangCode, {
     alertError: 'Please enter a valid 10-digit mobile number.',
     alertSuccess: 'OTP sent to:',
     modalTitle: 'Select Language / भाषा चुनें',
+    newRegisterPrompt: 'New user? ',
+    newRegisterLink: 'Register here',
+    regModalTitle: 'Artisan Registration',
+    regModalSub: 'Fill in your identification details to join KalaSetu',
+    fullNameLabel: 'Full Name *',
+    fullNamePlaceholder: 'Enter your full name',
+    mobileLabel: 'Mobile Number *',
+    mobilePlaceholder: 'Enter 10-digit mobile number',
+    aadhaarLabel: 'Aadhaar Card Number *',
+    aadhaarPlaceholder: 'Enter 12-digit Aadhaar number',
+    panLabel: 'PAN Card Number *',
+    panPlaceholder: 'Enter 10-character PAN number (e.g. ABCDE1234F)',
+    gstinLabel: 'GSTIN Number (Optional)',
+    gstinPlaceholder: 'Enter 15-digit GSTIN (if available)',
+    categoryLabel: 'Category *',
+    categories: [
+      { key: 'individual', label: 'Individual Artisan / Buyer' },
+      { key: 'shg', label: 'Woman SHG Group' },
+      { key: 'sc_st', label: 'SC / ST Community' },
+      { key: 'obc', label: 'OBC Community' },
+      { key: 'pwd', label: 'PWD (Specially Abled)' },
+    ],
+    regSubmitBtn: 'Next →',
+    errFullName: 'Please enter your full name.',
+    errMobile: 'Please enter a valid 10-digit mobile number.',
+    errAadhaar: 'Please enter a valid 12-digit Aadhaar card number.',
+    errPan: 'Please enter a valid 10-character PAN card number.',
+    closeText: 'Close',
   },
 };
 
@@ -80,6 +158,15 @@ export default function AppLoginScreen() {
   const [isLangModalVisible, setIsLangModalVisible] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [countryCode, setCountryCode] = useState('+91');
+
+  // Registration Modal State
+  const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false);
+  const [regFullName, setRegFullName] = useState('');
+  const [regMobile, setRegMobile] = useState('');
+  const [regAadhaar, setRegAadhaar] = useState('');
+  const [regPan, setRegPan] = useState('');
+  const [regGstin, setRegGstin] = useState('');
+  const [regCategory, setRegCategory] = useState('individual');
 
   useEffect(() => {
     if (params.lang && (params.lang === 'hi' || params.lang === 'en')) {
@@ -98,6 +185,28 @@ export default function AppLoginScreen() {
       pathname: '/otp',
       params: { phone: phoneNumber, lang: selectedLang },
     });
+  };
+
+  const handleRegisterSubmit = () => {
+    if (!regFullName.trim()) {
+      alert(t.errFullName);
+      return;
+    }
+    if (regMobile.length < 10) {
+      alert(t.errMobile);
+      return;
+    }
+    if (regAadhaar.length < 12) {
+      alert(t.errAadhaar);
+      return;
+    }
+    if (regPan.trim().length < 10) {
+      alert(t.errPan);
+      return;
+    }
+    // GSTIN is not mandatory!
+    setIsRegisterModalVisible(false);
+    router.push('/home');
   };
 
   const currentLangLabel = LANGUAGES.find((l) => l.code === selectedLang)?.label || 'हिंदी';
@@ -189,6 +298,22 @@ export default function AppLoginScreen() {
               <Text style={styles.primaryButtonText}>{t.button}</Text>
               <Feather name="arrow-right" size={22} color="#FFFFFF" style={{ marginLeft: 8 }} />
             </TouchableOpacity>
+
+            {/* New Registration Link */}
+            <View style={styles.newRegisterContainer}>
+              <Text style={styles.newRegisterPromptText}>{t.newRegisterPrompt}</Text>
+              <TouchableOpacity
+                onPress={() =>
+                  router.push({
+                    pathname: '/app-register',
+                    params: { lang: selectedLang },
+                  })
+                }
+                activeOpacity={0.7}
+              >
+                <Text style={styles.newRegisterLinkText}>{t.newRegisterLink}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Or Divider */}
@@ -201,12 +326,12 @@ export default function AppLoginScreen() {
           {/* SHG Card */}
           <TouchableOpacity
             style={styles.shgCard}
-            onPress={() => {
+            onPress={() =>
               router.push({
-                pathname: '/login',
+                pathname: '/app-register',
                 params: { lang: selectedLang, role: 'shg' },
-              });
-            }}
+              })
+            }
             activeOpacity={0.9}
           >
             <View style={styles.shgAvatarCircle}>
@@ -288,6 +413,153 @@ export default function AppLoginScreen() {
             />
           </View>
         </TouchableOpacity>
+      </Modal>
+
+      {/* Registration Modal */}
+      <Modal
+        visible={isRegisterModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsRegisterModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
+          <View style={styles.regModalContent}>
+            {/* Modal Header */}
+            <View style={styles.regModalHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.regModalTitle}>{t.regModalTitle}</Text>
+                <Text style={styles.regModalSub}>{t.regModalSub}</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setIsRegisterModalVisible(false)}
+                style={styles.closeBtn}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+              {/* Full Name Field */}
+              <Text style={styles.regFieldLabel}>{t.fullNameLabel}</Text>
+              <View style={styles.regInputBox}>
+                <Ionicons name="person-outline" size={20} color="#3B6029" style={{ marginRight: 8 }} />
+                <TextInput
+                  style={styles.regTextInput}
+                  placeholder={t.fullNamePlaceholder}
+                  placeholderTextColor="#8E8E93"
+                  value={regFullName}
+                  onChangeText={setRegFullName}
+                />
+              </View>
+
+              {/* Mobile Number Field */}
+              <Text style={styles.regFieldLabel}>{t.mobileLabel}</Text>
+              <View style={styles.regInputBox}>
+                <Text style={styles.regCountryCode}>{countryCode}</Text>
+                <View style={styles.regDividerVertical} />
+                <TextInput
+                  style={styles.regTextInput}
+                  placeholder={t.mobilePlaceholder}
+                  placeholderTextColor="#8E8E93"
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  value={regMobile}
+                  onChangeText={setRegMobile}
+                />
+                <Ionicons name="call-outline" size={20} color="#3B6029" style={{ marginRight: 4 }} />
+              </View>
+
+              {/* Aadhaar Card Number Field */}
+              <Text style={styles.regFieldLabel}>{t.aadhaarLabel}</Text>
+              <View style={styles.regInputBox}>
+                <Ionicons name="card-outline" size={20} color="#3B6029" style={{ marginRight: 8 }} />
+                <TextInput
+                  style={styles.regTextInput}
+                  placeholder={t.aadhaarPlaceholder}
+                  placeholderTextColor="#8E8E93"
+                  keyboardType="number-pad"
+                  maxLength={12}
+                  value={regAadhaar}
+                  onChangeText={setRegAadhaar}
+                />
+              </View>
+
+              {/* PAN Card Number Field */}
+              <Text style={styles.regFieldLabel}>{t.panLabel}</Text>
+              <View style={styles.regInputBox}>
+                <Ionicons name="document-text-outline" size={20} color="#3B6029" style={{ marginRight: 8 }} />
+                <TextInput
+                  style={styles.regTextInput}
+                  placeholder={t.panPlaceholder}
+                  placeholderTextColor="#8E8E93"
+                  autoCapitalize="characters"
+                  maxLength={10}
+                  value={regPan}
+                  onChangeText={setRegPan}
+                />
+              </View>
+
+              {/* GSTIN Number Field (Optional) */}
+              <Text style={styles.regFieldLabel}>{t.gstinLabel}</Text>
+              <View style={styles.regInputBox}>
+                <Ionicons name="business-outline" size={20} color="#3B6029" style={{ marginRight: 8 }} />
+                <TextInput
+                  style={styles.regTextInput}
+                  placeholder={t.gstinPlaceholder}
+                  placeholderTextColor="#8E8E93"
+                  autoCapitalize="characters"
+                  maxLength={15}
+                  value={regGstin}
+                  onChangeText={setRegGstin}
+                />
+              </View>
+
+              {/* Category Selection */}
+              <Text style={styles.regFieldLabel}>{t.categoryLabel}</Text>
+              <View style={styles.categoryContainer}>
+                {t.categories.map((cat) => (
+                  <TouchableOpacity
+                    key={cat.key}
+                    style={[
+                      styles.categoryChip,
+                      regCategory === cat.key && styles.categoryChipActive,
+                    ]}
+                    onPress={() => setRegCategory(cat.key)}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons
+                      name={regCategory === cat.key ? 'checkmark-circle' : 'ellipse-outline'}
+                      size={18}
+                      color={regCategory === cat.key ? '#3B6029' : '#888'}
+                      style={{ marginRight: 8 }}
+                    />
+                    <Text
+                      style={[
+                        styles.categoryChipText,
+                        regCategory === cat.key && styles.categoryChipTextActive,
+                      ]}
+                    >
+                      {cat.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Next Button */}
+              <TouchableOpacity
+                style={styles.regSubmitButton}
+                onPress={handleRegisterSubmit}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.regSubmitButtonText}>{t.regSubmitBtn}</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );
@@ -567,5 +839,137 @@ const styles = StyleSheet.create({
   langOptionTextSelected: {
     fontWeight: 'bold',
     color: '#3B6029',
+  },
+  /* New Registration Link */
+  newRegisterContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 14,
+  },
+  newRegisterPromptText: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  newRegisterLinkText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#3B6029',
+    textDecorationLine: 'underline',
+  },
+  /* Registration Modal */
+  regModalContent: {
+    width: '94%',
+    maxHeight: '85%',
+    backgroundColor: '#FAF8F5',
+    borderRadius: 24,
+    padding: 20,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+  },
+  regModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EBE8DF',
+    paddingBottom: 12,
+  },
+  regModalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1A1A1A',
+  },
+  regModalSub: {
+    fontSize: 13,
+    color: '#666666',
+    marginTop: 2,
+  },
+  closeBtn: {
+    padding: 4,
+  },
+  regFieldLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333333',
+    marginTop: 12,
+    marginBottom: 6,
+  },
+  regInputBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 50,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D3CEBE',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+  },
+  regCountryCode: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#1A1A1A',
+    marginRight: 8,
+  },
+  regDividerVertical: {
+    width: 1,
+    height: '60%',
+    backgroundColor: '#E2E0D8',
+    marginRight: 8,
+  },
+  regTextInput: {
+    flex: 1,
+    fontSize: 15,
+    color: '#1A1A1A',
+  },
+  categoryContainer: {
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  categoryChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E0D8',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginBottom: 8,
+  },
+  categoryChipActive: {
+    borderColor: '#3B6029',
+    backgroundColor: '#F3F8F1',
+  },
+  categoryChipText: {
+    fontSize: 14,
+    color: '#444444',
+  },
+  categoryChipTextActive: {
+    fontWeight: 'bold',
+    color: '#3B6029',
+  },
+  regSubmitButton: {
+    height: 52,
+    backgroundColor: '#3B6029',
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    marginBottom: 8,
+    elevation: 2,
+    shadowColor: '#3B6029',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  regSubmitButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
 });

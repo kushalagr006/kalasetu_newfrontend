@@ -182,7 +182,7 @@ export function CustSidebar({ activeKey }: CustSidebarProps) {
       <View style={sidebarStyles.sidebarBottomGroup}>
         <TouchableOpacity
           style={sidebarStyles.navItem}
-          onPress={() => router.push('/login')}
+          onPress={() => router.push('/')}
           activeOpacity={0.7}
         >
           <Ionicons name="log-out-outline" size={18} color="#555555" style={sidebarStyles.navIcon} />

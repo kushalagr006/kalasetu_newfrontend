@@ -185,7 +185,7 @@ export function GovtSidebar({ activeKey }: GovtSidebarProps) {
       {/* Sidebar Bottom Logout */}
       <TouchableOpacity
         style={sidebarStyles.logoutBtn}
-        onPress={() => router.push('/login')}
+        onPress={() => router.push('/')}
         activeOpacity={0.7}
       >
         <Ionicons

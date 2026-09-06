@@ -337,7 +337,7 @@ export default function GovtMyTendersScreen() {
 
                 <TouchableOpacity
                   style={styles.sidebarNavItem}
-                  onPress={() => router.push('/login')}
+                  onPress={() => router.push('/')}
                 >
                   <Ionicons name="log-out-outline" size={18} color="#555555" style={{ marginRight: 12 }} />
                   <Text style={styles.sidebarNavText}>{t.logout}</Text>
