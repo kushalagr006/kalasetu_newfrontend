@@ -161,7 +161,7 @@ export default function CustomerDashboardScreen() {
               {/* Card 2: Create Tender */}
               <TouchableOpacity
                 style={[styles.actionCard, styles.actionCardBlue]}
-                onPress={() => router.push('/govt-tenders-create' as any)}
+                onPress={() => alert(selectedLang === 'en' ? 'Mobile Tenders feature coming soon!' : 'टेंडर सुविधा ऐप के लिए जल्द आ रही है!')}
                 activeOpacity={0.85}
               >
                 <View style={styles.actionCardHeader}>

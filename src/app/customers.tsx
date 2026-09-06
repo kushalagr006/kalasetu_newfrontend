@@ -120,7 +120,7 @@ export default function CustomersScreen() {
               {/* Card 1: My Customers (Green Theme) */}
               <TouchableOpacity
                 style={[styles.quickCard, styles.quickCardGreen]}
-                onPress={() => handleQuickCardPress(isHindi ? 'मेरे ग्राहक' : 'My Customers')}
+                onPress={() => router.push({ pathname: '/my-customers', params: { lang: selectedLang } })}
                 activeOpacity={0.85}
               >
                 <View style={[styles.quickIconCircle, { backgroundColor: '#EAF2E8' }]}>
@@ -144,7 +144,7 @@ export default function CustomersScreen() {
               {/* Card 2: Bulk Orders (Blue Theme) */}
               <TouchableOpacity
                 style={[styles.quickCard, styles.quickCardBlue]}
-                onPress={() => handleQuickCardPress(isHindi ? 'बल्क ऑर्डर' : 'Bulk Orders')}
+                onPress={() => router.push({ pathname: '/bulk-orders', params: { lang: selectedLang } })}
                 activeOpacity={0.85}
               >
                 <View style={[styles.quickIconCircle, { backgroundColor: '#E3F2FD' }]}>
