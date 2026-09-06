@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useGlobalLang, LangCode } from '@/utils/languageStore';
 
 type RoleType = 'govt' | 'customer';
@@ -160,10 +160,18 @@ const TRANSLATIONS_LOGIN = {
 
 export default function WebLoginScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ lang?: string }>();
   const { width } = useWindowDimensions();
   const isDesktop = width >= 850;
 
   const [selectedLang, setSelectedLang] = useGlobalLang();
+
+  React.useEffect(() => {
+    if (params.lang && (params.lang === 'hi' || params.lang === 'en')) {
+      setSelectedLang(params.lang as LangCode);
+    }
+  }, [params.lang]);
+
   const effectiveLang = Platform.OS === 'web' ? 'en' : selectedLang;
   const t = TRANSLATIONS_LOGIN[effectiveLang as keyof typeof TRANSLATIONS_LOGIN] || TRANSLATIONS_LOGIN.en;
 

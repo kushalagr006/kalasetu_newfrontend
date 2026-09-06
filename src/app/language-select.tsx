@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { setGlobalLang, LangCode } from '@/utils/languageStore';
 
 type LangOption = {
   id: string;
@@ -32,15 +33,12 @@ const LANGUAGE_LIST: LangOption[] = [
   { id: 'kn', code: 'kn', nativeName: 'ಕನ್ನಡ', englishName: 'Kannada' },
   { id: 'ml', code: 'ml', nativeName: 'മലയാളം', englishName: 'Malayalam' },
   { id: 'pa', code: 'pa', nativeName: 'ਪੰਜਾਬੀ', englishName: 'Punjabi' },
-  { id: 'or', code: 'or', nativeName: 'ଓଡ଼ਿଆ', englishName: 'Odia' },
+  { id: 'or', code: 'or', nativeName: 'ଓଡ଼ିଆ', englishName: 'Odia' },
   { id: 'other', code: 'other', nativeName: 'अन्य भाषा', englishName: 'Other', isOther: true },
 ];
 
-import { setGlobalLang, LangCode } from '@/utils/languageStore';
-
 export default function LanguageSelectScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ phone?: string; lang?: string }>();
 
   const [selectedLangId, setSelectedLangId] = useState<string>('hi');
   const [isLangDropdownVisible, setIsLangDropdownVisible] = useState<boolean>(false);
@@ -48,7 +46,7 @@ export default function LanguageSelectScreen() {
   const handleProceed = () => {
     const langCode = (selectedLangId === 'other' ? 'hi' : selectedLangId) as LangCode;
     setGlobalLang(langCode);
-    router.replace('/login');
+    router.replace({ pathname: '/app-login', params: { lang: langCode } });
   };
 
   const selectedItem = LANGUAGE_LIST.find((item) => item.id === selectedLangId) || LANGUAGE_LIST[0];
@@ -63,7 +61,7 @@ export default function LanguageSelectScreen() {
           showsVerticalScrollIndicator={false}
           bounces={false}
         >
-          {/* Top Header Bar with Language Selector */}
+          {/* Top Header Bar with Language Selector Pill */}
           <View style={styles.headerBar}>
             <View style={{ flex: 1 }} />
             <TouchableOpacity
