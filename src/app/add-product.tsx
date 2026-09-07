@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,10 +8,13 @@ import {
   StatusBar,
   Modal,
   FlatList,
+  Platform,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import { useGlobalLang, LangCode } from '@/utils/languageStore';
 
 const LANGUAGES: { code: LangCode; label: string }[] = [
@@ -24,22 +27,28 @@ const TRANSLATIONS: Record<LangCode, {
   camHint: string;
   camSub: string;
   shutterText: string;
+  retakeText: string;
+  galleryText: string;
   nextBtn: string;
   modalTitle: string;
 }> = {
   hi: {
     headerTitle: 'नया उत्पाद जोड़ें',
-    camHint: 'उत्पाद को कैमरे के सामने रखें',
-    camSub: '(भविष्य में यहाँ लाइव कैमरा/expo-image-picker एकीकृत होगा)',
-    shutterText: 'फोटो खींचें',
+    camHint: 'कैमरा खोलने के लिए यहाँ टैप करें',
+    camSub: 'अपने उत्पाद की साफ़ और सीधी फोटो खींचें।',
+    shutterText: 'कैमरा खोलें और फोटो खींचें',
+    retakeText: 'दोबारा फोटो लें',
+    galleryText: 'गैलरी से चुनें',
     nextBtn: 'आगे बढ़ें (Next) →',
     modalTitle: 'भाषा चुनें / Select Language',
   },
   en: {
     headerTitle: 'Add New Product',
-    camHint: 'Position product in center of frame',
-    camSub: '(Future integration with live expo-image-picker camera)',
-    shutterText: 'Snap Photo',
+    camHint: 'Tap here to open camera',
+    camSub: 'Capture a clear, well-lit photo of your product.',
+    shutterText: 'Open Camera & Snap Photo',
+    retakeText: 'Retake Photo',
+    galleryText: 'Choose from Gallery',
     nextBtn: 'Next →',
     modalTitle: 'Select Language / भाषा चुनें',
   },
@@ -57,14 +66,151 @@ export default function AddProductCameraScreen() {
   const t = TRANSLATIONS[selectedLang] || TRANSLATIONS.hi;
   const currentLangLabel = LANGUAGES.find((l) => l.code === selectedLang)?.label || 'हिंदी';
 
+  const videoRef = useRef<any>(null);
+  const [webStream, setWebStream] = useState<any>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [hasSnapped, setHasSnapped] = useState(false);
+  const [isWebCamActive, setIsWebCamActive] = useState(false);
+
+  // Initialize Web RTC Camera if running in web browser
+  useEffect(() => {
+    let activeStream: any = null;
+    if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.mediaDevices) {
+      navigator.mediaDevices
+        .getUserMedia({
+          video: {
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+        })
+        .then((s) => {
+          activeStream = s;
+          setWebStream(s);
+          setIsWebCamActive(true);
+          if (videoRef.current) {
+            videoRef.current.srcObject = s;
+          }
+        })
+        .catch((err) => {
+          console.log('Camera fallback:', err);
+          navigator.mediaDevices
+            ?.getUserMedia({ video: true })
+            .then((s) => {
+              activeStream = s;
+              setWebStream(s);
+              setIsWebCamActive(true);
+              if (videoRef.current) {
+                videoRef.current.srcObject = s;
+              }
+            })
+            .catch((e) => console.log('Camera permission fallback error:', e));
+        });
+    }
+    return () => {
+      if (activeStream) {
+        activeStream.getTracks().forEach((track: any) => track.stop());
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (webStream && videoRef.current && !hasSnapped) {
+      videoRef.current.srcObject = webStream;
+    }
+  }, [webStream, hasSnapped]);
+
+  // Open native mobile camera using expo-image-picker
+  const launchNativeCamera = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+      if (!permissionResult.granted) {
+        alert(
+          selectedLang === 'hi'
+            ? 'कैमरा का उपयोग करने के लिए अनुमति (Permission) आवश्यक है।'
+            : 'Camera permission is required to snap photos.'
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        allowsEditing: false,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setCapturedImage(result.assets[0].uri);
+        setHasSnapped(true);
+      }
+    } catch (err) {
+      console.log('Error launching camera:', err);
+    }
+  };
+
+  // Pick from gallery
+  const launchGallery = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permissionResult.granted) {
+        alert(
+          selectedLang === 'hi'
+            ? 'गैलरी का उपयोग करने के लिए अनुमति (Permission) आवश्यक है।'
+            : 'Gallery permission is required to choose photos.'
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: false,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setCapturedImage(result.assets[0].uri);
+        setHasSnapped(true);
+      }
+    } catch (err) {
+      console.log('Error opening gallery:', err);
+    }
+  };
 
   const handleSnapPhoto = () => {
-    setHasSnapped(true);
+    if (hasSnapped) {
+      // Retake photo
+      setCapturedImage(null);
+      setHasSnapped(false);
+      if (Platform.OS !== 'web') {
+        launchNativeCamera();
+      }
+      return;
+    }
+
+    if (Platform.OS === 'web' && videoRef.current && isWebCamActive) {
+      try {
+        const video = videoRef.current;
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL('image/jpeg');
+          setCapturedImage(dataUrl);
+          setHasSnapped(true);
+          return;
+        }
+      } catch (err) {
+        console.log('Snap canvas error:', err);
+      }
+    }
+
+    // On Native mobile or web fallback, launch native camera picker
+    launchNativeCamera();
   };
 
   const handleNext = () => {
-    // Navigate to Description options (Voice vs Write) page
     router.push({
       pathname: '/add-product-details',
       params: { lang: selectedLang },
@@ -109,40 +255,91 @@ export default function AddProductCameraScreen() {
           <View style={styles.cameraViewfinderCard}>
             {/* Viewfinder Top Bar */}
             <View style={styles.viewfinderTopRow}>
-              <Ionicons name="flash-off-outline" size={20} color="#666" />
+              <Ionicons name="flash-outline" size={20} color="#666" />
               <View style={styles.liveIndicator}>
-                <View style={styles.redDot} />
-                <Text style={styles.liveText}>CAMERA</Text>
+                <View style={[styles.redDot, hasSnapped && styles.greenDot]} />
+                <Text style={styles.liveText}>
+                  {hasSnapped ? 'CAPTURED' : isWebCamActive ? 'LIVE WEBCAM' : 'CAMERA READY'}
+                </Text>
               </View>
               <Ionicons name="camera-reverse-outline" size={22} color="#666" />
             </View>
 
-            {/* Central Camera Icon & Graphic */}
-            <View style={styles.cameraGraphicBox}>
-              <View style={styles.cameraCircleOuter}>
-                <Ionicons
-                  name={hasSnapped ? "checkmark-circle" : "camera"}
-                  size={64}
-                  color="#3B6029"
-                />
-              </View>
-              <Text style={styles.camHintText}>
-                {hasSnapped
-                  ? selectedLang === 'hi' ? 'फोटो सफलतापूर्वक खींची गई!' : 'Photo Captured Successfully!'
-                  : t.camHint}
-              </Text>
-              <Text style={styles.camSubText}>{t.camSub}</Text>
-            </View>
-
-            {/* Shutter Button */}
+            {/* Viewfinder Frame Container */}
             <TouchableOpacity
-              style={[styles.shutterButton, hasSnapped && styles.shutterButtonCaptured]}
+              style={styles.frameContainer}
               onPress={handleSnapPhoto}
-              activeOpacity={0.8}
+              activeOpacity={0.9}
             >
-              <View style={styles.shutterInnerCircle} />
+              {hasSnapped && capturedImage ? (
+                <Image
+                  source={{ uri: capturedImage }}
+                  style={styles.capturedPhoto}
+                  resizeMode="cover"
+                />
+              ) : Platform.OS === 'web' && isWebCamActive ? (
+                React.createElement('video', {
+                  ref: videoRef,
+                  autoPlay: true,
+                  playsInline: true,
+                  muted: true,
+                  style: {
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderRadius: 16,
+                  },
+                })
+              ) : (
+                <View style={styles.cameraGraphicBox}>
+                  <View style={styles.cameraCircleOuter}>
+                    <Ionicons
+                      name={hasSnapped ? 'checkmark-circle' : 'camera'}
+                      size={54}
+                      color="#3B6029"
+                    />
+                  </View>
+                  <Text style={styles.camHintText}>
+                    {hasSnapped
+                      ? selectedLang === 'hi'
+                        ? 'फोटो सफलतापूर्वक खींची गई! 🎉'
+                        : 'Photo Captured Successfully! 🎉'
+                      : t.camHint}
+                  </Text>
+                  <Text style={styles.camSubText}>{t.camSub}</Text>
+                </View>
+              )}
             </TouchableOpacity>
-            <Text style={styles.shutterText}>{t.shutterText}</Text>
+
+            {/* Shutter & Controls Row */}
+            <View style={styles.controlsRow}>
+              <TouchableOpacity
+                style={[styles.shutterButton, hasSnapped && styles.shutterButtonCaptured]}
+                onPress={handleSnapPhoto}
+                activeOpacity={0.85}
+              >
+                <Ionicons
+                  name={hasSnapped ? 'refresh' : 'camera'}
+                  size={28}
+                  color={hasSnapped ? '#1F4D25' : '#FFFFFF'}
+                />
+              </TouchableOpacity>
+              <Text style={styles.shutterText}>
+                {hasSnapped ? t.retakeText : t.shutterText}
+              </Text>
+
+              {/* Gallery Pick Link */}
+              {!hasSnapped && (
+                <TouchableOpacity
+                  style={styles.galleryBtn}
+                  onPress={launchGallery}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="images-outline" size={16} color="#3B6029" />
+                  <Text style={styles.galleryBtnText}>{t.galleryText}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
 
           {/* Next Button */}
@@ -262,7 +459,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1.5,
     borderColor: '#E2E0D8',
-    padding: 20,
+    padding: 16,
     alignItems: 'center',
     marginBottom: 24,
     elevation: 3,
@@ -276,7 +473,7 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   liveIndicator: {
     flexDirection: 'row',
@@ -293,70 +490,104 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: '#D32F2F',
   },
+  greenDot: {
+    backgroundColor: '#2E7D32',
+  },
   liveText: {
     fontSize: 11,
     fontWeight: 'bold',
     color: '#3B6029',
     letterSpacing: 0.5,
   },
+  frameContainer: {
+    width: '100%',
+    height: 280,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1,
+    borderColor: '#E2E0D8',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  capturedPhoto: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 16,
+  },
   cameraGraphicBox: {
     alignItems: 'center',
-    paddingVertical: 24,
+    paddingVertical: 20,
     width: '100%',
   },
   cameraCircleOuter: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     backgroundColor: '#EAF2E8',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
-    borderWidth: 3,
+    marginBottom: 14,
+    borderWidth: 2,
     borderColor: '#D0E2CC',
   },
   camHintText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#1A1A1A',
     textAlign: 'center',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   camSubText: {
     fontSize: 12,
     color: '#777777',
     textAlign: 'center',
-    lineHeight: 18,
+    lineHeight: 16,
     paddingHorizontal: 10,
   },
+  controlsRow: {
+    alignItems: 'center',
+    marginTop: 16,
+  },
   shutterButton: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 4,
-    borderColor: '#3B6029',
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#3B6029',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 10,
-    marginBottom: 6,
     elevation: 4,
+    shadowColor: '#3B6029',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
   },
   shutterButtonCaptured: {
-    borderColor: '#2E4C20',
     backgroundColor: '#EAF2E8',
-  },
-  shutterInnerCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: '#3B6029',
+    borderWidth: 2,
+    borderColor: '#3B6029',
   },
   shutterText: {
     fontSize: 13,
     fontWeight: 'bold',
     color: '#3B6029',
+    marginTop: 6,
     marginBottom: 8,
+  },
+  galleryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: '#F0F7ED',
+  },
+  galleryBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#3B6029',
   },
   /* Next Button */
   nextButton: {

@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { ArtisanFloatingNav } from '@/components/ArtisanFloatingNav';
 
 type LangCode = 'hi' | 'en';
 type ActiveTab = 'home' | 'products' | 'customers' | 'profile';
@@ -267,49 +268,7 @@ export default function ProfileScreen() {
         </ScrollView>
 
         {/* Floating Bottom Navigation Bar (4 Tabs) */}
-        <View style={styles.bottomNavContainer}>
-          {/* Tab 1: Home */}
-          <TouchableOpacity
-            style={styles.navTab}
-            onPress={() => router.push({ pathname: '/home', params: { lang: selectedLang } })}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="home-outline" size={22} color="#666666" />
-            <Text style={styles.navTabText}>{t.navHome}</Text>
-          </TouchableOpacity>
-
-          {/* Tab 2: Products */}
-          <TouchableOpacity
-            style={styles.navTab}
-            onPress={() => router.push({ pathname: '/products', params: { lang: selectedLang } })}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="cube-outline" size={22} color="#666666" />
-            <Text style={styles.navTabText}>{t.navProducts}</Text>
-          </TouchableOpacity>
-
-          {/* Tab 3: Customers */}
-          <TouchableOpacity
-            style={styles.navTab}
-            onPress={() => router.push({ pathname: '/customers', params: { lang: selectedLang } })}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="people-outline" size={22} color="#666666" />
-            <Text style={styles.navTabText}>{t.navCustomers}</Text>
-          </TouchableOpacity>
-
-          {/* Tab 4: Profile (Active) */}
-          <TouchableOpacity
-            style={styles.navTab}
-            onPress={() => setActiveTab('profile')}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="person" size={22} color="#1976D2" />
-            <Text style={[styles.navTabText, styles.navTabTextActiveProfile]}>
-              {t.navProfile}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <ArtisanFloatingNav activeTab="profile" selectedLang={selectedLang} />
 
         {/* Language Selection Modal */}
         <Modal
@@ -431,7 +390,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 24,
+    paddingBottom: 100,
     gap: 14,
   },
 

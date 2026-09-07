@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { ArtisanFloatingNav } from '@/components/ArtisanFloatingNav';
 
 type LangCode = 'hi' | 'en';
 type OrderFilter = 'all' | 'accepted' | 'processing' | 'completed';
@@ -242,7 +243,12 @@ export default function OrdersScreen() {
             {filteredOrders.map((order) => {
               const badgeStyle = getStatusBadgeStyle(order.status);
               return (
-                <TouchableOpacity key={order.id} style={styles.orderCard} activeOpacity={0.88}>
+                <TouchableOpacity
+                  key={order.id}
+                  style={styles.orderCard}
+                  onPress={() => router.push({ pathname: '/product-chats', params: { lang: selectedLang } })}
+                  activeOpacity={0.88}
+                >
                   <View style={styles.orderCardContentRow}>
                     <Image source={order.image} style={styles.orderImage} resizeMode="cover" />
 
@@ -272,6 +278,14 @@ export default function OrdersScreen() {
                       </View>
 
                       <Text style={styles.orderPriceText}>{order.price}</Text>
+
+                      {/* Customer Chat Action */}
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
+                        <Ionicons name="chatbubble-ellipses-outline" size={14} color="#3B6029" style={{ marginRight: 4 }} />
+                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#3B6029' }}>
+                          {selectedLang === 'hi' ? 'ग्राहक से चैट करें' : 'Chat with Buyer'}
+                        </Text>
+                      </View>
                     </View>
 
                     <Ionicons name="chevron-forward" size={20} color="#777777" style={{ alignSelf: 'center' }} />
@@ -289,32 +303,8 @@ export default function OrdersScreen() {
           </TouchableOpacity>
         </ScrollView>
 
-        {/* Bottom Tab Navigation Bar (4 Tabs) */}
-        <View style={styles.bottomTabBar}>
-          {/* Tab 1: Home */}
-          <TouchableOpacity style={styles.tabBarItem} onPress={() => router.push({ pathname: '/home', params: { lang: selectedLang } })}>
-            <Ionicons name="home-outline" size={22} color="#666666" />
-            <Text style={styles.tabBarLabel}>{t.navHome}</Text>
-          </TouchableOpacity>
-
-          {/* Tab 2: Products */}
-          <TouchableOpacity style={styles.tabBarItem} onPress={() => router.push({ pathname: '/products', params: { lang: selectedLang } })}>
-            <Ionicons name="cube-outline" size={22} color="#666666" />
-            <Text style={styles.tabBarLabel}>{t.navProducts}</Text>
-          </TouchableOpacity>
-
-          {/* Tab 3: Customers */}
-          <TouchableOpacity style={styles.tabBarItem} onPress={() => router.push({ pathname: '/customers', params: { lang: selectedLang } })}>
-            <Ionicons name="people-outline" size={22} color="#666666" />
-            <Text style={styles.tabBarLabel}>{t.navCustomers}</Text>
-          </TouchableOpacity>
-
-          {/* Tab 4: Profile */}
-          <TouchableOpacity style={styles.tabBarItem} onPress={() => router.push({ pathname: '/profile', params: { lang: selectedLang } })}>
-            <Ionicons name="person-outline" size={22} color="#666666" />
-            <Text style={styles.tabBarLabel}>{t.navProfile}</Text>
-          </TouchableOpacity>
-        </View>
+        {/* Floating Bottom Tab Navigation Bar */}
+        <ArtisanFloatingNav activeTab="orders" selectedLang={selectedLang} />
 
         {/* Language Selection Modal */}
         <Modal
@@ -441,7 +431,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 24,
+    paddingBottom: 100,
     gap: 14,
   },
 

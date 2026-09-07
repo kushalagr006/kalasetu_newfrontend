@@ -168,23 +168,11 @@ export default function WebGovtDashboard() {
               contentContainerStyle={styles.dashboardScrollContent}
               showsVerticalScrollIndicator={false}
             >
-              {/* Top Greeting & Govt Badge Row */}
+              {/* Top Greeting Row */}
               <View style={styles.greetingRow}>
                 <View style={styles.greetingTextGroup}>
                   <Text style={styles.greetingTitle}>{t.helloOfficer}</Text>
                   <Text style={styles.greetingSubtitle}>{t.helloSubtitle}</Text>
-                </View>
-
-                {/* Govt Badge Card */}
-                <View style={styles.govtBadgeCard}>
-                  <View style={styles.govtEmblemCircle}>
-                    <Ionicons name="shield-checkmark" size={24} color="#3B6029" />
-                  </View>
-                  <View style={styles.govtBadgeTextGroup}>
-                    <Text style={styles.govtBadgeTitle}>{t.bannerTitle}</Text>
-                    <Text style={styles.govtBadgeSub}>{t.deptName}</Text>
-                    <Text style={styles.govtBadgeSub}>{t.deptState}</Text>
-                  </View>
                 </View>
               </View>
 

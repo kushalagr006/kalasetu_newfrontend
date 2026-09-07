@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
-import { View, Image, StyleSheet, StatusBar } from 'react-native';
+import { View, Image, StyleSheet, StatusBar, LogBox } from 'react-native';
 import { Slot } from 'expo-router';
+
+LogBox.ignoreLogs([
+  'Cannot connect to Expo CLI',
+  'Expo CLI',
+  'Running "main" with',
+]);
 
 SplashScreen.preventAutoHideAsync();
 

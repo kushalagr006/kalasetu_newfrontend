@@ -36,40 +36,75 @@ const TRANSLATIONS = {
     feat2: 'Support Rural Livelihoods',
     feat3: 'Inclusive Growth',
     welcome: 'Welcome to ',
-    loginSub: 'Login to continue',
+    loginSub: 'Login with your Email & Password to continue',
     roleGovt: 'Government Buyer',
     roleCust: 'Customer / Buyer',
-    mobileLabel: 'Mobile Number',
-    mobilePlaceholder: 'Enter your 10-digit mobile number',
-    sendOtp: 'Send OTP',
+    emailLoginLabel: 'Email ID',
+    emailLoginPlaceholder: 'Enter your email address',
+    passwordLabel: 'Password',
+    passwordPlaceholder: 'Enter your password',
+    loginBtn: 'Login',
+    forgotPassword: 'Forgot Password?',
     newUser: 'New user? ',
     register: 'Register',
-    errMobile: 'Please enter a valid 10-digit mobile number.',
+    errEmailLogin: 'Please enter a valid email address.',
+    errPassword: 'Please enter your password.',
     langSelect: 'Select Language / भाषा चुनें',
     regTitle: 'Create New Account',
-    regSub: 'Choose account type to proceed',
-    indTitle: 'Individual User / Artisan',
-    indSub: 'For artisans, customers or individual buyers',
-    compTitle: 'Company / Business / Organization',
-    compSub: 'For companies, bulk buyers or organizations',
-    fullNameLabel: 'Full Name *',
-    fullNamePlaceholder: 'Enter your full name',
-    emailLabel: 'Email Address *',
+    regSub: 'Select your account role to proceed',
+    roleIndTitle: 'Individual',
+    roleIndSub: 'Name, Phone, Email, Password',
+    roleCompTitle: 'Private Company',
+    roleCompSub: 'Company Name, GST, Authorized Person, Phone, Email, Password',
+    roleNgoTitle: 'NGO',
+    roleNgoSub: 'NGO Name, Registration No., Authorized Person, Phone, Email, Password',
+    roleOrgTitle: 'Organization',
+    roleOrgSub: 'Organization Name, Type, Registration No., Authorized Person, Phone, Email, Password',
+
+    nameLabel: 'Full Name *',
+    namePlaceholder: 'Enter full name',
+    phoneLabel: 'Phone Number *',
+    phonePlaceholder: 'Enter 10-digit phone number',
+    emailLabel: 'Email ID *',
     emailPlaceholder: 'Enter email address',
-    aadhaarLabel: 'Aadhaar Card Number *',
-    aadhaarPlaceholder: '12-digit Aadhaar number',
+    regPasswordLabel: 'Password *',
+    regPasswordPlaceholder: 'Enter password (min 6 characters)',
+    
     compNameLabel: 'Company Name *',
     compNamePlaceholder: 'Enter company name',
     gstinLabel: 'GSTIN Number *',
-    gstinPlaceholder: '15-digit GSTIN',
-    submitReg: 'Register & Continue →',
-    errFullName: 'Please enter full name',
+    gstinPlaceholder: 'Enter 15-digit GSTIN',
+
+    ngoNameLabel: 'NGO Name *',
+    ngoNamePlaceholder: 'Enter NGO name',
+    ngoRegNoLabel: 'NGO Registration No. *',
+    ngoRegNoPlaceholder: 'Enter NGO registration number',
+
+    orgNameLabel: 'Organization Name *',
+    orgNamePlaceholder: 'Enter organization name',
+    orgTypeLabel: 'Organization Type *',
+    orgTypePlaceholder: 'e.g. Govt, Semi-Govt, PSU, Cooperative',
+    orgRegNoLabel: 'Registration Number *',
+    orgRegNoPlaceholder: 'Enter registration number',
+
+    authPersonLabel: 'Authorized Person Name *',
+    authPersonPlaceholder: 'Enter name of authorized person',
+
+    submitReg: 'Create Account →',
+    errName: 'Please enter full name',
+    errPhone: 'Please enter valid 10-digit phone number',
     errEmail: 'Please enter a valid email address',
-    errAadhaar: 'Please enter 12-digit Aadhaar number',
+    errRegPassword: 'Please enter password (min 6 characters)',
     errCompName: 'Please enter company name',
     errGstin: 'Please enter 15-digit GSTIN',
-    successInd: 'Individual Registration Successful!',
-    successComp: 'Company Registration Successful!',
+    errNgoName: 'Please enter NGO name',
+    errNgoRegNo: 'Please enter NGO registration number',
+    errOrgName: 'Please enter organization name',
+    errOrgType: 'Please enter organization type',
+    errOrgRegNo: 'Please enter organization registration number',
+    errAuthPerson: 'Please enter authorized person name',
+
+    successReg: 'Account Created Successfully!',
   },
   hi: {
     brandTitle: 'कलासेतु',
@@ -81,43 +116,80 @@ const TRANSLATIONS = {
     feat1: 'प्रामाणिक उत्पाद',
     feat2: 'ग्रामीण आजीविका समर्थन',
     feat3: 'समावेशी विकास',
-    welcome: 'कलासेतु में आपका स्वागत है',
-    loginSub: 'जारी रखने के लिए लॉगिन करें',
+    welcome: 'कलासेतु में आपका स्वागत है ',
+    loginSub: 'जारी रखने के लिए अपने ईमेल और पासवर्ड से लॉगिन करें',
     roleGovt: 'सरकारी खरीदार',
     roleCust: 'ग्राहक / खरीदार',
-    mobileLabel: 'मोबाइल नंबर',
-    mobilePlaceholder: 'अपना 10-अंको का मोबाइल नंबर दर्ज करें',
-    sendOtp: 'ओटीपी भेजें',
+    emailLoginLabel: 'ईमेल आईडी',
+    emailLoginPlaceholder: 'अपनी ईमेल आईडी दर्ज करें',
+    passwordLabel: 'पासवर्ड',
+    passwordPlaceholder: 'अपना पासवर्ड दर्ज करें',
+    loginBtn: 'लॉगिन करें',
+    forgotPassword: 'पासवर्ड भूल गए?',
     newUser: 'नया खाता बनाएं? ',
     register: 'रजिस्ट्रेशन करें',
-    errMobile: 'कृपया 10 अंकों का वैध मोबाइल नंबर दर्ज करें।',
+    errEmailLogin: 'कृपया एक वैध ईमेल आईडी दर्ज करें।',
+    errPassword: 'कृपया अपना पासवर्ड दर्ज करें।',
     langSelect: 'भाषा चुनें / Select Language',
     regTitle: 'नया खाता बनाएं',
-    regSub: 'आगे बढ़ने के लिए खाते का प्रकार चुनें',
-    indTitle: 'व्यक्तिगत उपयोगकर्ता / कारीगर',
-    indSub: 'कारीगरों, ग्राहकों या व्यक्तिगत खरीदारों के लिए',
-    compTitle: 'कंपनी / व्यवसाय / संस्था',
-    compSub: 'कंपनियों, थोक खरीदारों या संस्थाओं के लिए',
-    fullNameLabel: 'पूरा नाम *',
-    fullNamePlaceholder: 'अपना पूरा नाम दर्ज करें',
-    emailLabel: 'ईमेल पता *',
-    emailPlaceholder: 'अपना ईमेल दर्ज करें',
-    aadhaarLabel: 'आधार कार्ड नंबर *',
-    aadhaarPlaceholder: '12-अंकों का आधार नंबर दर्ज करें',
+    regSub: 'आगे बढ़ने के लिए खाता रोल चुनें',
+    roleIndTitle: 'व्यक्तिगत (Individual)',
+    roleIndSub: 'नाम, फोन, ईमेल, पासवर्ड',
+    roleCompTitle: 'प्राइवेट कंपनी (Private Company)',
+    roleCompSub: 'कंपनी नाम, GST, अधिकृत व्यक्ति, फोन, ईमेल, पासवर्ड',
+    roleNgoTitle: 'एनजीओ (NGO)',
+    roleNgoSub: 'NGO नाम, पंजीकरण संख्या, अधिकृत व्यक्ति, फोन, ईमेल, पासवर्ड',
+    roleOrgTitle: 'संस्था (Organization)',
+    roleOrgSub: 'संस्था नाम, प्रकार, पंजीकरण संख्या, अधिकृत व्यक्ति, फोन, ईमेल, पासवर्ड',
+
+    nameLabel: 'पूरा नाम *',
+    namePlaceholder: 'अपना पूरा नाम दर्ज करें',
+    phoneLabel: 'फोन नंबर *',
+    phonePlaceholder: '10 अंकों का फोन नंबर दर्ज करें',
+    emailLabel: 'ईमेल आईडी *',
+    emailPlaceholder: 'अपनी ईमेल आईडी दर्ज करें',
+    regPasswordLabel: 'पासवर्ड *',
+    regPasswordPlaceholder: 'पासवर्ड दर्ज करें (कम से कम 6 अक्षर)',
+    
     compNameLabel: 'कंपनी का नाम *',
     compNamePlaceholder: 'कंपनी का नाम दर्ज करें',
     gstinLabel: 'जीएसटीआईएन (GSTIN) *',
     gstinPlaceholder: '15-अंकों का GSTIN दर्ज करें',
-    submitReg: 'रजिस्ट्रेशन करें और आगे बढ़ें →',
-    errFullName: 'कृपया पूरा नाम दर्ज करें',
+
+    ngoNameLabel: 'NGO का नाम *',
+    ngoNamePlaceholder: 'NGO का नाम दर्ज करें',
+    ngoRegNoLabel: 'NGO पंजीकरण संख्या *',
+    ngoRegNoPlaceholder: 'NGO पंजीकरण संख्या दर्ज करें',
+
+    orgNameLabel: 'संस्था का नाम (Organization Name) *',
+    orgNamePlaceholder: 'संस्था का नाम दर्ज करें',
+    orgTypeLabel: 'संस्था का प्रकार (Organization Type) *',
+    orgTypePlaceholder: 'जैसे सरकारी, अर्ध-सरकारी, पीएसयू, सहकारी',
+    orgRegNoLabel: 'पंजीकरण संख्या *',
+    orgRegNoPlaceholder: 'पंजीकरण संख्या दर्ज करें',
+
+    authPersonLabel: 'अधिकृत व्यक्ति का नाम *',
+    authPersonPlaceholder: 'अधिकृत प्रतिनिधि का नाम दर्ज करें',
+
+    submitReg: 'खाता बनाएं →',
+    errName: 'कृपया पूरा नाम दर्ज करें',
+    errPhone: 'कृपया 10 अंकों का वैध फोन नंबर दर्ज करें',
     errEmail: 'कृपया एक वैध ईमेल पता दर्ज करें',
-    errAadhaar: 'कृपया 12 अंकों का आधार नंबर दर्ज करें',
+    errRegPassword: 'कृपया पासवर्ड दर्ज करें (कम से कम 6 अक्षर)',
     errCompName: 'कृपया कंपनी का नाम दर्ज करें',
     errGstin: 'कृपया 15 अंकों का GSTIN दर्ज करें',
-    successInd: 'व्यक्तिगत रजिस्ट्रेशन सफल!',
-    successComp: 'कंपनी रजिस्ट्रेशन सफल!',
+    errNgoName: 'कृपया NGO का नाम दर्ज करें',
+    errNgoRegNo: 'कृपया NGO पंजीकरण संख्या दर्ज करें',
+    errOrgName: 'कृपया संस्था का नाम दर्ज करें',
+    errOrgType: 'कृपया संस्था का प्रकार दर्ज करें',
+    errOrgRegNo: 'कृपया पंजीकरण संख्या दर्ज करें',
+    errAuthPerson: 'कृपया अधिकृत व्यक्ति का नाम दर्ज करें',
+
+    successReg: 'खाता सफलतापूर्वक बनाया गया!',
   },
 };
+
+type RegRoleType = 'individual' | 'private_company' | 'ngo' | 'organization' | null;
 
 export default function WebLoginScreen() {
   const router = useRouter();
@@ -129,22 +201,36 @@ export default function WebLoginScreen() {
   const t = TRANSLATIONS[selectedLang] || TRANSLATIONS.en;
 
   const [selectedRole, setSelectedRole] = useState<RoleType>('govt');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLangModalVisible, setIsLangModalVisible] = useState(false);
   const [isRegModalVisible, setIsRegModalVisible] = useState(false);
-  const [regType, setRegType] = useState<'individual' | 'company' | null>(null);
 
-  // Form states
-  const [fullName, setFullName] = useState('');
-  const [regMobile, setRegMobile] = useState('');
-  const [email, setEmail] = useState('');
-  const [aadhaar, setAadhaar] = useState('');
+  // Selected Registration Role
+  const [regRole, setRegRole] = useState<RegRoleType>(null);
+
+  // Form states for registration
+  const [regName, setRegName] = useState('');
+  const [regPhone, setRegPhone] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
   const [compName, setCompName] = useState('');
   const [gstin, setGstin] = useState('');
+  const [ngoName, setNgoName] = useState('');
+  const [ngoRegNo, setNgoRegNo] = useState('');
+  const [orgName, setOrgName] = useState('');
+  const [orgType, setOrgType] = useState('');
+  const [orgRegNo, setOrgRegNo] = useState('');
+  const [authorizedPerson, setAuthorizedPerson] = useState('');
 
-  const handleSendOtp = () => {
-    if (phoneNumber.length < 10) {
-      alert(t.errMobile);
+  const handleLogin = () => {
+    if (!loginEmail.trim() || !loginEmail.includes('@')) {
+      alert(t.errEmailLogin);
+      return;
+    }
+    if (!loginPassword.trim()) {
+      alert(t.errPassword);
       return;
     }
     if (selectedRole === 'govt') {
@@ -155,37 +241,58 @@ export default function WebLoginScreen() {
   };
 
   const handleRegisterSubmit = () => {
-    if (!fullName.trim()) {
-      alert(t.errFullName);
-      return;
+    if (regRole === 'individual') {
+      if (!regName.trim()) { alert(t.errName); return; }
+      if (regPhone.length < 10) { alert(t.errPhone); return; }
+      if (!regEmail.trim() || !regEmail.includes('@')) { alert(t.errEmail); return; }
+      if (regPassword.length < 6) { alert(t.errRegPassword); return; }
+    } else if (regRole === 'private_company') {
+      if (!compName.trim()) { alert(t.errCompName); return; }
+      if (gstin.length < 15) { alert(t.errGstin); return; }
+      if (!authorizedPerson.trim()) { alert(t.errAuthPerson); return; }
+      if (regPhone.length < 10) { alert(t.errPhone); return; }
+      if (!regEmail.trim() || !regEmail.includes('@')) { alert(t.errEmail); return; }
+      if (regPassword.length < 6) { alert(t.errRegPassword); return; }
+    } else if (regRole === 'ngo') {
+      if (!ngoName.trim()) { alert(t.errNgoName); return; }
+      if (!ngoRegNo.trim()) { alert(t.errNgoRegNo); return; }
+      if (!authorizedPerson.trim()) { alert(t.errAuthPerson); return; }
+      if (regPhone.length < 10) { alert(t.errPhone); return; }
+      if (!regEmail.trim() || !regEmail.includes('@')) { alert(t.errEmail); return; }
+      if (regPassword.length < 6) { alert(t.errRegPassword); return; }
+    } else if (regRole === 'organization') {
+      if (!orgName.trim()) { alert(t.errOrgName); return; }
+      if (!orgType.trim()) { alert(t.errOrgType); return; }
+      if (!orgRegNo.trim()) { alert(t.errOrgRegNo); return; }
+      if (!authorizedPerson.trim()) { alert(t.errAuthPerson); return; }
+      if (regPhone.length < 10) { alert(t.errPhone); return; }
+      if (!regEmail.trim() || !regEmail.includes('@')) { alert(t.errEmail); return; }
+      if (regPassword.length < 6) { alert(t.errRegPassword); return; }
     }
-    if (regMobile.length < 10) {
-      alert(t.errMobile);
-      return;
-    }
-    if (!email.trim() || !email.includes('@')) {
-      alert(t.errEmail);
-      return;
-    }
-    if (regType === 'individual') {
-      if (aadhaar.length < 12) {
-        alert(t.errAadhaar);
-        return;
-      }
-      alert(t.successInd);
-    } else {
-      if (!compName.trim()) {
-        alert(t.errCompName);
-        return;
-      }
-      if (gstin.length < 15) {
-        alert(t.errGstin);
-        return;
-      }
-      alert(t.successComp);
-    }
+
+    alert(t.successReg);
     setIsRegModalVisible(false);
-    router.push('/customer-dashboard');
+
+    // Reset fields
+    setRegRole(null);
+    setRegName('');
+    setRegPhone('');
+    setRegEmail('');
+    setRegPassword('');
+    setCompName('');
+    setGstin('');
+    setNgoName('');
+    setNgoRegNo('');
+    setOrgName('');
+    setOrgType('');
+    setOrgRegNo('');
+    setAuthorizedPerson('');
+
+    if (regRole === 'organization') {
+      router.push('/govt-dashboard');
+    } else {
+      router.push('/customer-dashboard');
+    }
   };
 
   const currentLangLabel = LANGUAGES.find((l) => l.code === selectedLang)?.label || 'English';
@@ -347,32 +454,50 @@ export default function WebLoginScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Mobile Number Input */}
-            <Text style={styles.mobileInputLabel}>{t.mobileLabel}</Text>
-            <View style={styles.mobileInputContainer}>
-              <TouchableOpacity style={styles.countryPrefix} activeOpacity={0.8}>
-                <Text style={styles.countryCodeText}>IN +91</Text>
-                <Ionicons name="chevron-down" size={12} color="#666" style={{ marginLeft: 4 }} />
-              </TouchableOpacity>
-              <View style={styles.verticalDivider} />
+            {/* Email ID Input */}
+            <Text style={styles.inputLabel}>{t.emailLoginLabel}</Text>
+            <View style={styles.inputContainer}>
+              <Ionicons name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
               <TextInput
-                style={styles.mobileTextInput}
-                placeholder={t.mobilePlaceholder}
+                style={styles.textInput}
+                placeholder={t.emailLoginPlaceholder}
                 placeholderTextColor="#999999"
-                keyboardType="phone-pad"
-                maxLength={10}
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={loginEmail}
+                onChangeText={setLoginEmail}
               />
             </View>
 
-            {/* Send OTP Primary Button */}
+            {/* Password Input */}
+            <View style={styles.passwordHeaderRow}>
+              <Text style={styles.inputLabel}>{t.passwordLabel}</Text>
+              <TouchableOpacity onPress={() => alert(selectedLang === 'hi' ? 'पासवर्ड रीसेट लिंक आपके ईमेल पर भेजा गया है।' : 'Password reset link sent to your email.')}>
+                <Text style={styles.forgotPasswordText}>{t.forgotPassword}</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.inputContainer}>
+              <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
+              <TextInput
+                style={styles.textInput}
+                placeholder={t.passwordPlaceholder}
+                placeholderTextColor="#999999"
+                secureTextEntry={!showPassword}
+                value={loginPassword}
+                onChangeText={setLoginPassword}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIconBtn}>
+                <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Login Primary Button */}
             <TouchableOpacity
-              style={styles.sendOtpButton}
-              onPress={handleSendOtp}
+              style={styles.loginButton}
+              onPress={handleLogin}
               activeOpacity={0.85}
             >
-              <Text style={styles.sendOtpButtonText}>{t.sendOtp}</Text>
+              <Text style={styles.loginButtonText}>{t.loginBtn}</Text>
             </TouchableOpacity>
 
             {/* Register Link Row */}
@@ -380,7 +505,7 @@ export default function WebLoginScreen() {
               <Text style={styles.newUserText}>{t.newUser}</Text>
               <TouchableOpacity
                 onPress={() => {
-                  setRegMobile(phoneNumber);
+                  setRegRole(null);
                   setIsRegModalVisible(true);
                 }}
                 activeOpacity={0.7}
@@ -455,88 +580,129 @@ export default function WebLoginScreen() {
               </TouchableOpacity>
             </View>
 
-            {!regType ? (
+            {!regRole ? (
               <View style={{ marginTop: 8 }}>
                 <Text style={styles.regModalSub}>{t.regSub}</Text>
                 
+                {/* 1. Individual */}
                 <TouchableOpacity
                   style={styles.regTypeCard}
-                  onPress={() => setRegType('individual')}
+                  onPress={() => setRegRole('individual')}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name="person-circle-outline" size={32} color="#1F4D25" />
+                  <Ionicons name="person-circle-outline" size={30} color="#1F4D25" />
                   <View style={{ marginLeft: 14, flex: 1 }}>
-                    <Text style={styles.regTypeTitle}>{t.indTitle}</Text>
-                    <Text style={styles.regTypeSub}>{t.indSub}</Text>
+                    <Text style={styles.regTypeTitle}>{t.roleIndTitle}</Text>
+                    <Text style={styles.regTypeSub}>{t.roleIndSub}</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={20} color="#1F4D25" />
                 </TouchableOpacity>
 
+                {/* 2. Private Company */}
                 <TouchableOpacity
                   style={styles.regTypeCard}
-                  onPress={() => setRegType('company')}
+                  onPress={() => setRegRole('private_company')}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name="business-outline" size={32} color="#1F4D25" />
+                  <Ionicons name="business-outline" size={30} color="#1F4D25" />
                   <View style={{ marginLeft: 14, flex: 1 }}>
-                    <Text style={styles.regTypeTitle}>{t.compTitle}</Text>
-                    <Text style={styles.regTypeSub}>{t.compSub}</Text>
+                    <Text style={styles.regTypeTitle}>{t.roleCompTitle}</Text>
+                    <Text style={styles.regTypeSub}>{t.roleCompSub}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#1F4D25" />
+                </TouchableOpacity>
+
+                {/* 3. NGO */}
+                <TouchableOpacity
+                  style={styles.regTypeCard}
+                  onPress={() => setRegRole('ngo')}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="people-outline" size={30} color="#1F4D25" />
+                  <View style={{ marginLeft: 14, flex: 1 }}>
+                    <Text style={styles.regTypeTitle}>{t.roleNgoTitle}</Text>
+                    <Text style={styles.regTypeSub}>{t.roleNgoSub}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#1F4D25" />
+                </TouchableOpacity>
+
+                {/* 4. Organization */}
+                <TouchableOpacity
+                  style={styles.regTypeCard}
+                  onPress={() => setRegRole('organization')}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="library-outline" size={30} color="#1F4D25" />
+                  <View style={{ marginLeft: 14, flex: 1 }}>
+                    <Text style={styles.regTypeTitle}>{t.roleOrgTitle}</Text>
+                    <Text style={styles.regTypeSub}>{t.roleOrgSub}</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={20} color="#1F4D25" />
                 </TouchableOpacity>
               </View>
             ) : (
-              <ScrollView style={{ maxHeight: 420 }} showsVerticalScrollIndicator={false}>
-                <TouchableOpacity onPress={() => setRegType(null)} style={styles.backLink}>
+              <ScrollView style={{ maxHeight: 460 }} showsVerticalScrollIndicator={false}>
+                <TouchableOpacity onPress={() => setRegRole(null)} style={styles.backLink}>
                   <Ionicons name="arrow-back" size={16} color="#1F4D25" />
-                  <Text style={styles.backLinkText}>Back to options</Text>
+                  <Text style={styles.backLinkText}>
+                    {selectedLang === 'hi' ? 'रोल चयन पर वापस जाएं' : 'Back to roles'}
+                  </Text>
                 </TouchableOpacity>
 
-                <Text style={styles.fieldLabel}>{t.fullNameLabel}</Text>
-                <TextInput
-                  style={styles.regTextInput}
-                  placeholder={t.fullNamePlaceholder}
-                  value={fullName}
-                  onChangeText={setFullName}
-                />
-
-                <Text style={styles.fieldLabel}>{t.mobileLabel} *</Text>
-                <TextInput
-                  style={styles.regTextInput}
-                  placeholder={t.mobilePlaceholder}
-                  keyboardType="phone-pad"
-                  maxLength={10}
-                  value={regMobile}
-                  onChangeText={setRegMobile}
-                />
-
-                <Text style={styles.fieldLabel}>{t.emailLabel}</Text>
-                <TextInput
-                  style={styles.regTextInput}
-                  placeholder={t.emailPlaceholder}
-                  keyboardType="email-address"
-                  value={email}
-                  onChangeText={setEmail}
-                />
-
-                {regType === 'individual' ? (
+                {/* 1. INDIVIDUAL FORM */}
+                {regRole === 'individual' && (
                   <>
-                    <Text style={styles.fieldLabel}>{t.aadhaarLabel}</Text>
+                    <Text style={styles.fieldLabel}>{t.nameLabel}</Text>
                     <TextInput
                       style={styles.regTextInput}
-                      placeholder={t.aadhaarPlaceholder}
-                      keyboardType="number-pad"
-                      maxLength={12}
-                      value={aadhaar}
-                      onChangeText={setAadhaar}
+                      placeholder={t.namePlaceholder}
+                      placeholderTextColor="#999999"
+                      value={regName}
+                      onChangeText={setRegName}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.phoneLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.phonePlaceholder}
+                      placeholderTextColor="#999999"
+                      keyboardType="phone-pad"
+                      maxLength={10}
+                      value={regPhone}
+                      onChangeText={setRegPhone}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.emailLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.emailPlaceholder}
+                      placeholderTextColor="#999999"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      value={regEmail}
+                      onChangeText={setRegEmail}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.regPasswordLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.regPasswordPlaceholder}
+                      placeholderTextColor="#999999"
+                      secureTextEntry
+                      value={regPassword}
+                      onChangeText={setRegPassword}
                     />
                   </>
-                ) : (
+                )}
+
+                {/* 2. PRIVATE COMPANY FORM */}
+                {regRole === 'private_company' && (
                   <>
                     <Text style={styles.fieldLabel}>{t.compNameLabel}</Text>
                     <TextInput
                       style={styles.regTextInput}
                       placeholder={t.compNamePlaceholder}
+                      placeholderTextColor="#999999"
                       value={compName}
                       onChangeText={setCompName}
                     />
@@ -545,9 +711,189 @@ export default function WebLoginScreen() {
                     <TextInput
                       style={styles.regTextInput}
                       placeholder={t.gstinPlaceholder}
+                      placeholderTextColor="#999999"
                       maxLength={15}
+                      autoCapitalize="characters"
                       value={gstin}
                       onChangeText={setGstin}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.authPersonLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.authPersonPlaceholder}
+                      placeholderTextColor="#999999"
+                      value={authorizedPerson}
+                      onChangeText={setAuthorizedPerson}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.phoneLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.phonePlaceholder}
+                      placeholderTextColor="#999999"
+                      keyboardType="phone-pad"
+                      maxLength={10}
+                      value={regPhone}
+                      onChangeText={setRegPhone}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.emailLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.emailPlaceholder}
+                      placeholderTextColor="#999999"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      value={regEmail}
+                      onChangeText={setRegEmail}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.regPasswordLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.regPasswordPlaceholder}
+                      placeholderTextColor="#999999"
+                      secureTextEntry
+                      value={regPassword}
+                      onChangeText={setRegPassword}
+                    />
+                  </>
+                )}
+
+                {/* 3. NGO FORM */}
+                {regRole === 'ngo' && (
+                  <>
+                    <Text style={styles.fieldLabel}>{t.ngoNameLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.ngoNamePlaceholder}
+                      placeholderTextColor="#999999"
+                      value={ngoName}
+                      onChangeText={setNgoName}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.ngoRegNoLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.ngoRegNoPlaceholder}
+                      placeholderTextColor="#999999"
+                      value={ngoRegNo}
+                      onChangeText={setNgoRegNo}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.authPersonLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.authPersonPlaceholder}
+                      placeholderTextColor="#999999"
+                      value={authorizedPerson}
+                      onChangeText={setAuthorizedPerson}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.phoneLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.phonePlaceholder}
+                      placeholderTextColor="#999999"
+                      keyboardType="phone-pad"
+                      maxLength={10}
+                      value={regPhone}
+                      onChangeText={setRegPhone}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.emailLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.emailPlaceholder}
+                      placeholderTextColor="#999999"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      value={regEmail}
+                      onChangeText={setRegEmail}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.regPasswordLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.regPasswordPlaceholder}
+                      placeholderTextColor="#999999"
+                      secureTextEntry
+                      value={regPassword}
+                      onChangeText={setRegPassword}
+                    />
+                  </>
+                )}
+
+                {/* 4. ORGANIZATION FORM */}
+                {regRole === 'organization' && (
+                  <>
+                    <Text style={styles.fieldLabel}>{t.orgNameLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.orgNamePlaceholder}
+                      placeholderTextColor="#999999"
+                      value={orgName}
+                      onChangeText={setOrgName}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.orgTypeLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.orgTypePlaceholder}
+                      placeholderTextColor="#999999"
+                      value={orgType}
+                      onChangeText={setOrgType}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.orgRegNoLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.orgRegNoPlaceholder}
+                      placeholderTextColor="#999999"
+                      value={orgRegNo}
+                      onChangeText={setOrgRegNo}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.authPersonLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.authPersonPlaceholder}
+                      placeholderTextColor="#999999"
+                      value={authorizedPerson}
+                      onChangeText={setAuthorizedPerson}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.phoneLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.phonePlaceholder}
+                      placeholderTextColor="#999999"
+                      keyboardType="phone-pad"
+                      maxLength={10}
+                      value={regPhone}
+                      onChangeText={setRegPhone}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.emailLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.emailPlaceholder}
+                      placeholderTextColor="#999999"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      value={regEmail}
+                      onChangeText={setRegEmail}
+                    />
+
+                    <Text style={styles.fieldLabel}>{t.regPasswordLabel}</Text>
+                    <TextInput
+                      style={styles.regTextInput}
+                      placeholder={t.regPasswordPlaceholder}
+                      placeholderTextColor="#999999"
+                      secureTextEntry
+                      value={regPassword}
+                      onChangeText={setRegPassword}
                     />
                   </>
                 )}
@@ -786,14 +1132,14 @@ const styles = StyleSheet.create({
     color: '#1F4D25',
     fontWeight: 'bold',
   },
-  /* Mobile Input */
-  mobileInputLabel: {
+  /* Form Inputs */
+  inputLabel: {
     fontSize: 14,
     fontWeight: 'bold',
     color: '#222222',
     marginBottom: 8,
   },
-  mobileInputContainer: {
+  inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     height: 52,
@@ -801,37 +1147,39 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E0DDD3',
     borderRadius: 12,
-    paddingHorizontal: 12,
-    marginBottom: 20,
+    paddingHorizontal: 14,
+    marginBottom: 16,
   },
-  countryPrefix: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingRight: 8,
-  },
-  countryCodeText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#1A1A1A',
-  },
-  verticalDivider: {
-    width: 1,
-    height: '55%',
-    backgroundColor: '#E2E0D8',
+  inputIcon: {
     marginRight: 10,
   },
-  mobileTextInput: {
+  textInput: {
     flex: 1,
     fontSize: 15,
     color: '#1A1A1A',
   },
+  passwordHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  forgotPasswordText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#1F4D25',
+    marginBottom: 8,
+  },
+  eyeIconBtn: {
+    padding: 4,
+  },
   /* Primary Button */
-  sendOtpButton: {
+  loginButton: {
     height: 52,
     backgroundColor: '#1F4D25',
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 6,
     marginBottom: 20,
     elevation: 2,
     shadowColor: '#1F4D25',
@@ -839,7 +1187,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
   },
-  sendOtpButtonText: {
+  loginButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#FFFFFF',

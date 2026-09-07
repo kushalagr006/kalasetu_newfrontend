@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { ArtisanFloatingNav } from '@/components/ArtisanFloatingNav';
 
 type LangCode = 'hi' | 'en';
 type ActiveTab = 'home' | 'products' | 'customers' | 'profile';
@@ -53,7 +54,7 @@ const TRANSLATIONS: Record<LangCode, {
     totalProducts: 'कुल उत्पाद',
     totalOrders: 'कुल ऑर्डर',
     salesTillDate: 'आज तक की बिक्री',
-    recentOrders: 'हाल की बिक्री',
+    recentOrders: 'ऑर्डर्स',
     viewAll: 'सभी देखें',
     order1Title: 'सजावटी मिट्टी का घड़ा',
     order1Sub: 'रमेश कुमार • ₹450 • भुगतान पूरा',
@@ -76,7 +77,7 @@ const TRANSLATIONS: Record<LangCode, {
     totalProducts: 'Total Products',
     totalOrders: 'Total Orders',
     salesTillDate: 'Sales Till Date',
-    recentOrders: 'Recent Sales',
+    recentOrders: 'Orders',
     viewAll: 'View All',
     order1Title: 'Decorative Clay Pot',
     order1Sub: 'Ramesh Kumar • ₹450 • Payment Received',
@@ -151,16 +152,25 @@ export default function HomeScreen() {
             <Text style={styles.addProductText}>{t.addProduct}</Text>
           </TouchableOpacity>
 
-          {/* Product Statistics Card */}
-          <View style={styles.cardContainer}>
+          {/* Product Statistics Card (Clicking opens All Uploaded Products) */}
+          <TouchableOpacity
+            style={styles.cardContainer}
+            onPress={() => router.push({ pathname: '/products', params: { lang: selectedLang } })}
+            activeOpacity={0.88}
+          >
             <View style={styles.cardHeaderRow}>
-              <Ionicons name="bar-chart" size={20} color="#3B6029" style={{ marginRight: 8 }} />
+              <Ionicons name="cube-outline" size={20} color="#3B6029" style={{ marginRight: 8 }} />
               <Text style={styles.cardHeaderTitle}>{t.yourProducts}</Text>
+              <Ionicons name="chevron-forward" size={18} color="#777777" style={{ marginLeft: 'auto' }} />
             </View>
 
             <View style={styles.statsMetricsRow}>
               {/* Metric 1: Total Products */}
-              <View style={styles.metricItem}>
+              <TouchableOpacity
+                style={styles.metricItem}
+                onPress={() => router.push({ pathname: '/products', params: { lang: selectedLang } })}
+                activeOpacity={0.7}
+              >
                 <View style={[styles.metricIconCircle, { backgroundColor: '#EAF2E8' }]}>
                   <Ionicons name="cube-outline" size={24} color="#3B6029" />
                 </View>
@@ -168,12 +178,16 @@ export default function HomeScreen() {
                   <Text style={[styles.metricNumber, { color: '#3B6029' }]}>12</Text>
                   <Text style={styles.metricLabel}>{t.totalProducts}</Text>
                 </View>
-              </View>
+              </TouchableOpacity>
 
               <View style={styles.verticalDivider} />
 
               {/* Metric 2: Total Orders */}
-              <View style={styles.metricItem}>
+              <TouchableOpacity
+                style={styles.metricItem}
+                onPress={() => router.push({ pathname: '/product-chats', params: { lang: selectedLang } })}
+                activeOpacity={0.7}
+              >
                 <View style={[styles.metricIconCircle, { backgroundColor: '#FFF0E6' }]}>
                   <Ionicons name="clipboard-outline" size={24} color="#E65100" />
                 </View>
@@ -181,12 +195,16 @@ export default function HomeScreen() {
                   <Text style={[styles.metricNumber, { color: '#E65100' }]}>3</Text>
                   <Text style={styles.metricLabel}>{t.totalOrders}</Text>
                 </View>
-              </View>
+              </TouchableOpacity>
             </View>
-          </View>
+          </TouchableOpacity>
 
           {/* Sales Summary Card */}
-          <TouchableOpacity style={styles.salesCard} activeOpacity={0.88}>
+          <TouchableOpacity
+            style={styles.salesCard}
+            onPress={() => router.push({ pathname: '/product-chats', params: { lang: selectedLang } })}
+            activeOpacity={0.88}
+          >
             <View style={styles.salesBagCircle}>
               <Ionicons name="wallet-outline" size={26} color="#4E342E" />
             </View>
@@ -197,20 +215,31 @@ export default function HomeScreen() {
             <Ionicons name="chevron-forward" size={20} color="#777777" />
           </TouchableOpacity>
 
-          {/* Recent Orders Section */}
+          {/* Orders Section (Clicking opens Customer Purchase Chat) */}
           <View style={styles.recentOrdersCard}>
             <View style={styles.recentHeaderRow}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Ionicons name="trending-up-outline" size={20} color="#3B6029" style={{ marginRight: 6 }} />
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+                onPress={() => router.push({ pathname: '/product-chats', params: { lang: selectedLang } })}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="clipboard-outline" size={20} color="#3B6029" style={{ marginRight: 6 }} />
                 <Text style={styles.recentHeaderTitle}>{t.recentOrders}</Text>
-              </View>
-              <TouchableOpacity activeOpacity={0.7}>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => router.push({ pathname: '/product-chats', params: { lang: selectedLang } })}
+                activeOpacity={0.7}
+              >
                 <Text style={styles.viewAllText}>{t.viewAll}</Text>
               </TouchableOpacity>
             </View>
 
             {/* Order Item 1 */}
-            <View style={styles.orderRowItem}>
+            <TouchableOpacity
+              style={styles.orderRowItem}
+              onPress={() => router.push({ pathname: '/product-chats', params: { lang: selectedLang } })}
+              activeOpacity={0.85}
+            >
               <View style={styles.orderBadgeCircle}>
                 <Ionicons name="cart-outline" size={22} color="#3B6029" />
               </View>
@@ -219,12 +248,16 @@ export default function HomeScreen() {
                 <Text style={styles.orderSub}>{t.order1Sub}</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color="#CCCCCC" />
-            </View>
+            </TouchableOpacity>
 
             <View style={styles.orderDividerLine} />
 
             {/* Order Item 2 */}
-            <View style={styles.orderRowItem}>
+            <TouchableOpacity
+              style={styles.orderRowItem}
+              onPress={() => router.push({ pathname: '/product-chats', params: { lang: selectedLang } })}
+              activeOpacity={0.85}
+            >
               <View style={[styles.orderBadgeCircle, { backgroundColor: '#FFF0E6' }]}>
                 <Ionicons name="gift-outline" size={22} color="#E65100" />
               </View>
@@ -233,10 +266,20 @@ export default function HomeScreen() {
                 <Text style={styles.orderSub}>{t.order2Sub}</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color="#CCCCCC" />
-            </View>
+            </TouchableOpacity>
           </View>
 
-          {/* Sales Growth Artisan Tip Card */}
+          {/* Non-Working View Government Schemes Button */}
+          <TouchableOpacity
+            style={styles.viewGovtSchemesBtn}
+            onPress={() => {}}
+            activeOpacity={1}
+          >
+            <Ionicons name="document-text-outline" size={20} color="#3B6029" style={{ marginRight: 8 }} />
+            <Text style={styles.viewGovtSchemesBtnText}>View Government Schemes</Text>
+          </TouchableOpacity>
+
+          {/* Non-Working Sales Growth Artisan Tip Card */}
           <View style={styles.tipCard}>
             <Text style={styles.tipTitle}>{t.tipTitle}</Text>
             <Text style={styles.tipBody}>{t.tipBody}</Text>
@@ -252,101 +295,17 @@ export default function HomeScreen() {
           </View>
         </ScrollView>
 
-        {/* Floating Action Chat Button */}
+        {/* Floating Action Chat Button (Navigates to Product Chats) */}
         <TouchableOpacity
           style={styles.floatingChatButton}
-          onPress={() => alert('सहायता चैट / Help Chat')}
+          onPress={() => router.push({ pathname: '/product-chats', params: { lang: selectedLang } })}
           activeOpacity={0.85}
         >
           <Ionicons name="chatbubble-ellipses" size={24} color="#FFFFFF" />
         </TouchableOpacity>
 
-        {/* Bottom Navigation Bar (4 Tabs) */}
-        <View style={styles.bottomNavContainer}>
-          {/* Tab 1: Home */}
-          <TouchableOpacity
-            style={styles.navTab}
-            onPress={() => setActiveTab('home')}
-            activeOpacity={0.7}
-          >
-            <Ionicons
-              name={activeTab === 'home' ? 'home' : 'home-outline'}
-              size={22}
-              color={activeTab === 'home' ? '#3B6029' : '#666666'}
-            />
-            <Text
-              style={[
-                styles.navTabText,
-                activeTab === 'home' && styles.navTabTextActive,
-              ]}
-            >
-              {t.navHome}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Tab 2: Products */}
-          <TouchableOpacity
-            style={styles.navTab}
-            onPress={() => router.push({ pathname: '/products', params: { lang: selectedLang } })}
-            activeOpacity={0.7}
-          >
-            <Ionicons
-              name={activeTab === 'products' ? 'cube' : 'cube-outline'}
-              size={22}
-              color={activeTab === 'products' ? '#E65100' : '#666666'}
-            />
-            <Text
-              style={[
-                styles.navTabText,
-                activeTab === 'products' && styles.navTabTextActiveProduct,
-              ]}
-            >
-              {t.navProducts}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Tab 3: Customers */}
-          <TouchableOpacity
-            style={styles.navTab}
-            onPress={() => router.push({ pathname: '/customers', params: { lang: selectedLang } })}
-            activeOpacity={0.7}
-          >
-            <Ionicons
-              name={activeTab === 'customers' ? 'people' : 'people-outline'}
-              size={22}
-              color={activeTab === 'customers' ? '#5E35B1' : '#666666'}
-            />
-            <Text
-              style={[
-                styles.navTabText,
-                activeTab === 'customers' && styles.navTabTextActiveCustomer,
-              ]}
-            >
-              {t.navCustomers}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Tab 4: Profile */}
-          <TouchableOpacity
-            style={styles.navTab}
-            onPress={() => router.push({ pathname: '/profile', params: { lang: selectedLang } })}
-            activeOpacity={0.7}
-          >
-            <Ionicons
-              name={activeTab === 'profile' ? 'person' : 'person-outline'}
-              size={22}
-              color={activeTab === 'profile' ? '#1976D2' : '#666666'}
-            />
-            <Text
-              style={[
-                styles.navTabText,
-                activeTab === 'profile' && styles.navTabTextActiveProfile,
-              ]}
-            >
-              {t.navProfile}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {/* Persistent Floating Pill Bottom Navigation Bar */}
+        <ArtisanFloatingNav activeTab="home" selectedLang={selectedLang} />
 
         {/* Language Selection Modal */}
         <Modal
@@ -411,7 +370,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 24,
+    paddingBottom: 100,
   },
   /* Header Row */
   headerRow: {
@@ -661,6 +620,24 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#F5F4EF',
     marginVertical: 8,
+  },
+  /* Non-Working View Government Schemes Button */
+  viewGovtSchemesBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#3B6029',
+    borderRadius: 16,
+    height: 52,
+    marginHorizontal: 20,
+    marginBottom: 16,
+  },
+  viewGovtSchemesBtnText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#3B6029',
   },
   /* Sales Growth Tip Card */
   tipCard: {

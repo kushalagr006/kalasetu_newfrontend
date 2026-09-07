@@ -1,0 +1,145 @@
+import React from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useGlobalLang } from '@/utils/languageStore';
+
+export type ArtisanTabKey = 'home' | 'products' | 'orders' | 'customers' | 'profile' | 'chat';
+
+interface ArtisanFloatingNavProps {
+  activeTab: ArtisanTabKey;
+  selectedLang?: 'hi' | 'en';
+}
+
+const TRANSLATIONS = {
+  hi: {
+    home: 'होम',
+    products: 'माय प्रोडक्ट्स',
+    orders: 'ऑर्डर्स',
+    profile: 'प्रोफाइल',
+  },
+  en: {
+    home: 'Home',
+    products: 'My Products',
+    orders: 'Orders',
+    profile: 'Profile',
+  },
+};
+
+export function ArtisanFloatingNav({ activeTab, selectedLang }: ArtisanFloatingNavProps) {
+  const router = useRouter();
+  const [globalLang] = useGlobalLang();
+  const lang = selectedLang || (globalLang === 'en' ? 'en' : 'hi');
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.hi;
+
+  const navItems: {
+    key: 'home' | 'products' | 'orders' | 'profile';
+    label: string;
+    iconOutline: keyof typeof Ionicons.glyphMap;
+    iconSolid: keyof typeof Ionicons.glyphMap;
+    route: string;
+  }[] = [
+    {
+      key: 'home',
+      label: t.home,
+      iconOutline: 'home-outline',
+      iconSolid: 'home',
+      route: '/home',
+    },
+    {
+      key: 'products',
+      label: t.products,
+      iconOutline: 'cube-outline',
+      iconSolid: 'cube',
+      route: '/products',
+    },
+    {
+      key: 'orders',
+      label: t.orders,
+      iconOutline: 'clipboard-outline',
+      iconSolid: 'clipboard',
+      route: '/customers',
+    },
+    {
+      key: 'profile',
+      label: t.profile,
+      iconOutline: 'person-outline',
+      iconSolid: 'person',
+      route: '/profile',
+    },
+  ];
+
+  return (
+    <View style={styles.floatingNavContainer}>
+      {navItems.map((item) => {
+        const isActive = activeTab === item.key;
+        return (
+          <TouchableOpacity
+            key={item.key}
+            style={styles.navTab}
+            onPress={() => {
+              if (!isActive) {
+                router.push({ pathname: item.route as any, params: { lang } });
+              }
+            }}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name={isActive ? item.iconSolid : item.iconOutline}
+              size={24}
+              color={isActive ? '#3B6029' : '#666666'}
+            />
+            <Text style={[styles.navTabText, isActive && styles.navTabTextActive]}>
+              {item.label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  floatingNavContainer: {
+    position: 'absolute',
+    bottom: Platform.OS === 'ios' ? 24 : 16,
+    left: 16,
+    right: 16,
+    height: 68,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 36,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    borderWidth: 1,
+    borderColor: '#EFECE6',
+    zIndex: 1000,
+  },
+  navTab: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 6,
+  },
+  navTabText: {
+    fontSize: 12,
+    color: '#666666',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  navTabTextActive: {
+    color: '#3B6029',
+    fontWeight: 'bold',
+  },
+});

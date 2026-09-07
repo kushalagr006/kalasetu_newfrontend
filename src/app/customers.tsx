@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { ArtisanFloatingNav } from '@/components/ArtisanFloatingNav';
 
 type LangCode = 'hi' | 'en';
 
@@ -63,11 +64,7 @@ export default function CustomersScreen() {
   const isHindi = selectedLang === 'hi';
 
   const handleChatPress = (customerName: string) => {
-    alert(
-      isHindi
-        ? `${customerName} के साथ चैट शुरू हो रही है...`
-        : `Opening chat with ${customerName}...`
-    );
+    router.push({ pathname: '/product-chats', params: { lang: selectedLang } });
   };
 
   const handleQuickCardPress = (cardTitle: string) => {
@@ -91,12 +88,12 @@ export default function CustomersScreen() {
           <View style={styles.headerRow}>
             <View style={styles.headerTextGroup}>
               <Text style={styles.headerTitle}>
-                {isHindi ? 'ग्राहक' : 'Customers'}
+                {isHindi ? 'ऑर्डर्स' : 'Orders'}
               </Text>
               <Text style={styles.headerSubtitle}>
                 {isHindi
-                  ? 'अपने ग्राहकों से जुड़ें और नए अवसर पाएं'
-                  : 'Connect with your buyers & find new opportunities'}
+                  ? 'अपने सभी उत्पाद ऑर्डर, थोक खरीदारी और सरकारी टेंडर देखें'
+                  : 'View all product orders, bulk inquiries & government tenders'}
               </Text>
             </View>
 
@@ -291,49 +288,7 @@ export default function CustomersScreen() {
         </ScrollView>
 
         {/* Bottom Navigation Bar (4 Tabs) */}
-        <View style={styles.bottomNavContainer}>
-          {/* Tab 1: Home */}
-          <TouchableOpacity
-            style={styles.navTab}
-            onPress={() => router.push({ pathname: '/home', params: { lang: selectedLang } })}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="home-outline" size={22} color="#666666" />
-            <Text style={styles.navTabText}>{isHindi ? 'होम' : 'Home'}</Text>
-          </TouchableOpacity>
-
-          {/* Tab 2: Products */}
-          <TouchableOpacity
-            style={styles.navTab}
-            onPress={() => router.push({ pathname: '/products', params: { lang: selectedLang } })}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="cube-outline" size={22} color="#666666" />
-            <Text style={styles.navTabText}>{isHindi ? 'उत्पाद' : 'Products'}</Text>
-          </TouchableOpacity>
-
-          {/* Tab 3: Customers (Active) */}
-          <TouchableOpacity
-            style={styles.navTab}
-            onPress={() => {}}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="people" size={22} color="#3B6029" />
-            <Text style={[styles.navTabText, styles.navTabTextActive]}>
-              {isHindi ? 'ग्राहक' : 'Customers'}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Tab 4: Profile */}
-          <TouchableOpacity
-            style={styles.navTab}
-            onPress={() => router.push({ pathname: '/profile', params: { lang: selectedLang } })}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="person-outline" size={22} color="#666666" />
-            <Text style={styles.navTabText}>{isHindi ? 'प्रोफाइल' : 'Profile'}</Text>
-          </TouchableOpacity>
-        </View>
+        <ArtisanFloatingNav activeTab="orders" selectedLang={selectedLang} />
       </View>
     </SafeAreaView>
   );
@@ -352,7 +307,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 24,
+    paddingBottom: 100,
   },
   /* Header Row */
   headerRow: {
