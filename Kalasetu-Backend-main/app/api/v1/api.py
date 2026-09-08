@@ -10,10 +10,13 @@ from app.api.v1.endpoints import (
     orders,
     chat,
     schemes,
-    admin
+    admin,
+    bhashini
 )
 
 api_router = APIRouter()
+
+api_router.include_router(bhashini.router, prefix="/bhashini", tags=["BHASHINI AI Speech & NLP"])
 
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth & Registration"])
 api_router.include_router(verifications.router, prefix="/verifications", tags=["Mock Verification APIs"])
