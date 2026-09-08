@@ -9,42 +9,44 @@ import {
   Platform,
   TextInput,
   Image,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { getPendingProductPhoto } from '@/utils/photoStore';
 import { useGlobalLang } from '@/utils/languageStore';
-
-type LangCode = 'hi' | 'en';
+import TopLangSelector from '@/components/TopLangSelector';
+import { TEXT_STRINGS } from '@/utils/productQuestions';
 
 export default function AddProductTextScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ lang?: string }>();
   const [globalLang] = useGlobalLang();
-
-  const selectedLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
-  const isHindi = selectedLang === 'hi';
+  const t = TEXT_STRINGS[globalLang] || TEXT_STRINGS.hi;
 
   const [productName, setProductName] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
   const [description, setDescription] = useState('');
   const [features, setFeatures] = useState('');
-  const [category, setCategory] = useState(isHindi ? 'मिट्टी के उत्पाद' : 'Clay Products');
+  const [category, setCategory] = useState(t.labelCategory);
   const [location, setLocation] = useState('');
 
   const handleSaveProduct = () => {
     if (!productName.trim()) {
-      alert(isHindi ? 'कृपया उत्पाद का नाम भरें' : 'Please enter product name');
+      Alert.alert('Notice', t.errNameAlert);
       return;
     }
-    alert(
-      isHindi
-        ? 'उत्पाद सफलतापूर्वक सेव हो गया है और समीक्षा के लिए भेज दिया गया है!'
-        : 'Product saved successfully and sent for review!'
+    Alert.alert(
+      'Success',
+      t.successAlert,
+      [
+        {
+          text: 'OK',
+          onPress: () => router.push('/products'),
+        },
+      ]
     );
-    router.push({ pathname: '/products', params: { lang: selectedLang } });
   };
 
   const pendingPhoto = getPendingProductPhoto();
@@ -54,7 +56,7 @@ export default function AddProductTextScreen() {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" translucent={false} />
       <View style={styles.container}>
-        {/* Top Header Row with Back Button and Help */}
+        {/* Top Header Row with Back Button and Language Selector */}
         <View style={styles.headerRow}>
           <TouchableOpacity
             style={styles.backButton}
@@ -65,17 +67,10 @@ export default function AddProductTextScreen() {
           </TouchableOpacity>
 
           <Text style={styles.headerTitle}>
-            {isHindi ? 'लिखकर उत्पाद जोड़ें' : 'Add Product by Writing'}
+            {t.headerTitle}
           </Text>
 
-          <TouchableOpacity
-            style={styles.helpButton}
-            onPress={() => alert(isHindi ? 'सहायता केन्द्र' : 'Help Center')}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="help-circle-outline" size={22} color="#3B6029" />
-            <Text style={styles.helpText}>{isHindi ? 'सहायता' : 'Help'}</Text>
-          </TouchableOpacity>
+          <TopLangSelector />
         </View>
 
         <ScrollView
@@ -103,10 +98,10 @@ export default function AddProductTextScreen() {
               />
               <View style={{ marginLeft: 12, flex: 1 }}>
                 <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#3B6029' }}>
-                  {isHindi ? '✨ AI एनहांस्ड फोटो संलग्न' : '✨ AI Enhanced Photo Attached'}
+                  {t.photoAttached}
                 </Text>
                 <Text style={{ fontSize: 11, color: '#666666', marginTop: 2 }}>
-                  {isHindi ? 'यह फोटो आपके उत्पाद के साथ दिखेगी' : 'This photo will be displayed with your product'}
+                  {t.photoSub}
                 </Text>
               </View>
             </View>
@@ -120,12 +115,10 @@ export default function AddProductTextScreen() {
 
             <View style={styles.infoTextGroup}>
               <Text style={styles.infoTitle}>
-                {isHindi ? 'टेक्स्ट में जानकारी भरें' : 'Fill details in text'}
+                {t.infoTitle}
               </Text>
               <Text style={styles.infoSubtitle}>
-                {isHindi
-                  ? "नीचे दिए गए सभी विवरण लिखें और 'उत्पाद सेव करें' पर टैप करें"
-                  : "Write all details below and tap 'Save Product'"}
+                {t.infoSub}
               </Text>
             </View>
           </View>
@@ -135,12 +128,11 @@ export default function AddProductTextScreen() {
           {/* 1. Product Name */}
           <View style={styles.formGroup}>
             <Text style={styles.label}>
-              {isHindi ? 'उत्पाद का नाम ' : 'Product Name '}
-              <Text style={styles.asterisk}>*</Text>
+              {t.labelName}
             </Text>
             <TextInput
               style={styles.input}
-              placeholder={isHindi ? 'जैसे: मिट्टी का घड़ा' : 'e.g. Clay Pot'}
+              placeholder={t.placeholderName}
               placeholderTextColor="#999999"
               value={productName}
               onChangeText={setProductName}
@@ -152,12 +144,11 @@ export default function AddProductTextScreen() {
             {/* Price */}
             <View style={[styles.formGroup, styles.formCol]}>
               <Text style={styles.label}>
-                {isHindi ? 'कीमत (₹) ' : 'Price (₹) '}
-                <Text style={styles.asterisk}>*</Text>
+                {t.labelPrice}
               </Text>
               <TextInput
                 style={styles.input}
-                placeholder={isHindi ? 'जैसे: 450' : 'e.g. 450'}
+                placeholder={t.placeholderPrice}
                 placeholderTextColor="#999999"
                 keyboardType="numeric"
                 value={price}
@@ -168,12 +159,11 @@ export default function AddProductTextScreen() {
             {/* Stock */}
             <View style={[styles.formGroup, styles.formCol]}>
               <Text style={styles.label}>
-                {isHindi ? 'स्टॉक (संख्या) ' : 'Stock (Count) '}
-                <Text style={styles.asterisk}>*</Text>
+                {t.labelStock}
               </Text>
               <TextInput
                 style={styles.input}
-                placeholder={isHindi ? 'जैसे: 10' : 'e.g. 10'}
+                placeholder={t.placeholderStock}
                 placeholderTextColor="#999999"
                 keyboardType="numeric"
                 value={stock}
@@ -185,13 +175,12 @@ export default function AddProductTextScreen() {
           {/* 4. Product Description */}
           <View style={styles.formGroup}>
             <Text style={styles.label}>
-              {isHindi ? 'उत्पाद का विवरण ' : 'Product Description '}
-              <Text style={styles.asterisk}>*</Text>
+              {t.labelDescription}
             </Text>
             <View style={styles.multilineInputContainer}>
               <TextInput
                 style={styles.multilineInput}
-                placeholder={isHindi ? 'अपने उत्पाद के बारे में लिखें...' : 'Write about your product...'}
+                placeholder={t.placeholderDescription}
                 placeholderTextColor="#999999"
                 multiline
                 maxLength={300}
@@ -202,18 +191,14 @@ export default function AddProductTextScreen() {
             </View>
           </View>
 
-          {/* 5. Features (Optional) */}
+          {/* 5. Features / Materials */}
           <View style={styles.formGroup}>
             <Text style={styles.label}>
-              {isHindi ? 'विशेषताएं (वैकल्पिक)' : 'Features (Optional)'}
+              {t.labelMaterials}
             </Text>
             <TextInput
               style={styles.input}
-              placeholder={
-                isHindi
-                  ? 'जैसे: हस्तनिर्मित, पर्यावरण के अनुकूल, टिकाऊ आदि'
-                  : 'e.g. Handmade, Eco-friendly, Durable etc.'
-              }
+              placeholder={t.placeholderMaterials}
               placeholderTextColor="#999999"
               value={features}
               onChangeText={setFeatures}
@@ -223,17 +208,16 @@ export default function AddProductTextScreen() {
           {/* 6. Category Dropdown */}
           <View style={styles.formGroup}>
             <Text style={styles.label}>
-              {isHindi ? 'श्रेणी ' : 'Category '}
-              <Text style={styles.asterisk}>*</Text>
+              {t.labelCategory}
             </Text>
             <TouchableOpacity
               style={styles.dropdownInput}
-              onPress={() => alert(isHindi ? 'श्रेणी चुनें' : 'Select Category')}
+              onPress={() => Alert.alert(t.labelCategory, category)}
               activeOpacity={0.8}
             >
               <View style={styles.dropdownLeftGroup}>
                 <Ionicons name="color-palette-outline" size={20} color="#3B6029" style={{ marginRight: 10 }} />
-                <Text style={styles.dropdownText}>{category}</Text>
+                <Text style={styles.dropdownText}>{category || t.labelCategory}</Text>
               </View>
               <Ionicons name="chevron-down" size={18} color="#666666" />
             </TouchableOpacity>
@@ -242,23 +226,23 @@ export default function AddProductTextScreen() {
           {/* 7. Product City / Location */}
           <View style={styles.formGroup}>
             <Text style={styles.label}>
-              {isHindi ? 'उत्पाद शहर / स्थान' : 'Product City / Location'}
+              {t.labelLocation}
             </Text>
             <View style={styles.locationInputBox}>
               <Ionicons name="location-outline" size={20} color="#777777" style={{ marginRight: 8 }} />
               <TextInput
                 style={styles.locationTextInput}
-                placeholder={isHindi ? 'अपना गाँव / शहर चुनें' : 'Choose your village / city'}
+                placeholder={t.placeholderLocation}
                 placeholderTextColor="#999999"
                 value={location}
                 onChangeText={setLocation}
               />
               <TouchableOpacity
                 style={styles.selectLocBtn}
-                onPress={() => alert(isHindi ? 'स्थान चुनें' : 'Select Location')}
+                onPress={() => Alert.alert(t.labelLocation, t.placeholderLocation)}
                 activeOpacity={0.8}
               >
-                <Text style={styles.selectLocBtnText}>{isHindi ? 'चुनें' : 'Select'}</Text>
+                <Text style={styles.selectLocBtnText}>{t.help}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -271,7 +255,7 @@ export default function AddProductTextScreen() {
           >
             <Ionicons name="save-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
             <Text style={styles.saveProductButtonText}>
-              {isHindi ? 'उत्पाद सेव करें' : 'Save Product'}
+              {t.saveButton}
             </Text>
           </TouchableOpacity>
 
@@ -279,9 +263,7 @@ export default function AddProductTextScreen() {
           <View style={styles.reviewLockRow}>
             <Ionicons name="lock-closed-outline" size={14} color="#777777" style={{ marginRight: 6 }} />
             <Text style={styles.reviewLockText}>
-              {isHindi
-                ? 'आपका उत्पाद समीक्षा के बाद प्रकाशित होगा'
-                : 'Your product will be published after review'}
+              {t.infoSub}
             </Text>
           </View>
         </ScrollView>

@@ -13,83 +13,234 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { getPendingProductPhoto } from '@/utils/photoStore';
-import { useGlobalLang } from '@/utils/languageStore';
+import { useGlobalLang, LangCode } from '@/utils/languageStore';
+import TopLangSelector from '@/components/TopLangSelector';
+import {
+  PRODUCT_QUESTIONS,
+  VOICE_STRINGS,
+  ProductQuestion,
+} from '@/utils/productQuestions';
 
-type LangCode = 'hi' | 'en';
-
-interface VoiceQuestion {
-  id: number;
-  questionHi: string;
-  questionEn: string;
-  hintHi: string;
-  hintEn: string;
-  dummyAnswerHi: string;
-  dummyAnswerEn: string;
-}
-
-const QUESTIONS: VoiceQuestion[] = [
-  {
-    id: 1,
-    questionHi: 'अपने सामान का नाम बताएं',
-    questionEn: 'Tell us the name of your product',
-    hintHi: 'जैसे: मिट्टी का घड़ा, हाथ से बुनी साड़ी, लकड़ी की नक्काशीदार घड़ी',
-    hintEn: 'e.g. Handmade Clay Pot, Handloom Saree, Carved Wooden Clock',
-    dummyAnswerHi: 'सजावटी हस्तनिर्मित मिट्टी का घड़ा',
-    dummyAnswerEn: 'Decorative Handmade Clay Pot',
+const VOICE_EXTRA_STRINGS: Record<LangCode, {
+  listening: string;
+  recorded: string;
+  tapMic: string;
+  yourRecordedResponse: string;
+  reRecord: string;
+  viewEstimatedPrice: string;
+  aiPredictedTitle: string;
+  aiPredictedSub: string;
+  yourQuotedPrice: string;
+  aiSellingPrice: string;
+  profitBadge: string;
+  pricingIntelligence: string;
+  costRawMaterial: string;
+  costCraftsmanship: string;
+  costFinishing: string;
+  costMarketDemand: string;
+  finalPredictedPrice: string;
+  publishToCatalog: string;
+  editAnswers: string;
+}> = {
+  hi: {
+    listening: 'सुन रहा हूँ... बोलना समाप्त करने के लिए पुनः टैप करें',
+    recorded: 'उत्तर दर्ज हो गया है! नीचे देखें',
+    tapMic: 'बोलने के लिए माइक पर टैप करें',
+    yourRecordedResponse: 'आपकी रिकॉर्ड की गई जानकारी:',
+    reRecord: 'पुनः बोलें (Re-record)',
+    viewEstimatedPrice: 'मूल्य अनुमान देखें →',
+    aiPredictedTitle: '✨ AI द्वारा भविष्यवाणित अंतिम कीमत',
+    aiPredictedSub: 'शिल्प गुणवत्ता, सामग्री व बाज़ार मांग के आधार पर AI की सटीक कीमत',
+    yourQuotedPrice: 'आपकी बताई कीमत:',
+    aiSellingPrice: '🔥 AI द्वारा अनुशंसित अंतिम बिक्री मूल्य',
+    profitBadge: '✨ +22% अतिरिक्त मुनाफा (शहरों व टेंडर के लिए बेस्ट)',
+    pricingIntelligence: 'AI मूल्य विश्लेषण एवं लागत विवरण',
+    costRawMaterial: 'सामग्री लागत (Raw Material)',
+    costCraftsmanship: 'हस्तशिल्प व कारीगरी (Craftsmanship)',
+    costFinishing: 'फिनिशिंग व बायो-पॉलिश',
+    costMarketDemand: 'शहरी बाज़ार मांग व प्रीमियम',
+    finalPredictedPrice: 'AI अनुमानित अंतिम मूल्य:',
+    publishToCatalog: 'AI कीमत (₹550) से कैटलॉग में जोड़ें',
+    editAnswers: 'जानकारी में सुधार करें (Edit Answers)',
   },
-  {
-    id: 2,
-    questionHi: 'अपने प्रोडक्ट का डिस्क्रिप्शन और विशेषताएं बताइए',
-    questionEn: 'Describe your product and its special features',
-    hintHi: 'जैसे: यह घड़ा 100% प्राकृतिक मिट्टी से बना है, जो पानी को ठंडा रखता है',
-    hintEn: 'e.g. Made from 100% natural organic clay, keeps water naturally cool',
-    dummyAnswerHi: 'यह घड़ा 100% शुद्ध काली मिट्टी से बना है। इस पर पारंपरिक प्राकृतिक नक्काशी की गई है जो पानी को 24 घंटे प्राकृतिक रूप से ठंडा रखती है।',
-    dummyAnswerEn: 'Made from 100% pure organic black clay with traditional handmade etching that keeps water naturally cool.',
+  en: {
+    listening: 'Listening... Tap again to stop speaking',
+    recorded: 'Answer recorded! See preview below',
+    tapMic: 'Tap mic button to start speaking',
+    yourRecordedResponse: 'Your Recorded Response:',
+    reRecord: 'Re-record',
+    viewEstimatedPrice: 'View Estimated Price →',
+    aiPredictedTitle: '✨ Final AI Predicted Market Price',
+    aiPredictedSub: 'Calculated optimal price based on craft quality & market demand',
+    yourQuotedPrice: 'Your Quoted Price:',
+    aiSellingPrice: '🔥 AI PREDICTED SELLING PRICE',
+    profitBadge: '✨ +22% Higher Profit (Best for Urban & Govt Tenders)',
+    pricingIntelligence: 'AI Pricing Intelligence & Cost Analysis',
+    costRawMaterial: 'Raw Material Cost',
+    costCraftsmanship: 'Labor & Craftsmanship',
+    costFinishing: 'Finishing & Bio Polish',
+    costMarketDemand: 'Urban Market Demand Premium',
+    finalPredictedPrice: 'Final AI Predicted Price:',
+    publishToCatalog: 'Publish to Catalog at AI Price (₹550)',
+    editAnswers: 'Edit Answers',
   },
-  {
-    id: 3,
-    questionHi: 'इसकी कैटेगरी बताएं',
-    questionEn: 'Tell us the category of your product',
-    hintHi: 'जैसे: हस्तशिल्प, मिट्टी के बर्तन, टेक्सटाइल, लकड़ी का काम',
-    hintEn: 'e.g. Handicrafts, Pottery, Textiles, Woodcraft',
-    dummyAnswerHi: 'हस्तशिल्प - मिट्टी के बर्तन (Pottery & Claycraft)',
-    dummyAnswerEn: 'Handicrafts - Pottery & Claycraft',
+  bn: {
+    listening: 'শুনছি... কথা বলা শেষ করতে আবার ট্যাপ করুন',
+    recorded: 'উত্তর রেকর্ড হয়েছে! নিচে দেখুন',
+    tapMic: 'বলতে মাইক বোতামে ট্যাপ করুন',
+    yourRecordedResponse: 'আপনার রেকর্ড করা তথ্য:',
+    reRecord: 'আবার বলুন',
+    viewEstimatedPrice: 'আনুমানিক মূল্য দেখুন →',
+    aiPredictedTitle: '✨ AI দ্বারা নির্ধারিত চূড়ান্ত বাজার মূল্য',
+    aiPredictedSub: 'পণ্যের গুণমান ও চাহিদার ভিত্তিতে সেরা মূল্য',
+    yourQuotedPrice: 'আপনার প্রস্তাবিত মূল্য:',
+    aiSellingPrice: '🔥 AI প্রস্তাবিত চূড়ান্ত বিক্রয় মূল্য',
+    profitBadge: '✨ +২২% অতিরিক্ত লাভ',
+    pricingIntelligence: 'AI মূল্য বিশ্লেষণ ও খরচ বিবরণ',
+    costRawMaterial: 'কাঁচামালের খরচ',
+    costCraftsmanship: 'হস্তশিল্প ও কারুশিল্পের পারিশ্রমিক',
+    costFinishing: 'ফিনিশিং ও পালিশ',
+    costMarketDemand: 'শহুরে বাজারের চাহিদা প্রিমিয়াম',
+    finalPredictedPrice: 'AI নির্ধারিত চূড়ান্ত মূল্য:',
+    publishToCatalog: 'AI মূল্যে ক্যাটালগে যুক্ত করুন (₹৫৫০)',
+    editAnswers: 'উত্তরগুলি সম্পাদনা করুন',
   },
-  {
-    id: 4,
-    questionHi: 'मटेरियल यूज्ड बताइए, क्या सामान लगा है इसको बनाने में?',
-    questionEn: 'What materials were used to make this product?',
-    hintHi: 'जैसे: प्राकृतिक काली मिट्टी, जैविक रंग, कुम्हार का चाक',
-    hintEn: 'e.g. Organic Black Clay, Natural Terracotta Dyes, Potter Wheel',
-    dummyAnswerHi: 'प्राकृतिक काली मिट्टी, टेराकोटा जैविक रंग, हर्बल पॉलिश',
-    dummyAnswerEn: 'Organic Black Clay, Terracotta Bio Colors, Herbal Polish',
+  bho: {
+    listening: 'सुनत बानी... बोला के खतम करे खातिर फिर छुईं',
+    recorded: 'उत्तर दर्ज हो गइल! नीचे देखीं',
+    tapMic: 'बोले खातिर माइक पर छुईं',
+    yourRecordedResponse: 'रउआ के दर्ज जानकारी:',
+    reRecord: 'फिर से बोलीं',
+    viewEstimatedPrice: 'अनुमानित भाव देखीं →',
+    aiPredictedTitle: '✨ AI द्वारा तय अंतिम भाव',
+    aiPredictedSub: 'शिल्प गुणवत्ता आ बाजार मांग अनुसार सही कीमत',
+    yourQuotedPrice: 'रउआ के बतावल भाव:',
+    aiSellingPrice: '🔥 AI अनुशंसित अंतिम बिक्री भाव',
+    profitBadge: '✨ +22% जादे मुनाफा',
+    pricingIntelligence: 'AI मूल्य विश्लेषण आ लागत विवरण',
+    costRawMaterial: 'सामग्री लागत',
+    costCraftsmanship: 'कारीगरी आ मेहनत',
+    costFinishing: 'फिनिशिंग आ पॉलिश',
+    costMarketDemand: 'शहरी बाज़ार मांग',
+    finalPredictedPrice: 'AI अनुमानित अंतिम भाव:',
+    publishToCatalog: 'AI भाव से कैटलॉग में जोड़ीं (₹550)',
+    editAnswers: 'जानकारी में सुधार करीं',
   },
-  {
-    id: 5,
-    questionHi: 'उत्पाद की अनुमानित कीमत बताएं (Price of Product)',
-    questionEn: 'Tell us the expected price of your product',
-    hintHi: 'जैसे: ₹450, ₹1,000 या जितने में आप इस उत्पाद को बेचना चाहते हैं',
-    hintEn: 'e.g. ₹450, ₹1,000 or your expected selling price for this product',
-    dummyAnswerHi: '₹450 (चार सौ पचास रुपये)',
-    dummyAnswerEn: '₹450 (Four hundred fifty rupees)',
+  mr: {
+    listening: 'ऐकत आहे... बोलणे थांबवण्यासाठी पुन्हा टॅप करा',
+    recorded: 'उत्तर नोंदवले गेले! खाली पहा',
+    tapMic: 'बोलण्यासाठी माइकवर टॅप करा',
+    yourRecordedResponse: 'तुमची नोंदवलेली माहिती:',
+    reRecord: 'पुन्हा बोला',
+    viewEstimatedPrice: 'अंदाजित किंमत पहा →',
+    aiPredictedTitle: '✨ AI द्वारे अंदाजित अंतिम बाजार किंमत',
+    aiPredictedSub: 'शिल्प गुणवत्ता आणि बाजारातील मागणीनुसार अचूक किंमत',
+    yourQuotedPrice: 'तुमची सांगितलेली किंमत:',
+    aiSellingPrice: '🔥 AI शिफारस केलेली अंतिम विक्री किंमत',
+    profitBadge: '✨ +२२% अधिक नफा',
+    pricingIntelligence: 'AI मूल्य विश्लेषण आणि खर्च तपशील',
+    costRawMaterial: 'कच्च्या मालाचा खर्च',
+    costCraftsmanship: 'हस्तकला आणि कारागिरी',
+    costFinishing: 'फिनिशिंग आणि बायो-पॉलिश',
+    costMarketDemand: 'शहरी बाजार मागणी प्रीमियम',
+    finalPredictedPrice: 'AI अंदाजित अंतिम किंमत:',
+    publishToCatalog: 'AI किमतीत कॅटलॉगमध्ये जोडा (₹५५०)',
+    editAnswers: 'उत्तरे संपादित करा',
   },
-];
+  gu: {
+    listening: 'સાંભળી રહ્યો છું... બોલવાનું બંધ કરવા ફરી ટૅપ કરો',
+    recorded: 'જવાબ નોંધાઈ ગયો છે! નીચે જુઓ',
+    tapMic: 'બોલવા માટે માઇક પર ટૅપ કરો',
+    yourRecordedResponse: 'તમારી નોંધાયેલી વિગત:',
+    reRecord: 'ફરીથી બોલો',
+    viewEstimatedPrice: 'અંદાજિત કિંમત જુઓ →',
+    aiPredictedTitle: '✨ AI દ્વારા અનુમાનિત અંતિમ બજાર કિંમત',
+    aiPredictedSub: 'ગુણવત્તા અને બજાર માંગ પર આધારિત શ્રેષ્ઠ કિંમત',
+    yourQuotedPrice: 'તમારી જણાવેલ કિંમત:',
+    aiSellingPrice: '🔥 AI ભલામણ કરેલ વેચાણ કિંમત',
+    profitBadge: '✨ +૨૨% વધુ નફો',
+    pricingIntelligence: 'AI કિંમત વિશ્લેષણ અને ખર્ચ વિગતો',
+    costRawMaterial: 'કાચા માલનો ખર્ચ',
+    costCraftsmanship: 'કારીગરી અને મહેનત',
+    costFinishing: 'ફિનિશિંગ અને બાયો-પોલિશ',
+    costMarketDemand: 'શહેરી બજાર માંગ પ્રીમિયમ',
+    finalPredictedPrice: 'AI અનુમાનિત અંતિમ કિંમત:',
+    publishToCatalog: 'AI કિંમતે કેટલોગમાં ઉમેરો (₹૫૫૦)',
+    editAnswers: 'જવાબો સુધારો',
+  },
+  raj: {
+    listening: 'सुणूं लाग्यो हूं... बोलणो बंद करबा सारू पाछो दबाओ',
+    recorded: 'जवाब जुड़ गयो! नीचे देखो',
+    tapMic: 'बोलण सारू माइक छुओ',
+    yourRecordedResponse: 'आपरी दर्ज जानकारी:',
+    reRecord: 'पाछो बोलो',
+    viewEstimatedPrice: 'भाव रो अंदाजो देखो →',
+    aiPredictedTitle: '✨ AI द्वारा तय अंतिम भाव',
+    aiPredictedSub: 'कारीगरी अर बजार मांग रे आधार पर सटीक भाव',
+    yourQuotedPrice: 'आपरो बतायोड़ो भाव:',
+    aiSellingPrice: '🔥 AI अनुशंसित बिक्री भाव',
+    profitBadge: '✨ +२२% जादा नफो',
+    pricingIntelligence: 'AI भाव विश्लेषण अर लागत ब्योरो',
+    costRawMaterial: 'सामान रो भाव',
+    costCraftsmanship: 'कारीगरी अर मेहनत',
+    costFinishing: 'फिनिशिंग अर पॉलिश',
+    costMarketDemand: 'शहरी बजार मांग',
+    finalPredictedPrice: 'AI अनुमानित अंतिम भाव:',
+    publishToCatalog: 'AI भाव सूं कैटलॉग में जोड़ो (₹५५०)',
+    editAnswers: 'ब्योरो बदलो',
+  },
+  kn: {
+    listening: 'ಕೇಳಿಸಿಕೊಳ್ಳುತ್ತಿದ್ದೇನೆ... ಮಾತನಾಡುವುದು ಮುಗಿಸಲು ಮತ್ತೆ ಟ್ಯಾಪ್ ಮಾಡಿ',
+    recorded: 'ಉತ್ತರ ದಾಖಲಾಗಿದೆ! ಕೆಳಗೆ ನೋಡಿ',
+    tapMic: 'ಮಾತನಾಡಲು ಮೈಕ್ ಟ್ಯಾಪ್ ಮಾಡಿ',
+    yourRecordedResponse: 'ನಿಮ್ಮ ದಾಖಲಾದ ಮಾಹಿತಿ:',
+    reRecord: 'ಮತ್ತೆ ಮಾತನಾಡಿ',
+    viewEstimatedPrice: 'ಅಂದಾಜು ಬೆಲೆ ನೋಡಿ →',
+    aiPredictedTitle: '✨ AI ನಿಂದ ಅಂದಾಜು ಮಾಡಿದ ಅಂತಿಮ ಮಾರುಕಟ್ಟೆ ಬೆಲೆ',
+    aiPredictedSub: 'ಕರಕುಶಲ ಗುಣಮಟ್ಟ ಮತ್ತು ಬೇಡಿಕೆಯ ಆಧಾರದ ಮೇಲೆ ಸೂಕ್ತ ಬೆಲೆ',
+    yourQuotedPrice: 'ನಿಮ್ಮ ಬೆಲೆ:',
+    aiSellingPrice: '🔥 AI ಶಿಫಾರಸು ಮಾಡಿದ ಮಾರಾಟ ಬೆಲೆ',
+    profitBadge: '✨ +೨೨% ಹೆಚ್ಚಿನ ಲಾಭ',
+    pricingIntelligence: 'AI ಬೆಲೆ ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ವೆಚ್ಚ ವಿವರ',
+    costRawMaterial: 'ಕಚ್ಚಾ ವಸ್ತುಗಳ ವೆಚ್ಚ',
+    costCraftsmanship: 'ಕರಕುಶಲತೆ ಮತ್ತು ಶ್ರಮ',
+    costFinishing: 'ಫಿನಿಶಿಂಗ್ ಮತ್ತು ಬಯೋ-ಪಾಲಿಶ್',
+    costMarketDemand: 'ನಗರ ಮಾರುಕಟ್ಟೆ ಬೇಡಿಕೆ ಪ್ರೀಮಿಯಂ',
+    finalPredictedPrice: 'AI ಅಂದಾಜು ಅಂತಿಮ ಬೆಲೆ:',
+    publishToCatalog: 'AI ಬೆಲೆಯಲ್ಲಿ ಕ್ಯಾಟಲಾಗ್‌ಗೆ ಸೇರಿಸಿ (₹೫೫೦)',
+    editAnswers: 'ಮಾಹಿತಿ ತಿದ್ದುಪಡಿ ಮಾಡಿ',
+  },
+};
 
 export default function AddProductVoiceScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ lang?: string }>();
   const [globalLang] = useGlobalLang();
 
-  const selectedLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
-  const isHindi = selectedLang === 'hi';
+  const questions: ProductQuestion[] =
+    PRODUCT_QUESTIONS[globalLang] || PRODUCT_QUESTIONS.hi;
+  const t = {
+    ...(VOICE_STRINGS[globalLang] || VOICE_STRINGS.hi),
+    ...(VOICE_EXTRA_STRINGS[globalLang] || VOICE_EXTRA_STRINGS.hi),
+  };
 
-  const [currentStepIndex, setCurrentStepIndex] = useState(0); // 0..3 for Qs, 4 for Price Summary
+  const [currentStepIndex, setCurrentStepIndex] = useState(0); // 0..4 for Qs, 5 for Price Summary
   const [isRecording, setIsRecording] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [recordedAnswers, setRecordedAnswers] = useState<Record<number, string>>({});
+  const [photoUri, setPhotoUri] = useState<string | null>(() => getPendingProductPhoto().photoUri);
 
-  const currentQ = QUESTIONS[currentStepIndex];
-  const totalSteps = QUESTIONS.length;
+  const params = useLocalSearchParams<{ photoUri?: string }>();
+  useEffect(() => {
+    if (params.photoUri) {
+      setPhotoUri(params.photoUri);
+    } else {
+      const pending = getPendingProductPhoto();
+      if (pending.photoUri) setPhotoUri(pending.photoUri);
+    }
+  }, [params.photoUri]);
+
+  const currentQ = questions[currentStepIndex] || questions[0];
+  const totalSteps = questions.length;
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -115,9 +266,9 @@ export default function AddProductVoiceScreen() {
       setIsRecording(true);
       setTimerSeconds(0);
     } else {
-      // Stop recording & record simulated text
+      // Stop recording & record simulated text in the active language
       setIsRecording(false);
-      const answer = isHindi ? currentQ.dummyAnswerHi : currentQ.dummyAnswerEn;
+      const answer = currentQ.dummyAnswer;
       setRecordedAnswers((prev) => ({
         ...prev,
         [currentStepIndex]: answer,
@@ -142,7 +293,7 @@ export default function AddProductVoiceScreen() {
       setTimerSeconds(0);
     } else {
       // Advance to final AI Price Estimation screen
-      setCurrentStepIndex(totalSteps); // Step 4 (Price summary)
+      setCurrentStepIndex(totalSteps); // Step 5 (Price summary)
     }
   };
 
@@ -158,14 +309,12 @@ export default function AddProductVoiceScreen() {
 
   const handlePublishCatalog = () => {
     Alert.alert(
-      isHindi ? 'सफलतापूर्वक जोड़ा गया!' : 'Successfully Added!',
-      isHindi
-        ? 'आपका उत्पाद कैटलॉग में सफलतापूर्वक जोड़ दिया गया है।'
-        : 'Your product catalog has been successfully added.',
+      t.summaryTitle,
+      t.confirmAndPublish,
       [
         {
           text: 'OK',
-          onPress: () => router.push('/home'),
+          onPress: () => router.push('/products'),
         },
       ]
     );
@@ -191,15 +340,12 @@ export default function AddProductVoiceScreen() {
 
           <Text style={styles.headerTitle}>
             {isQuestionScreen
-              ? isHindi
-                ? `आवाज़ से विवरण (${currentStepIndex + 1}/${totalSteps})`
-                : `Voice Entry (${currentStepIndex + 1}/${totalSteps})`
-              : isHindi
-              ? 'उत्पाद मूल्य विवरण'
-              : 'Product Pricing Summary'}
+              ? `${t.headerTitle} (${currentStepIndex + 1}/${totalSteps})`
+              : t.summaryTitle}
           </Text>
 
-          <View style={{ width: 36 }} />
+          {/* Top Language Selector */}
+          <TopLangSelector />
         </View>
 
         <ScrollView
@@ -208,7 +354,7 @@ export default function AddProductVoiceScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Enhanced Photo Thumbnail Preview */}
-          {getPendingProductPhoto().photoUri && (
+          {photoUri && (
             <View style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -221,27 +367,27 @@ export default function AddProductVoiceScreen() {
               elevation: 2,
             }}>
               <Image
-                source={{ uri: getPendingProductPhoto().photoUri! }}
+                source={{ uri: photoUri }}
                 style={{ width: 56, height: 56, borderRadius: 10, backgroundColor: '#F0F0F0' }}
                 resizeMode="cover"
               />
               <View style={{ marginLeft: 12, flex: 1 }}>
                 <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#3B6029' }}>
-                  {isHindi ? '✨ AI एनहांस्ड फोटो संलग्न' : '✨ AI Enhanced Photo Attached'}
+                  ✨ AI Enhanced Photo Attached
                 </Text>
                 <Text style={{ fontSize: 11, color: '#666666', marginTop: 2 }}>
-                  {isHindi ? 'यह फोटो आपके उत्पाद के साथ दिखेगी' : 'This photo will be displayed with your product'}
+                  {t.recorded}
                 </Text>
               </View>
             </View>
           )}
 
           {isQuestionScreen ? (
-            /* ================= QUESTION VOICE STEPS (1-4) ================= */
+            /* ================= QUESTION VOICE STEPS (1-5) ================= */
             <View>
               {/* Question Progress Indicator */}
               <View style={styles.progressRow}>
-                {QUESTIONS.map((q, idx) => (
+                {questions.map((q, idx) => (
                   <View
                     key={q.id}
                     style={[
@@ -258,10 +404,10 @@ export default function AddProductVoiceScreen() {
                   <Text style={styles.qBadgeText}>Q{currentStepIndex + 1}</Text>
                 </View>
                 <Text style={styles.questionTitle}>
-                  {isHindi ? currentQ.questionHi : currentQ.questionEn}
+                  {currentQ.question}
                 </Text>
                 <Text style={styles.questionHint}>
-                  {isHindi ? currentQ.hintHi : currentQ.hintEn}
+                  {currentQ.hint}
                 </Text>
               </View>
 
@@ -287,16 +433,10 @@ export default function AddProductVoiceScreen() {
 
                 <Text style={styles.micInstructionText}>
                   {isRecording
-                    ? isHindi
-                      ? 'सुन रहा हूँ... बोलना समाप्त करने के लिए पुनः टैप करें'
-                      : 'Listening... Tap again to stop speaking'
+                    ? t.listening
                     : currentAnswer
-                    ? isHindi
-                      ? 'उत्तर दर्ज हो गया है! नीचे देखें'
-                      : 'Answer recorded! See preview below'
-                    : isHindi
-                    ? 'बोलने के लिए माइक पर टैप करें'
-                    : 'Tap mic button to start speaking'}
+                    ? t.recorded
+                    : t.tapMic}
                 </Text>
 
                 {/* Timer Badge */}
@@ -314,7 +454,7 @@ export default function AddProductVoiceScreen() {
                   <View style={styles.transcribedHeader}>
                     <Ionicons name="checkmark-circle" size={18} color="#3B6029" />
                     <Text style={styles.transcribedLabel}>
-                      {isHindi ? 'आपकी रिकॉर्ड की गई जानकारी:' : 'Your Recorded Response:'}
+                      {t.yourRecordedResponse}
                     </Text>
                   </View>
 
@@ -329,7 +469,7 @@ export default function AddProductVoiceScreen() {
                     >
                       <Ionicons name="refresh-outline" size={18} color="#D32F2F" />
                       <Text style={styles.reRecordText}>
-                        {isHindi ? 'पुनः बोलें (Re-record)' : 'Re-record'}
+                        {t.reRecord}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -345,12 +485,8 @@ export default function AddProductVoiceScreen() {
                 >
                   <Text style={styles.nextQuestionBtnText}>
                     {currentStepIndex < totalSteps - 1
-                      ? isHindi
-                        ? 'अगला प्रश्न →'
-                        : 'Next Question →'
-                      : isHindi
-                      ? 'मूल्य अनुमान देखें →'
-                      : 'View Estimated Price →'}
+                      ? t.nextQuestion
+                      : t.viewEstimatedPrice}
                   </Text>
                 </TouchableOpacity>
               ) : (
@@ -360,7 +496,7 @@ export default function AddProductVoiceScreen() {
                   activeOpacity={0.8}
                 >
                   <Text style={styles.simulateSpeakBtnText}>
-                    {isHindi ? '🗣️ माइक टैप करें और बोलें' : '🗣️ Tap Mic & Speak'}
+                    {`🗣️ ${t.tapMic}`}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -373,35 +509,41 @@ export default function AddProductVoiceScreen() {
                 <Ionicons name="sparkles" size={26} color="#3B6029" />
                 <View style={{ flex: 1, marginLeft: 10 }}>
                   <Text style={styles.priceBannerTitle}>
-                    {isHindi ? '✨ AI द्वारा भविष्यवाणित अंतिम कीमत' : '✨ Final AI Predicted Market Price'}
+                    {t.aiPredictedTitle}
                   </Text>
                   <Text style={styles.priceBannerSub}>
-                    {isHindi
-                      ? 'शिल्प गुणवत्ता, सामग्री व बाज़ार मांग के आधार पर AI की सटीक कीमत'
-                      : 'Calculated optimal price based on craft quality & market demand'}
+                    {t.aiPredictedSub}
                   </Text>
                 </View>
               </View>
 
               {/* Product Info Preview Card */}
               <View style={styles.productPreviewCard}>
-                <Image
-                  source={require('@/assets/images/cust_prod_clay.png')}
-                  style={styles.productThumb}
-                  resizeMode="cover"
-                />
+                {photoUri ? (
+                  <Image
+                    source={{ uri: photoUri }}
+                    style={styles.productThumb}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <Image
+                    source={require('@/assets/images/cust_prod_clay.png')}
+                    style={styles.productThumb}
+                    resizeMode="cover"
+                  />
+                )}
                 <View style={styles.productMetaCol}>
                   <Text style={styles.productTitle}>
-                    {recordedAnswers[0] || (isHindi ? 'सजावटी मिट्टी का घड़ा' : 'Decorative Clay Pot')}
+                    {recordedAnswers[0] || questions[0]?.hint || 'Product'}
                   </Text>
                   <Text style={styles.productCat}>
-                    📁 {recordedAnswers[2] || (isHindi ? 'हस्तशिल्प' : 'Handicrafts')}
+                    📁 {recordedAnswers[2] || questions[2]?.hint || 'Category'}
                   </Text>
                   <Text style={styles.productMat} numberOfLines={2}>
-                    🧱 {recordedAnswers[3] || (isHindi ? 'प्राकृतिक मिट्टी' : 'Organic Clay')}
+                    🧱 {recordedAnswers[3] || questions[3]?.hint || 'Materials'}
                   </Text>
                   <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#E65100', marginTop: 4 }}>
-                    🗣️ {isHindi ? 'आपकी बताई कीमत:' : 'Your Quoted Price:'} {recordedAnswers[4] || '₹450'}
+                    🗣️ {t.yourQuotedPrice} {recordedAnswers[4] || '₹450'}
                   </Text>
                 </View>
               </View>
@@ -415,14 +557,14 @@ export default function AddProductVoiceScreen() {
                 alignItems: 'center',
               }}>
                 <Text style={{ fontSize: 13, color: '#EAF2E8', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 0.8 }}>
-                  {isHindi ? '🔥 AI द्वारा अनुशंसित अंतिम बिक्री मूल्य' : '🔥 AI PREDICTED SELLING PRICE'}
+                  {t.aiSellingPrice}
                 </Text>
                 <Text style={{ fontSize: 34, fontWeight: 'bold', color: '#FFFFFF', marginVertical: 6 }}>
                   ₹550
                 </Text>
                 <View style={{ backgroundColor: '#EAF2E8', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 }}>
                   <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#3B6029' }}>
-                    {isHindi ? '✨ +22% अतिरिक्त मुनाफा (शहरों व टेंडर के लिए बेस्ट)' : '✨ +22% Higher Profit (Best for Urban & Govt Tenders)'}
+                    {t.profitBadge}
                   </Text>
                 </View>
               </View>
@@ -430,16 +572,14 @@ export default function AddProductVoiceScreen() {
               {/* Itemized Price Breakdown Card */}
               <View style={styles.priceBreakdownCard}>
                 <Text style={styles.breakdownHeading}>
-                  {isHindi ? 'AI मूल्य विश्लेषण एवं लागत विवरण' : 'AI Pricing Intelligence & Cost Analysis'}
+                  {t.pricingIntelligence}
                 </Text>
 
                 {/* Line Item 1: Raw Material Cost */}
                 <View style={styles.costRow}>
                   <View style={styles.costLabelCol}>
                     <MaterialCommunityIcons name="cube-outline" size={20} color="#3B6029" />
-                    <Text style={styles.costName}>
-                      {isHindi ? 'सामग्री लागत (Raw Material)' : 'Raw Material Cost'}
-                    </Text>
+                    <Text style={styles.costName}>{t.costRawMaterial}</Text>
                   </View>
                   <Text style={styles.costValue}>₹150</Text>
                 </View>
@@ -448,20 +588,16 @@ export default function AddProductVoiceScreen() {
                 <View style={styles.costRow}>
                   <View style={styles.costLabelCol}>
                     <Ionicons name="construct-outline" size={20} color="#3B6029" />
-                    <Text style={styles.costName}>
-                      {isHindi ? 'हस्तशिल्प व कारीगरी (Craftsmanship)' : 'Labor & Craftsmanship'}
-                    </Text>
+                    <Text style={styles.costName}>{t.costCraftsmanship}</Text>
                   </View>
                   <Text style={styles.costValue}>₹200</Text>
                 </View>
 
-                {/* Line Item 3: Developing & Enhancement */}
+                {/* Line Item 3: Finishing & Bio Polish */}
                 <View style={styles.costRow}>
                   <View style={styles.costLabelCol}>
                     <Ionicons name="color-palette-outline" size={20} color="#3B6029" />
-                    <Text style={styles.costName}>
-                      {isHindi ? 'फिनिशिंग व बायो-पॉलिश' : 'Finishing & Bio Polish'}
-                    </Text>
+                    <Text style={styles.costName}>{t.costFinishing}</Text>
                   </View>
                   <Text style={styles.costValue}>₹50</Text>
                 </View>
@@ -470,9 +606,7 @@ export default function AddProductVoiceScreen() {
                 <View style={styles.costRow}>
                   <View style={styles.costLabelCol}>
                     <Ionicons name="trending-up-outline" size={20} color="#3B6029" />
-                    <Text style={styles.costName}>
-                      {isHindi ? 'शहरी बाज़ार मांग व प्रीमियम' : 'Urban Market Demand Premium'}
-                    </Text>
+                    <Text style={styles.costName}>{t.costMarketDemand}</Text>
                   </View>
                   <Text style={[styles.costValue, { color: '#3B6029' }]}>+₹150</Text>
                 </View>
@@ -481,9 +615,7 @@ export default function AddProductVoiceScreen() {
 
                 {/* Total AI Predicted Selling Price */}
                 <View style={styles.totalPriceRow}>
-                  <Text style={styles.totalPriceLabel}>
-                    {isHindi ? 'AI अनुमानित अंतिम मूल्य:' : 'Final AI Predicted Price:'}
-                  </Text>
+                  <Text style={styles.totalPriceLabel}>{t.finalPredictedPrice}</Text>
                   <Text style={styles.totalPriceValue}>₹550</Text>
                 </View>
               </View>
@@ -496,7 +628,7 @@ export default function AddProductVoiceScreen() {
               >
                 <Ionicons name="checkmark-done" size={22} color="#FFFFFF" style={{ marginRight: 8 }} />
                 <Text style={styles.publishBtnText}>
-                  {isHindi ? 'AI कीमत (₹550) से कैटलॉग में जोड़ें' : 'Publish to Catalog at AI Price (₹550)'}
+                  {t.publishToCatalog}
                 </Text>
               </TouchableOpacity>
 
@@ -507,7 +639,7 @@ export default function AddProductVoiceScreen() {
               >
                 <Ionicons name="create-outline" size={18} color="#666666" style={{ marginRight: 6 }} />
                 <Text style={styles.editBtnText}>
-                  {isHindi ? 'जानकारी में सुधार करें (Edit Answers)' : 'Edit Answers'}
+                  {t.editAnswers}
                 </Text>
               </TouchableOpacity>
             </View>

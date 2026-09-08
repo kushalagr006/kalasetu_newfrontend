@@ -20,12 +20,9 @@ import { enhanceCameraPhotoBase64 } from '@/services/apiClient';
 import { setPendingProductPhoto } from '@/utils/photoStore';
 import { ActivityIndicator } from 'react-native';
 
-const LANGUAGES: { code: LangCode; label: string }[] = [
-  { code: 'hi', label: 'हिंदी' },
-  { code: 'en', label: 'English' },
-];
+import TopLangSelector from '@/components/TopLangSelector';
 
-const TRANSLATIONS: Record<string, {
+const CAMERA_STRINGS: Record<LangCode, {
   headerTitle: string;
   camHint: string;
   camSub: string;
@@ -33,7 +30,11 @@ const TRANSLATIONS: Record<string, {
   retakeText: string;
   galleryText: string;
   nextBtn: string;
-  modalTitle: string;
+  camAlert: string;
+  galleryAlert: string;
+  enhancingText: string;
+  enhancedBadge: string;
+  capturedSuccess: string;
 }> = {
   hi: {
     headerTitle: 'नया उत्पाद जोड़ें',
@@ -43,7 +44,11 @@ const TRANSLATIONS: Record<string, {
     retakeText: 'दोबारा फोटो लें',
     galleryText: 'गैलरी से चुनें',
     nextBtn: 'आगे बढ़ें (Next) →',
-    modalTitle: 'भाषा चुनें / Select Language',
+    camAlert: 'कैमरा का उपयोग करने के लिए अनुमति (Permission) आवश्यक है।',
+    galleryAlert: 'गैलरी का उपयोग करने के लिए अनुमति (Permission) आवश्यक है।',
+    enhancingText: 'AI द्वारा फोटो एनहांस हो रही है...',
+    enhancedBadge: '✨ OpenCV AI एनहांस्ड फोटो ✓',
+    capturedSuccess: 'फोटो सफलतापूर्वक खींची गई! 🎉',
   },
   en: {
     headerTitle: 'Add New Product',
@@ -53,21 +58,102 @@ const TRANSLATIONS: Record<string, {
     retakeText: 'Retake Photo',
     galleryText: 'Choose from Gallery',
     nextBtn: 'Next →',
-    modalTitle: 'Select Language / भाषा चुनें',
+    camAlert: 'Camera permission is required to snap photos.',
+    galleryAlert: 'Gallery permission is required to choose photos.',
+    enhancingText: 'Enhancing with AI...',
+    enhancedBadge: '✨ OpenCV AI Enhanced Photo ✓',
+    capturedSuccess: 'Photo Captured Successfully! 🎉',
+  },
+  bn: {
+    headerTitle: 'নতুন পণ্য যোগ করুন',
+    camHint: 'ক্যামেরা খুলতে এখানে ট্যাপ করুন',
+    camSub: 'আপনার পণ্যের পরিষ্কার ও আলোকিত ছবি তুলুন।',
+    shutterText: 'ক্যামেরা খুলুন এবং ছবি তুলুন',
+    retakeText: 'পুনরায় ছবি তুলুন',
+    galleryText: 'গ্যালারি থেকে বেছে নিন',
+    nextBtn: 'পরবর্তী ধাপ →',
+    camAlert: 'ক্যামেরা ব্যবহারের অনুমতি প্রয়োজন।',
+    galleryAlert: 'গ্যালারি ব্যবহারের অনুমতি প্রয়োজন।',
+    enhancingText: 'AI দ্বারা ছবি উন্নত করা হচ্ছে...',
+    enhancedBadge: '✨ OpenCV AI উন্নত ছবি ✓',
+    capturedSuccess: 'ছবি সফলভাবে তোলা হয়েছে! 🎉',
+  },
+  bho: {
+    headerTitle: 'नया उत्पाद जोड़ीं',
+    camHint: 'कैमरा खोले खातिर इहाँ दबाईं',
+    camSub: 'अपना उत्पाद के साफ आ सीधा फोटो खींचीं।',
+    shutterText: 'कैमरा खोलीं आ फोटो खींचीं',
+    retakeText: 'दोबारा फोटो लीं',
+    galleryText: 'गैलरी से चुनीं',
+    nextBtn: 'आगे बढ़ीं →',
+    camAlert: 'कैमरा के अनुमति जरूरी बा।',
+    galleryAlert: 'गैलरी के अनुमति जरूरी बा।',
+    enhancingText: 'AI से फोटो एनहांस हो रहल बा...',
+    enhancedBadge: '✨ OpenCV AI एनहांस्ड फोटो ✓',
+    capturedSuccess: 'फोटो खिंचा गइल! 🎉',
+  },
+  mr: {
+    headerTitle: 'नवीन उत्पादन जोडा',
+    camHint: 'कॅमेरा उघडण्यासाठी येथे टॅप करा',
+    camSub: 'तुमच्या उत्पादनाचा स्पष्ट आणि चांगला प्रकाश असलेला फोटो काढा.',
+    shutterText: 'कॅमेरा उघडा आणि फोटो काढा',
+    retakeText: 'पुन्हा फोटो घ्या',
+    galleryText: 'गॅलरीतून निवडा',
+    nextBtn: 'पुढे जा →',
+    camAlert: 'कॅमेरा परवानगी आवश्यक आहे.',
+    galleryAlert: 'गॅलरी परवानगी आवश्यक आहे.',
+    enhancingText: 'AI द्वारे फोटो सुधारित केला जात आहे...',
+    enhancedBadge: '✨ OpenCV AI सुधारित फोटो ✓',
+    capturedSuccess: 'फोटो यशस्वीरित्या काढला! 🎉',
+  },
+  gu: {
+    headerTitle: 'નવું ઉત્પાદન ઉમેરો',
+    camHint: 'કૅમેરો ખોલવા માટે અહીં ટૅપ કરો',
+    camSub: 'તમારા ઉત્પાદનનો સ્પષ્ટ અને સારો ફોટો પાડો.',
+    shutterText: 'કૅમેરો ખોલો અને ફોટો પાડો',
+    retakeText: 'ફરીથી ફોટો લો',
+    galleryText: 'ગૅલેરીમાંથી પસંદ કરો',
+    nextBtn: 'આગળ વધો →',
+    camAlert: 'કૅમેરાની પરવાનગી જરૂરી છે.',
+    galleryAlert: 'ગૅલેરીની પરવાનગી જરૂરી છે.',
+    enhancingText: 'AI દ્વારા ફોટો સુધારાઈ રહ્યો છે...',
+    enhancedBadge: '✨ OpenCV AI સુધારેલ ફોટો ✓',
+    capturedSuccess: 'ફોટો સફળતાપૂર્વક લેવાયો! 🎉',
+  },
+  raj: {
+    headerTitle: 'नयो उत्पाद जोड़ो',
+    camHint: 'कैमरो खोलण सारू अठै दबाओ',
+    camSub: 'आपरा उत्पाद री साफ अर चोखी फोटो खींचो।',
+    shutterText: 'कैमरो खोलो अर फोटो खींचो',
+    retakeText: 'पाछो फोटो खींचो',
+    galleryText: 'गैलरी सूं चुणो',
+    nextBtn: 'आगै बढ़ो →',
+    camAlert: 'कैमरा री इजाजत जरूरी है।',
+    galleryAlert: 'गैलरी री इजाजत जरूरी है।',
+    enhancingText: 'AI सूं फोटो ठीक होवे है...',
+    enhancedBadge: '✨ OpenCV AI एनहांस्ड फोटो ✓',
+    capturedSuccess: 'फोटो खिंच गयो! 🎉',
+  },
+  kn: {
+    headerTitle: 'ಹೊಸ ಉತ್ಪನ್ನ ಸೇರಿಸಿ',
+    camHint: 'ಕ್ಯಾಮರಾ ತೆರೆಯಲು ಇಲ್ಲಿ ಟ್ಯಾಪ್ ಮಾಡಿ',
+    camSub: 'ನಿಮ್ಮ ಉತ್ಪನ್ನದ ಸ್ಪಷ್ಟ ಮತ್ತು ಉತ್ತಮವಾದ ಫೋಟೋ ತೆಗೆಯಿರಿ.',
+    shutterText: 'ಕ್ಯಾಮರಾ ತೆರೆಯಿರಿ ಮತ್ತು ಫೋಟೋ ತೆಗೆಯಿರಿ',
+    retakeText: 'ಮತ್ತೆ ಫೋಟೋ ತೆಗೆಯಿರಿ',
+    galleryText: 'ಗ್ಯಾಲರಿಯಿಂದ ಆಯ್ಕೆಮಾಡಿ',
+    nextBtn: 'ಮುಂದೆ ಹೋಗಿ →',
+    camAlert: 'ಕ್ಯಾಮರಾ ಅನುಮತಿ ಅಗತ್ಯವಿದೆ.',
+    galleryAlert: 'ಗ್ಯಾಲರಿ ಅನುಮತಿ ಅಗತ್ಯವಿದೆ.',
+    enhancingText: 'AI ಮೂಲಕ ಫೋಟೋ ವರ್ಧಿಸಲಾಗುತ್ತಿದೆ...',
+    enhancedBadge: '✨ OpenCV AI ವರ್ಧಿತ ಫೋಟೋ ✓',
+    capturedSuccess: 'ಫೋಟೋ ಯಶಸ್ವಿಯಾಗಿ ಸೆರೆಹಿಡಿಯಲಾಗಿದೆ! 🎉',
   },
 };
 
 export default function AddProductCameraScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ lang?: string }>();
   const [globalLang] = useGlobalLang();
-
-  const selectedLang: LangCode =
-    (params.lang as LangCode) || (globalLang === 'en' ? 'en' : 'hi');
-  const [isLangModalVisible, setIsLangModalVisible] = useState(false);
-
-  const t = (TRANSLATIONS as any)[selectedLang] || TRANSLATIONS.hi;
-  const currentLangLabel = LANGUAGES.find((l) => l.code === selectedLang)?.label || 'हिंदी';
+  const t = CAMERA_STRINGS[globalLang] || CAMERA_STRINGS.hi;
 
   const videoRef = useRef<any>(null);
   const [webStream, setWebStream] = useState<any>(null);
@@ -153,11 +239,7 @@ export default function AddProductCameraScreen() {
     try {
       const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
       if (!permissionResult.granted) {
-        alert(
-          selectedLang === 'hi'
-            ? 'कैमरा का उपयोग करने के लिए अनुमति (Permission) आवश्यक है।'
-            : 'Camera permission is required to snap photos.'
-        );
+        alert(t.camAlert);
         return;
       }
 
@@ -183,11 +265,7 @@ export default function AddProductCameraScreen() {
     try {
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permissionResult.granted) {
-        alert(
-          selectedLang === 'hi'
-            ? 'गैलरी का उपयोग करने के लिए अनुमति (Permission) आवश्यक है।'
-            : 'Gallery permission is required to choose photos.'
-        );
+        alert(t.galleryAlert);
         return;
       }
 
@@ -250,7 +328,7 @@ export default function AddProductCameraScreen() {
     router.push({
       pathname: '/add-product-details',
       params: {
-        lang: selectedLang,
+        lang: globalLang,
         ...(finalUri ? { photoUri: finalUri } : {}),
       },
     });
@@ -272,16 +350,8 @@ export default function AddProductCameraScreen() {
 
           <Text style={styles.headerTitle}>{t.headerTitle}</Text>
 
-          {/* Language Selector Pill */}
-          <TouchableOpacity
-            style={styles.langSelectorBtn}
-            onPress={() => setIsLangModalVisible(true)}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="globe-outline" size={13} color="#2C2C2C" />
-            <Text style={styles.langSelectorText}>{currentLangLabel}</Text>
-            <Ionicons name="chevron-down" size={11} color="#2C2C2C" />
-          </TouchableOpacity>
+          {/* Top Language Selector */}
+          <TopLangSelector />
         </View>
 
         {/* Camera Main Body */}
@@ -333,7 +403,7 @@ export default function AddProductCameraScreen() {
                     }}>
                       <ActivityIndicator size="small" color="#FFFFFF" style={{ marginRight: 8 }} />
                       <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: 'bold' }}>
-                        {selectedLang === 'hi' ? 'AI द्वारा फोटो एनहांस हो रही है...' : 'Enhancing with AI...'}
+                        {t.enhancingText}
                       </Text>
                     </View>
                   ) : enhancedImage ? (
@@ -349,7 +419,7 @@ export default function AddProductCameraScreen() {
                       alignItems: 'center',
                     }}>
                       <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: 'bold' }}>
-                        {selectedLang === 'hi' ? '✨ OpenCV AI एनहांस्ड फोटो ✓' : '✨ OpenCV AI Enhanced Photo ✓'}
+                        {t.enhancedBadge}
                       </Text>
                     </View>
                   ) : null}
@@ -378,9 +448,7 @@ export default function AddProductCameraScreen() {
                   </View>
                   <Text style={styles.camHintText}>
                     {hasSnapped
-                      ? selectedLang === 'hi'
-                        ? 'फोटो सफलतापूर्वक खींची गई! 🎉'
-                        : 'Photo Captured Successfully! 🎉'
+                      ? t.capturedSuccess
                       : t.camHint}
                   </Text>
                   <Text style={styles.camSubText}>{t.camSub}</Text>
@@ -428,51 +496,6 @@ export default function AddProductCameraScreen() {
             <Text style={styles.nextButtonText}>{t.nextBtn}</Text>
           </TouchableOpacity>
         </ScrollView>
-
-        {/* Language Selection Modal */}
-        <Modal
-          visible={isLangModalVisible}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setIsLangModalVisible(false)}
-        >
-          <TouchableOpacity
-            style={styles.modalOverlay}
-            activeOpacity={1}
-            onPress={() => setIsLangModalVisible(false)}
-          >
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>{t.modalTitle}</Text>
-              <FlatList
-                data={LANGUAGES}
-                keyExtractor={(item) => item.code}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={[
-                      styles.langOptionItem,
-                      selectedLang === item.code ? styles.langOptionSelected : null,
-                    ]}
-                    onPress={() => {
-                      setIsLangModalVisible(false);
-                    }}
-                  >
-                    <Text
-                      style={[
-                        styles.langOptionText,
-                        selectedLang === item.code ? styles.langOptionTextSelected : null,
-                      ]}
-                    >
-                      {item.label}
-                    </Text>
-                    {selectedLang === item.code && (
-                      <Ionicons name="checkmark" size={20} color="#3B6029" />
-                    )}
-                  </TouchableOpacity>
-                )}
-              />
-            </View>
-          </TouchableOpacity>
-        </Modal>
       </View>
     </SafeAreaView>
   );

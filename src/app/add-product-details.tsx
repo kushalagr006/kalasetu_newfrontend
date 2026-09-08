@@ -14,41 +14,15 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useGlobalLang, LangCode } from '@/utils/languageStore';
 import { getPendingProductPhoto } from '@/utils/photoStore';
 
-const TRANSLATIONS = {
-  en: {
-    headerTitle: 'Add Product Details',
-    changePhoto: 'Change Photo',
-    imgSuccess: 'Image uploaded successfully',
-    heading: 'Now add product details',
-    subtitle: 'You can tell us about your product by voice or type it manually.',
-    speakTitle: 'Speak and Add Details',
-    speakSub: 'Tap the mic and tell us about your product.',
-    writeTitle: 'Write Details',
-    writeSub: 'Type the product details manually.',
-    continueBtn: 'Continue →',
-  },
-  hi: {
-    headerTitle: 'उत्पाद विवरण जोड़ें',
-    changePhoto: 'फोटो बदलें',
-    imgSuccess: 'इमेज सफलतापूर्वक अपलोड की गई',
-    heading: 'अब उत्पाद विवरण जोड़ें',
-    subtitle: 'आप बोलकर या लिखकर अपने उत्पाद की जानकारी दे सकते हैं।',
-    speakTitle: 'बोलकर विवरण जोड़ें (Speak)',
-    speakSub: 'माइक पर टैप करें और अपने उत्पाद के बारे में बताएं।',
-    writeTitle: 'लिखकर विवरण जोड़ें (Write)',
-    writeSub: 'उत्पाद का नाम, विवरण और मूल्य खुद टाइप करें।',
-    continueBtn: 'आगे बढ़ें →',
-  },
-};
+import TopLangSelector from '@/components/TopLangSelector';
+import { PRODUCT_DETAILS_STRINGS } from '@/utils/productQuestions';
 
 export default function AddProductDetailsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ lang?: string; photoUri?: string }>();
   const [globalLang] = useGlobalLang();
 
-  const selectedLang: LangCode =
-    (params.lang as LangCode) || (globalLang === 'en' ? 'en' : 'hi');
-  const t = (TRANSLATIONS as any)[selectedLang] || TRANSLATIONS.en;
+  const t = PRODUCT_DETAILS_STRINGS[globalLang] || PRODUCT_DETAILS_STRINGS.hi;
 
   const pendingPhoto = getPendingProductPhoto();
   const displayPhotoUri = params.photoUri || pendingPhoto.photoUri;
@@ -58,12 +32,12 @@ export default function AddProductDetailsScreen() {
 
   const handleSpeakClick = () => {
     setSelectedOption('voice');
-    router.push({ pathname: '/add-product-voice', params: { lang: selectedLang } });
+    router.push({ pathname: '/add-product-voice', params: { lang: globalLang } });
   };
 
   const handleWriteClick = () => {
     setSelectedOption('text');
-    router.push({ pathname: '/add-product-text', params: { lang: selectedLang } });
+    router.push({ pathname: '/add-product-text', params: { lang: globalLang } });
   };
 
   return (
@@ -83,8 +57,8 @@ export default function AddProductDetailsScreen() {
           
           <Text style={styles.headerTitle}>{t.headerTitle}</Text>
           
-          {/* Spacer to keep title perfectly centered */}
-          <View style={{ width: 36 }} />
+          {/* Top Language Selector */}
+          <TopLangSelector />
         </View>
 
         <ScrollView
