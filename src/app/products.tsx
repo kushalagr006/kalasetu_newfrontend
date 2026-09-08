@@ -22,7 +22,7 @@ type ActiveTab = 'home' | 'products' | 'customers' | 'profile';
 
 const TRANSLATIONS: Record<LangCode, {
   headerTitle: string;
-  totalProducts: string;
+  totalProductsLabel: string;
   activeStatus: string;
   stockPrefix: string;
   pieceSuffix: string;
@@ -35,10 +35,12 @@ const TRANSLATIONS: Record<LangCode, {
   navCustomers: string;
   navProfile: string;
   modalTitle: string;
+  noProductsTitle: string;
+  noProductsSub: string;
 }> = {
   hi: {
     headerTitle: 'मेरे उत्पाद',
-    totalProducts: 'कुल उत्पाद: 18',
+    totalProductsLabel: 'कुल उत्पाद',
     activeStatus: 'सक्रिय',
     stockPrefix: 'स्टॉक: ',
     pieceSuffix: ' पीस',
@@ -51,10 +53,12 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'ग्राहक',
     navProfile: 'प्रोफ़ाइल',
     modalTitle: 'भाषा चुनें / Select Language',
+    noProductsTitle: 'अभी तक कोई उत्पाद नहीं जोड़ा गया है',
+    noProductsSub: 'अपना पहला उत्पाद जोड़ने के लिए नीचे दिए गए बटन पर टैप करें और AI द्वारा फोटो व विवरण दर्ज करें।',
   },
   en: {
     headerTitle: 'My Products',
-    totalProducts: 'Total Products: 18',
+    totalProductsLabel: 'Total Products',
     activeStatus: 'Active',
     stockPrefix: 'Stock: ',
     pieceSuffix: ' pcs',
@@ -67,10 +71,12 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'Customers',
     navProfile: 'Profile',
     modalTitle: 'Select Language / भाषा चुनें',
+    noProductsTitle: 'No Products Published Yet',
+    noProductsSub: 'Tap the button below to capture photo, answer questions, and publish your first product!',
   },
   bn: {
     headerTitle: 'আমার পণ্যসমূহ',
-    totalProducts: 'মোট পণ্য: ১৮',
+    totalProductsLabel: 'মোট পণ্য',
     activeStatus: 'সক্রিয়',
     stockPrefix: 'স্টক: ',
     pieceSuffix: ' টি',
@@ -83,10 +89,12 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'গ্রাহক',
     navProfile: 'প্রোফাইল',
     modalTitle: 'ভাষা নির্বাচন করুন / Select Language',
+    noProductsTitle: 'এখনও কোনো পণ্য যুক্ত করা হয়নি',
+    noProductsSub: 'আপনার প্রথম পণ্য যুক্ত করতে নিচের বোতামে ট্যাপ করুন।',
   },
   bho: {
     headerTitle: 'हमर सामान',
-    totalProducts: 'कुल सामान: 18',
+    totalProductsLabel: 'कुल सामान',
     activeStatus: 'चालू',
     stockPrefix: 'स्टॉक: ',
     pieceSuffix: ' गो',
@@ -99,10 +107,12 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'ग्राहक',
     navProfile: 'प्रोफाइल',
     modalTitle: 'भाषा चुनीं / Select Language',
+    noProductsTitle: 'अभी तक कौनो सामान ना जुड़ल बा',
+    noProductsSub: 'अपन पहिला सामान जोड़े खातिर नीचे दिहल बटन पर छुईं।',
   },
   mr: {
     headerTitle: 'माझी उत्पादने',
-    totalProducts: 'एकूण उत्पादने: १८',
+    totalProductsLabel: 'एकूण उत्पादने',
     activeStatus: 'सक्रिय',
     stockPrefix: 'स्टॉक: ',
     pieceSuffix: ' नग',
@@ -115,10 +125,12 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'ग्राहक',
     navProfile: 'प्रोफाइल',
     modalTitle: 'भाषा निवडा / Select Language',
+    noProductsTitle: 'अजून कोणतेही उत्पादन जोडलेले नाही',
+    noProductsSub: 'तुमचे पहिले उत्पादन जोडण्यासाठी खालील बटणावर टॅप करा.',
   },
   gu: {
     headerTitle: 'મારા ઉત્પાદનો',
-    totalProducts: 'કુલ ઉત્પાદનો: 18',
+    totalProductsLabel: 'કુલ ઉત્પાદનો',
     activeStatus: 'સક્રિય',
     stockPrefix: 'સ્ટોક: ',
     pieceSuffix: ' પીસ',
@@ -131,10 +143,12 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'ગ્રાહકો',
     navProfile: 'પ્રોફાઇલ',
     modalTitle: 'ભાષા પસંદ કરો / Select Language',
+    noProductsTitle: 'હજુ સુધી કોઈ ઉત્પાદન ઉમેરાયેલ નથી',
+    noProductsSub: 'તમારું પ્રથમ ઉત્પાદન ઉમેરવા માટે નીચેના બટન પર ટૅપ કરો.',
   },
   raj: {
     headerTitle: 'म्हारा सामान',
-    totalProducts: 'सगळा सामान: 18',
+    totalProductsLabel: 'सगळा सामान',
     activeStatus: 'चालू',
     stockPrefix: 'स्टॉक: ',
     pieceSuffix: ' नग',
@@ -147,10 +161,12 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'ग्राहक',
     navProfile: 'प्रोफाइल',
     modalTitle: 'भाषा चूणो / Select Language',
+    noProductsTitle: 'अजूं तांई कोई सामान नी जुड़्यो है',
+    noProductsSub: 'आपरो पेलो सामान जोड़बा सारू नीचे दबायोड़ा बटन पर दबाओ।',
   },
   kn: {
     headerTitle: 'ನನ್ನ ಉತ್ಪನ್ನಗಳು',
-    totalProducts: 'ಒಟ್ಟು ಉತ್ಪನ್ನಗಳು: 18',
+    totalProductsLabel: 'ಒಟ್ಟು ಉತ್ಪನ್ನಗಳು',
     activeStatus: 'ಸಕ್ರಿಯ',
     stockPrefix: 'ಸ್ಟಾಕ್: ',
     pieceSuffix: ' ತುಂಡುಗಳು',
@@ -163,99 +179,10 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'ಗ್ರಾಹಕರು',
     navProfile: 'ಪ್ರೊಫೈಲ್',
     modalTitle: 'ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ / Select Language',
+    noProductsTitle: 'ಇನ್ನೂ ಯಾವುದೇ ಉತ್ಪನ್ನಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡಲಾಗಿಲ್ಲ',
+    noProductsSub: 'ನಿಮ್ಮ ಮೊದಲ ಉತ್ಪನ್ನವನ್ನು ಸೇರಿಸಲು ಕೆಳಗಿನ ಬಟನ್ ಟ್ಯಾಪ್ ಮಾಡಿ!',
   },
 };
-
-interface ProductItem {
-  id: string;
-  names: Record<LangCode, string>;
-  price: string;
-  stockQty: number;
-  image: any;
-}
-
-const PRODUCTS_LIST: ProductItem[] = [
-  {
-    id: '1',
-    names: {
-      en: 'Bamboo Basket',
-      hi: 'बांस की टोकरी',
-      bn: 'বাঁশের ঝুড়ি',
-      bho: 'बांस के टोकरी',
-      mr: 'बांबूची टोपली',
-      gu: 'વાંસની ટોપલી',
-      raj: 'बांस री टोकरी',
-      kn: 'ಬಿದಿರಿನ ಬುಟ್ಟಿ',
-    },
-    price: '₹350',
-    stockQty: 45,
-    image: require('@/assets/images/product_basket.png'),
-  },
-  {
-    id: '2',
-    names: {
-      en: 'Bamboo Box Container',
-      hi: 'बांस का डिब्बा',
-      bn: 'বাঁশের বাক্স',
-      bho: 'बांस के डिब्बा',
-      mr: 'बांबूचा डब्बा',
-      gu: 'વાંસનું બોક્સ',
-      raj: 'बांस रो डिब्बो',
-      kn: 'ಬಿದಿರಿನ ಪೆಟ್ಟಿಗೆ',
-    },
-    price: '₹450',
-    stockQty: 30,
-    image: require('@/assets/images/product_pot.png'),
-  },
-  {
-    id: '3',
-    names: {
-      en: 'Wall Hanging Decor',
-      hi: 'दीवार सजावट',
-      bn: 'দেয়াল সজ্জা',
-      bho: 'दीवाल सजावट',
-      mr: 'भिंतीची सजावट',
-      gu: 'દીવાલ શણગાર',
-      raj: 'भींत सजावट',
-      kn: 'ಗೋಡೆಯ ಅಲಂಕಾರ',
-    },
-    price: '₹250',
-    stockQty: 60,
-    image: require('@/assets/images/product_macrame.png'),
-  },
-  {
-    id: '4',
-    names: {
-      en: 'Terracotta Clay Pot',
-      hi: 'मिट्टी का घड़ा',
-      bn: 'পোড়ামাটির পাত্র',
-      bho: 'माटी के घड़ा',
-      mr: 'मातीचे मडके',
-      gu: 'માટીનું માટલું',
-      raj: 'माटी रो घड़ो',
-      kn: 'ಮಣ್ಣಿನ ಮಡಕೆ',
-    },
-    price: '₹450',
-    stockQty: 15,
-    image: require('@/assets/images/product_pot.png'),
-  },
-  {
-    id: '5',
-    names: {
-      en: 'Handmade Fabric Bag',
-      hi: 'हैंडमेड कपड़ा बैग',
-      bn: 'হাতে তৈরি কাপড়ের ব্যাগ',
-      bho: 'हाथ के बनल कपड़ा बैग',
-      mr: 'हस्तनिर्मित कापडी पिशवी',
-      gu: 'હસ્તનિર્મિત કાપડની થેલી',
-      raj: 'हाथ सूं बन्यो कपड़ो थैलो',
-      kn: 'ಹಸ್ತಾಲಂಕಾರದ ಬಟ್ಟೆಯ ಚೀಲ',
-    },
-    price: '₹550',
-    stockQty: 25,
-    image: require('@/assets/images/product_bag.png'),
-  },
-];
 
 export default function ProductsScreen() {
   const router = useRouter();
@@ -273,12 +200,11 @@ export default function ProductsScreen() {
   }, [globalLang]);
 
   const [isLangModalVisible, setIsLangModalVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState<ActiveTab>('products');
 
   const t = TRANSLATIONS[selectedLang] || TRANSLATIONS.hi;
   const currentLangObj = ALL_LANGUAGES.find((l) => l.code === selectedLang) || ALL_LANGUAGES[1];
   const currentLangLabel = `${currentLangObj.nativeName} (${currentLangObj.englishName})`;
-  const totalLabel = `${t.totalProducts.split(':')[0]}: ${productsList.length}`;
+  const totalLabel = `${t.totalProductsLabel}: ${productsList.length}`;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -317,56 +243,78 @@ export default function ProductsScreen() {
           {/* Total Count Header */}
           <Text style={styles.totalCountHeader}>{totalLabel}</Text>
 
-          {/* Product Items List */}
-          <View style={styles.productListGroup}>
-            {productsList.map((item) => {
-              const displayName = item.title || (item.names ? (item.names[selectedLang] || item.names.hi || item.names.en) : 'Product');
-              const imageSource = typeof item.image === 'string' ? { uri: item.image } : item.image;
+          {productsList.length > 0 ? (
+            /* Product Items List */
+            <View style={styles.productListGroup}>
+              {productsList.map((item) => {
+                const displayName = item.title || (item.names ? (item.names[selectedLang] || item.names.hi || item.names.en) : 'Product');
+                const imageSource =
+                  typeof item.image === 'string'
+                    ? { uri: item.image }
+                    : item.image && typeof item.image === 'object' && item.image.uri
+                    ? { uri: item.image.uri }
+                    : item.image || require('@/assets/images/product_pot.png');
 
-              return (
-                <View key={item.id} style={styles.productCard}>
-                  <View style={styles.productMainRow}>
-                    <Image source={imageSource} style={styles.productImage} resizeMode="cover" />
+                return (
+                  <View key={item.id} style={styles.productCard}>
+                    <View style={styles.productMainRow}>
+                      <Image source={imageSource} style={styles.productImage} resizeMode="cover" />
 
-                    <View style={{ flex: 1 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Text style={styles.productNameText}>{displayName}</Text>
-                        <View style={styles.activeStatusBadge}>
-                          <Text style={styles.activeStatusText}>{t.activeStatus}</Text>
+                      <View style={{ flex: 1 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <Text style={styles.productNameText}>{displayName}</Text>
+                          <View style={styles.activeStatusBadge}>
+                            <Text style={styles.activeStatusText}>{t.activeStatus}</Text>
+                          </View>
                         </View>
-                      </View>
 
-                      <Text style={styles.productPriceText}>{item.price}</Text>
-                      <Text style={styles.productStockText}>{t.stockPrefix}{item.stockQty}{t.pieceSuffix}</Text>
+                        {(item.category || item.materialUsed) && (
+                          <Text style={{ fontSize: 11, color: '#666666', marginTop: 2 }} numberOfLines={1}>
+                            {item.category ? `📁 ${item.category}` : ''} {item.materialUsed ? `• 🧱 ${item.materialUsed}` : ''}
+                          </Text>
+                        )}
+
+                        <Text style={styles.productPriceText}>{item.price}</Text>
+                        <Text style={styles.productStockText}>{t.stockPrefix}{item.stockQty}{t.pieceSuffix}</Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.cardDividerLine} />
+
+                    <View style={styles.cardActionBar}>
+                      <TouchableOpacity style={styles.cardActionItem} activeOpacity={0.7}>
+                        <Ionicons name="eye-outline" size={16} color="#3B6029" />
+                        <Text style={styles.cardActionText}>{t.actionView}</Text>
+                      </TouchableOpacity>
+
+                      <View style={styles.actionDividerLine} />
+
+                      <TouchableOpacity style={styles.cardActionItem} activeOpacity={0.7}>
+                        <Ionicons name="pencil-outline" size={15} color="#3B6029" />
+                        <Text style={styles.cardActionText}>{t.actionEdit}</Text>
+                      </TouchableOpacity>
+
+                      <View style={styles.actionDividerLine} />
+
+                      <TouchableOpacity style={styles.cardActionItem} activeOpacity={0.7}>
+                        <Ionicons name="ellipsis-horizontal" size={16} color="#3B6029" />
+                        <Text style={styles.cardActionText}>{t.actionMore}</Text>
+                      </TouchableOpacity>
                     </View>
                   </View>
-
-                  <View style={styles.cardDividerLine} />
-
-                  <View style={styles.cardActionBar}>
-                    <TouchableOpacity style={styles.cardActionItem} activeOpacity={0.7}>
-                      <Ionicons name="eye-outline" size={16} color="#3B6029" />
-                      <Text style={styles.cardActionText}>{t.actionView}</Text>
-                    </TouchableOpacity>
-
-                    <View style={styles.actionDividerLine} />
-
-                    <TouchableOpacity style={styles.cardActionItem} activeOpacity={0.7}>
-                      <Ionicons name="pencil-outline" size={15} color="#3B6029" />
-                      <Text style={styles.cardActionText}>{t.actionEdit}</Text>
-                    </TouchableOpacity>
-
-                    <View style={styles.actionDividerLine} />
-
-                    <TouchableOpacity style={styles.cardActionItem} activeOpacity={0.7}>
-                      <Ionicons name="ellipsis-horizontal" size={16} color="#3B6029" />
-                      <Text style={styles.cardActionText}>{t.actionMore}</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              );
-            })}
-          </View>
+                );
+              })}
+            </View>
+          ) : (
+            /* Empty State Container */
+            <View style={styles.emptyStateCard}>
+              <View style={styles.emptyIconCircle}>
+                <Ionicons name="cube-outline" size={42} color="#3B6029" />
+              </View>
+              <Text style={styles.emptyTitle}>{t.noProductsTitle}</Text>
+              <Text style={styles.emptySub}>{t.noProductsSub}</Text>
+            </View>
+          )}
 
           {/* Primary Outlined Add Product Button */}
           <TouchableOpacity
@@ -374,7 +322,7 @@ export default function ProductsScreen() {
             onPress={() => router.push({ pathname: '/add-product', params: { lang: selectedLang } })}
             activeOpacity={0.85}
           >
-            <Ionicons name="add" size={20} color="#3B6029" style={{ marginRight: 6 }} />
+            <Ionicons name="add" size={20} color="#FFFFFF" style={{ marginRight: 6 }} />
             <Text style={styles.outlinedAddProductBtnText}>{t.addNewProduct}</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -598,14 +546,45 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0E0E0',
   },
 
+  /* Empty State Card */
+  emptyStateCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#EBEBEB',
+    padding: 28,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  emptyIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#EBF6EE',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#1A1A1A',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  emptySub: {
+    fontSize: 13,
+    color: '#666666',
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+
   /* Outlined Add Product Button */
   outlinedAddProductBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: '#3B6029',
+    backgroundColor: '#3B6029',
     borderRadius: 14,
     paddingVertical: 14,
     marginTop: 6,
@@ -613,42 +592,7 @@ const styles = StyleSheet.create({
   outlinedAddProductBtnText: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: '#3B6029',
-  },
-
-  /* Floating Bottom Navigation Bar */
-  bottomNavContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    height: 64,
-    marginHorizontal: 16,
-    marginBottom: 10,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    borderWidth: 1,
-    borderColor: '#F0EFEA',
-  },
-  navTab: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 6,
-  },
-  navTabText: {
-    fontSize: 11,
-    color: '#666666',
-    marginTop: 3,
-    fontWeight: '500',
-  },
-  navTabTextActiveProduct: {
-    color: '#E65100',
-    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
 
   /* Modal Styles */

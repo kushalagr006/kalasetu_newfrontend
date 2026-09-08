@@ -20,6 +20,7 @@ class ProductCreate(BaseModel):
     price: float
     stock_quantity: int = 1
     audio_note_url: Optional[str] = None
+    primary_image_url: Optional[str] = None
 
 
 class ProductUpdate(BaseModel):
