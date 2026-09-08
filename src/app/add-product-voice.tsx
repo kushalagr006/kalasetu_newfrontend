@@ -54,6 +54,13 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
   guidanceHeader: string;
   selectedAiPriceLabel: string;
   selectedArtisanPriceLabel: string;
+  optionCTitle?: string;
+  wholesaleBadge?: string;
+  bulkDiscountTag?: string;
+  unitPriceLabel?: string;
+  totalOrderValLabel?: string;
+  wholesaleProfitLabel?: string;
+  quantityPcsLabel?: string;
 }> = {
   hi: {
     listening: 'सुन रहा हूँ... बोलना समाप्त करने के लिए पुनः टैप करें',
@@ -85,6 +92,12 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     guidanceHeader: '💡 KalaSetu AI बाज़ार सलाह (Guidance):',
     selectedAiPriceLabel: 'चयनित AI फेयर प्राइस:',
     selectedArtisanPriceLabel: 'चयनित आपकी कीमत:',
+    wholesaleBadge: '📦 थोक बिक्री ऑर्डर (5+ पीस - Bulk Wholesale)',
+    bulkDiscountTag: 'विशेष थोक डिस्काउंट',
+    unitPriceLabel: 'थोक दर प्रति पीस (Unit Price)',
+    totalOrderValLabel: 'कुल थोक ऑर्डर मूल्य (Total Order Value)',
+    wholesaleProfitLabel: 'अनुमानित कुल थोक मुनाफ़ा (Wholesale Profit)',
+    quantityPcsLabel: 'मात्रा (Quantity)',
   },
   en: {
     listening: 'Listening... Tap again to stop speaking',
@@ -116,6 +129,12 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     guidanceHeader: '💡 KalaSetu AI Market Guidance:',
     selectedAiPriceLabel: 'Selected AI Fair Price:',
     selectedArtisanPriceLabel: 'Selected Your Quoted Price:',
+    wholesaleBadge: '📦 Wholesale Bulk Order (5+ Pcs)',
+    bulkDiscountTag: 'Bulk Volume Discount',
+    unitPriceLabel: 'Bulk Rate per Piece (Unit Price)',
+    totalOrderValLabel: 'Total Wholesale Order Value',
+    wholesaleProfitLabel: 'Total Wholesale Estimated Profit',
+    quantityPcsLabel: 'Order Quantity',
   },
   bn: {
     listening: 'শুনছি... কথা বলা শেষ করতে আবার ট্যাপ করুন',
@@ -333,8 +352,16 @@ export default function AddProductVoiceScreen() {
     artisan_price: number;
     guidance: { hindi: string; english: string };
     pricing: { cost_floor: number; market_reference_price: number };
+    bulk_wholesale?: {
+      is_bulk: boolean;
+      quantity: number;
+      bulk_discount_percentage?: string;
+      bulk_price_per_piece?: number;
+      bulk_order_total?: number;
+      total_estimated_profit?: string;
+    };
   } | null>(null);
-  const [selectedPriceOption, setSelectedPriceOption] = useState<'AI' | 'ARTISAN'>('AI');
+  const [selectedPriceOption, setSelectedPriceOption] = useState<'AI_RETAIL' | 'ARTISAN' | 'AI_WHOLESALE'>('AI_RETAIL');
   const [isLoadingPricing, setIsLoadingPricing] = useState(false);
 
   const fetchPricingEstimate = async () => {
@@ -342,6 +369,11 @@ export default function AddProductVoiceScreen() {
     try {
       const rawPriceStr = recordedAnswers[4] || questions[4]?.dummyAnswer || '450';
       const numPrice = parseFloat(rawPriceStr.replace(/[^0-9.]/g, '')) || 450;
+      
+      const rawQtyStr = recordedAnswers[5] || questions[5]?.dummyAnswer || '1';
+      const parsedQty = parseInt(rawQtyStr.replace(/[^0-9]/g, ''), 10);
+      const numQty = isNaN(parsedQty) || parsedQty < 1 ? 1 : parsedQty;
+
       const title = recordedAnswers[0] || questions[0]?.dummyAnswer || 'Handmade Craft Product';
       const description = recordedAnswers[1] || questions[1]?.dummyAnswer || '';
       const category = recordedAnswers[2] || questions[2]?.dummyAnswer || '';
@@ -349,6 +381,7 @@ export default function AddProductVoiceScreen() {
 
       const bodyParams = new URLSearchParams();
       bodyParams.append('selling_price', String(numPrice));
+      bodyParams.append('quantity', String(numQty));
       bodyParams.append('product_name', title);
       bodyParams.append('source_language', globalLang || 'hi');
       const combinedDesc = `${category} ${material} ${description}`.trim();
@@ -373,6 +406,14 @@ export default function AddProductVoiceScreen() {
           artisan_price: numPrice,
           guidance: data.guidance || { hindi: '', english: '' },
           pricing: data.pricing || { cost_floor: Math.round(numPrice * 0.7), market_reference_price: data.suggested_price || Math.round(numPrice * 1.22) },
+          bulk_wholesale: data.bulk_wholesale || (numQty >= 5 ? {
+            is_bulk: true,
+            quantity: numQty,
+            bulk_discount_percentage: numQty >= 50 ? '20.0%' : (numQty >= 20 ? '15.0%' : '10.0%'),
+            bulk_price_per_piece: Math.round(numPrice * (numQty >= 50 ? 0.8 : (numQty >= 20 ? 0.85 : 0.9))),
+            bulk_order_total: Math.round(numPrice * (numQty >= 50 ? 0.8 : (numQty >= 20 ? 0.85 : 0.9))) * numQty,
+            total_estimated_profit: `Rs. ${Math.round(numPrice * 0.3 * numQty)}`
+          } : { is_bulk: false, quantity: numQty }),
         });
       } else {
         throw new Error('Pricing API returned non-200 status');
@@ -381,6 +422,9 @@ export default function AddProductVoiceScreen() {
       console.log('Pricing API estimate fallback:', err);
       const rawPriceStr = recordedAnswers[4] || questions[4]?.dummyAnswer || '450';
       const numPrice = parseFloat(rawPriceStr.replace(/[^0-9.]/g, '')) || 450;
+      const rawQtyStr = recordedAnswers[5] || questions[5]?.dummyAnswer || '1';
+      const parsedQty = parseInt(rawQtyStr.replace(/[^0-9]/g, ''), 10);
+      const numQty = isNaN(parsedQty) || parsedQty < 1 ? 1 : parsedQty;
       const suggestedFallback = Math.round((numPrice * 1.22) / 10) * 10;
       setPricingEstimate({
         suggested_price: suggestedFallback,
@@ -394,7 +438,15 @@ export default function AddProductVoiceScreen() {
         pricing: {
           cost_floor: Math.round(numPrice * 0.7),
           market_reference_price: suggestedFallback
-        }
+        },
+        bulk_wholesale: numQty >= 5 ? {
+          is_bulk: true,
+          quantity: numQty,
+          bulk_discount_percentage: numQty >= 50 ? '20.0%' : (numQty >= 20 ? '15.0%' : '10.0%'),
+          bulk_price_per_piece: Math.round(numPrice * (numQty >= 50 ? 0.8 : (numQty >= 20 ? 0.85 : 0.9))),
+          bulk_order_total: Math.round(numPrice * (numQty >= 50 ? 0.8 : (numQty >= 20 ? 0.85 : 0.9))) * numQty,
+          total_estimated_profit: `Rs. ${Math.round(numPrice * 0.3 * numQty)}`
+        } : { is_bulk: false, quantity: numQty }
       });
     } finally {
       setIsLoadingPricing(false);
@@ -449,6 +501,8 @@ export default function AddProductVoiceScreen() {
       case 3:
         return 'work';
       case 4:
+        return 'phone';
+      case 5:
         return 'phone';
       default:
         return 'work';
@@ -526,7 +580,7 @@ export default function AddProductVoiceScreen() {
       setTimerSeconds(0);
     } else {
       // Advance to final AI Price Estimation screen
-      setCurrentStepIndex(totalSteps); // Step 5 (Price summary)
+      setCurrentStepIndex(totalSteps); // Step 6 (Price summary)
       fetchPricingEstimate();
     }
   };
@@ -545,27 +599,73 @@ export default function AddProductVoiceScreen() {
     }
   };
 
+  const currentAnswer = recordedAnswers[currentStepIndex];
+  const isQuestionScreen = currentStepIndex < totalSteps;
+
+  const rawPriceStr = recordedAnswers[4] || questions[4]?.dummyAnswer || '450';
+  const artisanPriceVal = parseFloat(rawPriceStr.replace(/[^0-9.]/g, '')) || 450;
+
+  const rawQtyStr = recordedAnswers[5] || questions[5]?.dummyAnswer || '1';
+  const parsedQtyVal = parseInt(rawQtyStr.replace(/[^0-9]/g, ''), 10);
+  const qtyVal = isNaN(parsedQtyVal) || parsedQtyVal < 1 ? 1 : parsedQtyVal;
+  const isBulkOrder = qtyVal >= 5;
+
+  const bulkInfo = pricingEstimate?.bulk_wholesale;
+  const bulkDiscPctStr = bulkInfo?.bulk_discount_percentage || (qtyVal >= 50 ? '20.0%' : (qtyVal >= 20 ? '15.0%' : (qtyVal >= 5 ? '10.0%' : '0%')));
+
+  const baseAiPriceVal = pricingEstimate?.suggested_price || Math.round((artisanPriceVal * 1.22) / 10) * 10;
+  
+  const discMult = qtyVal >= 50 ? 0.8 : (qtyVal >= 20 ? 0.85 : 0.9);
+  const bulkPricePerPiece = bulkInfo?.bulk_price_per_piece || Math.round((baseAiPriceVal * discMult) / 10) * 10;
+  const bulkOrderTotal = bulkInfo?.bulk_order_total || bulkPricePerPiece * qtyVal;
+
+  const gainVal = Math.max(0, baseAiPriceVal - artisanPriceVal);
+  const gainPct = artisanPriceVal > 0 ? Math.round((gainVal / artisanPriceVal) * 100) : 22;
+
+  const chosenUnitPrice = selectedPriceOption === 'AI_RETAIL'
+    ? baseAiPriceVal
+    : selectedPriceOption === 'AI_WHOLESALE'
+    ? bulkPricePerPiece
+    : artisanPriceVal;
+
+  const chosenFinalPrice = selectedPriceOption === 'AI_RETAIL'
+    ? baseAiPriceVal * qtyVal
+    : selectedPriceOption === 'AI_WHOLESALE'
+    ? bulkOrderTotal
+    : artisanPriceVal * qtyVal;
+
+  const materialEst = Math.round(chosenUnitPrice * 0.30);
+  const laborEst = Math.round(chosenUnitPrice * 0.35);
+  const finishingEst = Math.round(chosenUnitPrice * 0.10);
+  const demandEst = Math.max(0, chosenUnitPrice - (materialEst + laborEst + finishingEst));
+
   const handlePublishCatalog = async () => {
     const title = recordedAnswers[0] || questions[0]?.dummyAnswer || 'Handmade Craft Product';
     const description = recordedAnswers[1] || questions[1]?.dummyAnswer || '';
     const category = recordedAnswers[2] || questions[2]?.dummyAnswer || 'Pottery & Claycraft';
     const materialUsed = recordedAnswers[3] || questions[3]?.dummyAnswer || '';
 
-    const rawPriceStr = recordedAnswers[4] || questions[4]?.dummyAnswer || '450';
-    const artisanPriceNum = parseFloat(rawPriceStr.replace(/[^0-9.]/g, '')) || 450;
-    const aiPriceNum = pricingEstimate?.suggested_price || 550;
-
-    const finalPriceNum = selectedPriceOption === 'AI' ? aiPriceNum : artisanPriceNum;
+    const guidanceText = pricingEstimate?.guidance
+      ? (globalLang === 'en' ? pricingEstimate.guidance.english || pricingEstimate.guidance.hindi : pricingEstimate.guidance.hindi || pricingEstimate.guidance.english)
+      : '';
 
     await addPublishedProduct({
       title,
       description,
       category,
       materialUsed,
-      price: String(finalPriceNum),
+      price: String(chosenUnitPrice),
+      stockQty: qtyVal,
       image: photoUri || '',
       aiEnhanced: true,
       sourceLanguage: globalLang,
+      unitPrice: chosenUnitPrice,
+      isBulkOrder: isBulkOrder,
+      bulkDiscountPct: bulkDiscPctStr,
+      bulkOrderTotal: isBulkOrder ? chosenFinalPrice : chosenUnitPrice,
+      artisanPrice: artisanPriceVal,
+      aiSuggestedPrice: baseAiPriceVal,
+      guidanceText: guidanceText,
     });
 
     Alert.alert(
@@ -580,22 +680,6 @@ export default function AddProductVoiceScreen() {
     );
   };
 
-  const currentAnswer = recordedAnswers[currentStepIndex];
-  const isQuestionScreen = currentStepIndex < totalSteps;
-
-  const rawPriceStr = recordedAnswers[4] || questions[4]?.dummyAnswer || '450';
-  const artisanPriceVal = parseFloat(rawPriceStr.replace(/[^0-9.]/g, '')) || 450;
-  const aiPriceVal = pricingEstimate?.suggested_price || Math.round((artisanPriceVal * 1.22) / 10) * 10;
-  const gainVal = Math.max(0, aiPriceVal - artisanPriceVal);
-  const gainPct = artisanPriceVal > 0 ? Math.round((gainVal / artisanPriceVal) * 100) : 22;
-
-  const chosenFinalPrice = selectedPriceOption === 'AI' ? aiPriceVal : artisanPriceVal;
-
-  const materialEst = Math.round(chosenFinalPrice * 0.30);
-  const laborEst = Math.round(chosenFinalPrice * 0.35);
-  const finishingEst = Math.round(chosenFinalPrice * 0.10);
-  const demandEst = Math.max(0, chosenFinalPrice - (materialEst + laborEst + finishingEst));
-
   const getLocalizedGuidanceText = (
     lang: LangCode,
     artisanP: number,
@@ -605,6 +689,33 @@ export default function AddProductVoiceScreen() {
     gainP: number,
     backendGuidance?: { hindi?: string; english?: string }
   ): string => {
+    if (isBulkOrder) {
+      if (lang === 'en') {
+        return `Bulk Wholesale Guidance: ${qtyVal} pieces volume order with ${bulkDiscPctStr} volume discount. Unit rate ₹${bulkPricePerPiece}/pc. Total wholesale order value: ₹${bulkOrderTotal.toLocaleString()}.`;
+      }
+      if (lang === 'hi') {
+        return `थोक ऑर्डर सलाह: ${qtyVal} पीस के बड़े ऑर्डर पर ${bulkDiscPctStr} डिस्काउंट लागू है। ₹${bulkPricePerPiece}/पीस थोक दर पर कुल ऑर्डर मूल्य: ₹${bulkOrderTotal.toLocaleString()}।`;
+      }
+      if (lang === 'bn') {
+        return `পাইকারি অডার পরামর্শ: ${qtyVal} পিসের অর্ডারে ${bulkDiscPctStr} ছাড় প্রযোজ্য। মোট পাইকারি দাম: ₹${bulkOrderTotal.toLocaleString()}।`;
+      }
+      if (lang === 'bho') {
+        return `थोक ऑर्डर सलाह: ${qtyVal} पीस के ऑर्डर पर ${bulkDiscPctStr} छूट लागू बा। कुल थोक ऑर्डर दाम: ₹${bulkOrderTotal.toLocaleString()}।`;
+      }
+      if (lang === 'mr') {
+        return `घाऊक ऑर्डर सल्ला: ${qtyVal} नगांच्या ऑर्डरवर ${bulkDiscPctStr} सवलत लागू आहे. एकूण घाऊक मूल्य: ₹${bulkOrderTotal.toLocaleString()}।`;
+      }
+      if (lang === 'gu') {
+        return `જથ્થાબંધ ઓર્ડર સલાહ: ${qtyVal} પીસ પર ${bulkDiscPctStr} ડિસ્કાઉન્ટ ઉપલબ્ધ છે. કુલ ઓર્ડર કિંમત: ₹${bulkOrderTotal.toLocaleString()}।`;
+      }
+      if (lang === 'raj') {
+        return `थोक ऑर्डर सलाह: ${qtyVal} पीस रे ऑर्डर पर ${bulkDiscPctStr} छूट लागू है। कुल थोक भाव: ₹${bulkOrderTotal.toLocaleString()}।`;
+      }
+      if (lang === 'kn') {
+        return `ಸಗಟು ಆದೇಶ ಮಾರ್ಗದರ್ಶನ: ${qtyVal} ಪೀಸ್‌ಗಳ ಆದೇಶದ ಮೇಲೆ ${bulkDiscPctStr} ರಿಯಾಯಿತಿ ಇದೆ. ಒಟ್ಟು ಸಗಟು ಮೌಲ್ಯ: ₹${bulkOrderTotal.toLocaleString()}।`;
+      }
+    }
+
     if (lang === 'en') {
       if (backendGuidance?.english) return backendGuidance.english;
       if (gain > 0) {
@@ -718,7 +829,7 @@ export default function AddProductVoiceScreen() {
           )}
 
           {isQuestionScreen ? (
-            /* ================= QUESTION VOICE STEPS (1-5) ================= */
+            /* ================= QUESTION VOICE STEPS (1-6) ================= */
             <View>
               {/* Question Progress Indicator */}
               <View style={styles.progressRow}>
@@ -839,7 +950,7 @@ export default function AddProductVoiceScreen() {
               )}
             </View>
           ) : (
-            /* ================= STEP 6: DUAL PRICE SELECTION SUMMARY ================= */
+            /* ================= STEP 7: DUAL PRICE SELECTION SUMMARY ================= */
             <View>
               {/* AI Prediction Header Banner */}
               <View style={styles.priceHeaderBanner}>
@@ -853,6 +964,42 @@ export default function AddProductVoiceScreen() {
                   </Text>
                 </View>
               </View>
+
+              {/* Wholesale Bulk Order Summary Banner Card */}
+              {isBulkOrder && (
+                <View style={{
+                  backgroundColor: '#E8F5E9',
+                  borderColor: '#2E7D32',
+                  borderWidth: 1.5,
+                  borderRadius: 16,
+                  padding: 14,
+                  marginBottom: 16,
+                }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                    <MaterialCommunityIcons name="package-variant-closed" size={28} color="#2E7D32" style={{ marginRight: 10 }} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#1B5E20' }}>
+                        📦 थोक बल्क ऑर्डर ({qtyVal} पीस)
+                      </Text>
+                      <Text style={{ fontSize: 12, color: '#2E7D32', fontWeight: '600' }}>
+                        ⚡ बल्क डिस्काउंट: {bulkDiscPctStr} OFF लागू ({qtyVal} पीस के थोक ऑर्डर पर)
+                      </Text>
+                    </View>
+                  </View>
+                  
+                  <View style={{ backgroundColor: '#FFFFFF', padding: 10, borderRadius: 10, borderWidth: 1, borderColor: '#A5D6A7' }}>
+                    <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#1B5E20' }}>
+                      💡 सुझाई गई थोक दर: ₹{bulkPricePerPiece} / pc
+                    </Text>
+                    <Text style={{ fontSize: 12, fontWeight: '600', color: '#2E7D32', marginTop: 2 }}>
+                      💵 कुल थोक ऑर्डर मूल्य: ₹{bulkOrderTotal.toLocaleString()} ({qtyVal} Pcs)
+                    </Text>
+                    <Text style={{ fontSize: 11, color: '#388E3C', fontStyle: 'italic', marginTop: 2 }}>
+                      "इस रेट पर थोक में बेचने से ग्राहक और आपका दोनों का फ़ायदा होगा!"
+                    </Text>
+                  </View>
+                </View>
+              )}
 
               {/* Product Info Preview Card */}
               <View style={styles.productPreviewCard}>
@@ -880,62 +1027,65 @@ export default function AddProductVoiceScreen() {
                     🧱 {recordedAnswers[3] || questions[3]?.hint || 'Materials'}
                   </Text>
                   <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#E65100', marginTop: 4 }}>
-                    🗣️ {t.yourQuotedPrice} ₹{artisanPriceVal}
+                    🗣️ {t.yourQuotedPrice} ₹{artisanPriceVal} {isBulkOrder ? `(Qty: ${qtyVal} Pcs)` : ''}
                   </Text>
                 </View>
               </View>
 
-              {/* Dual Price Selection Cards (Option A vs Option B) */}
+              {/* 3 Price Selection Options (Option A, Option B, Option C) */}
               <View style={{ marginBottom: 16 }}>
                 <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#1A1A1A', marginBottom: 10 }}>
                   💰 {t.selectSellingPrice}
                 </Text>
 
-                {/* Option A: AI Fair Market Price (Recommended) */}
+                {/* Option A: AI Fair Market Retail Price */}
                 <TouchableOpacity
                   style={{
-                    backgroundColor: selectedPriceOption === 'AI' ? '#F4F9F2' : '#FFFFFF',
-                    borderColor: selectedPriceOption === 'AI' ? '#3B6029' : '#EFECE6',
+                    backgroundColor: selectedPriceOption === 'AI_RETAIL' ? '#F4F9F2' : '#FFFFFF',
+                    borderColor: selectedPriceOption === 'AI_RETAIL' ? '#3B6029' : '#EFECE6',
                     borderWidth: 2,
                     borderRadius: 16,
                     padding: 16,
                     marginBottom: 12,
                     flexDirection: 'row',
                     alignItems: 'center',
-                    elevation: selectedPriceOption === 'AI' ? 3 : 1,
+                    elevation: selectedPriceOption === 'AI_RETAIL' ? 3 : 1,
                   }}
-                  onPress={() => setSelectedPriceOption('AI')}
+                  onPress={() => setSelectedPriceOption('AI_RETAIL')}
                   activeOpacity={0.88}
                 >
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
                       <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#3B6029', textTransform: 'uppercase' }}>
-                        {t.optionATitle}
+                        {t.optionATitle || '✨ Option A: AI Fair Retail Price'}
                       </Text>
                       <View style={{ backgroundColor: '#3B6029', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, marginLeft: 8 }}>
                         <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>{t.recommendedBadge}</Text>
                       </View>
                     </View>
-                    <Text style={{ fontSize: 30, fontWeight: 'bold', color: '#1A1A1A' }}>
-                      ₹{aiPriceVal}
+                    
+                    <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#1A1A1A' }}>
+                      ₹{baseAiPriceVal} <Text style={{ fontSize: 14, fontWeight: 'normal', color: '#666' }}>/ pc</Text>
                     </Text>
+
                     {gainVal > 0 && (
                       <Text style={{ fontSize: 12, color: '#3B6029', fontWeight: '700', marginTop: 2 }}>
                         ✨ +₹{gainVal} ({gainPct}%) {t.moreProfitTag}
                       </Text>
                     )}
+
                     <Text style={{ fontSize: 11, color: '#666666', marginTop: 4 }}>
                       {t.fairMarketRange} ₹{pricingEstimate?.recommended_min || Math.round(artisanPriceVal * 1.05)} – ₹{pricingEstimate?.recommended_max || Math.round(artisanPriceVal * 1.45)}
                     </Text>
                   </View>
                   <Ionicons
-                    name={selectedPriceOption === 'AI' ? 'radio-button-on' : 'radio-button-off'}
+                    name={selectedPriceOption === 'AI_RETAIL' ? 'radio-button-on' : 'radio-button-off'}
                     size={26}
-                    color={selectedPriceOption === 'AI' ? '#3B6029' : '#CCCCCC'}
+                    color={selectedPriceOption === 'AI_RETAIL' ? '#3B6029' : '#CCCCCC'}
                   />
                 </TouchableOpacity>
 
-                {/* Option B: Artisan Quoted Price */}
+                {/* Option B: Artisan Original Quoted Price */}
                 <TouchableOpacity
                   style={{
                     backgroundColor: selectedPriceOption === 'ARTISAN' ? '#FFFDF5' : '#FFFFFF',
@@ -953,19 +1103,65 @@ export default function AddProductVoiceScreen() {
                 >
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#E65100', textTransform: 'uppercase', marginBottom: 4 }}>
-                      {t.optionBTitle}
+                      {t.optionBTitle || '🗣️ Option B: Your Original Quoted Price'}
                     </Text>
+                    
                     <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#1A1A1A' }}>
-                      ₹{artisanPriceVal}
+                      ₹{artisanPriceVal} <Text style={{ fontSize: 14, fontWeight: 'normal', color: '#666' }}>/ pc</Text>
                     </Text>
+
                     <Text style={{ fontSize: 12, color: '#666666', marginTop: 2 }}>
-                      {t.optionBSub}
+                      {t.optionBSub || 'Your original input price'}
                     </Text>
                   </View>
                   <Ionicons
                     name={selectedPriceOption === 'ARTISAN' ? 'radio-button-on' : 'radio-button-off'}
                     size={26}
                     color={selectedPriceOption === 'ARTISAN' ? '#E65100' : '#CCCCCC'}
+                  />
+                </TouchableOpacity>
+
+                {/* Option C: AI Recommended Wholesale Bulk Rate */}
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: selectedPriceOption === 'AI_WHOLESALE' ? '#E8F5E9' : '#FFFFFF',
+                    borderColor: selectedPriceOption === 'AI_WHOLESALE' ? '#2E7D32' : '#EFECE6',
+                    borderWidth: 2,
+                    borderRadius: 16,
+                    padding: 16,
+                    marginBottom: 12,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    elevation: selectedPriceOption === 'AI_WHOLESALE' ? 3 : 1,
+                  }}
+                  onPress={() => setSelectedPriceOption('AI_WHOLESALE')}
+                  activeOpacity={0.88}
+                >
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                      <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#2E7D32', textTransform: 'uppercase' }}>
+                        {t.optionCTitle || '📦 Option C: AI Wholesale Bulk Rate'}
+                      </Text>
+                      <View style={{ backgroundColor: '#2E7D32', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, marginLeft: 8 }}>
+                        <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>{bulkDiscPctStr} OFF</Text>
+                      </View>
+                    </View>
+
+                    <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#1A1A1A' }}>
+                      ₹{bulkPricePerPiece} <Text style={{ fontSize: 14, fontWeight: 'normal', color: '#666' }}>/ pc</Text>
+                    </Text>
+
+                    <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#2E7D32', marginTop: 2 }}>
+                      💵 Total Order Value: ₹{bulkOrderTotal.toLocaleString()} ({qtyVal} Pcs)
+                    </Text>
+                    <Text style={{ fontSize: 11, color: '#388E3C', marginTop: 2 }}>
+                      Best rate for bulk wholesale orders (Fair profit for you & buyer)
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name={selectedPriceOption === 'AI_WHOLESALE' ? 'radio-button-on' : 'radio-button-off'}
+                    size={26}
+                    color={selectedPriceOption === 'AI_WHOLESALE' ? '#2E7D32' : '#CCCCCC'}
                   />
                 </TouchableOpacity>
               </View>
@@ -991,8 +1187,8 @@ export default function AddProductVoiceScreen() {
                       {getLocalizedGuidanceText(
                         globalLang,
                         artisanPriceVal,
-                        aiPriceVal,
-                        pricingEstimate?.pricing?.market_reference_price || aiPriceVal,
+                        baseAiPriceVal,
+                        pricingEstimate?.pricing?.market_reference_price || baseAiPriceVal,
                         gainVal,
                         gainPct,
                         pricingEstimate?.guidance
@@ -1005,43 +1201,47 @@ export default function AddProductVoiceScreen() {
               {/* Itemized Price Breakdown Card */}
               <View style={styles.priceBreakdownCard}>
                 <Text style={styles.breakdownHeading}>
-                  {t.pricingIntelligence}
+                  {t.pricingIntelligence} {isBulkOrder ? `(${qtyVal} Pcs Order)` : ''}
                 </Text>
 
                 {/* Line Item 1: Raw Material Cost */}
                 <View style={styles.costRow}>
                   <View style={styles.costLabelCol}>
                     <MaterialCommunityIcons name="cube-outline" size={20} color="#3B6029" />
-                    <Text style={styles.costName}>{t.costRawMaterial}</Text>
+                    <Text style={styles.costName}>{t.costRawMaterial} {isBulkOrder ? `(x${qtyVal})` : ''}</Text>
                   </View>
-                  <Text style={styles.costValue}>₹{materialEst}</Text>
+                  <Text style={styles.costValue}>₹{materialEst * (isBulkOrder ? qtyVal : 1)}</Text>
                 </View>
 
                 {/* Line Item 2: Labor Cost */}
                 <View style={styles.costRow}>
                   <View style={styles.costLabelCol}>
                     <Ionicons name="construct-outline" size={20} color="#3B6029" />
-                    <Text style={styles.costName}>{t.costCraftsmanship}</Text>
+                    <Text style={styles.costName}>{t.costCraftsmanship} {isBulkOrder ? `(x${qtyVal})` : ''}</Text>
                   </View>
-                  <Text style={styles.costValue}>₹{laborEst}</Text>
+                  <Text style={styles.costValue}>₹{laborEst * (isBulkOrder ? qtyVal : 1)}</Text>
                 </View>
 
                 {/* Line Item 3: Finishing & Bio Polish */}
                 <View style={styles.costRow}>
                   <View style={styles.costLabelCol}>
                     <Ionicons name="color-palette-outline" size={20} color="#3B6029" />
-                    <Text style={styles.costName}>{t.costFinishing}</Text>
+                    <Text style={styles.costName}>{t.costFinishing} {isBulkOrder ? `(x${qtyVal})` : ''}</Text>
                   </View>
-                  <Text style={styles.costValue}>₹{finishingEst}</Text>
+                  <Text style={styles.costValue}>₹{finishingEst * (isBulkOrder ? qtyVal : 1)}</Text>
                 </View>
 
-                {/* Line Item 4: Market Demand Adjustment */}
+                {/* Line Item 4: Market Demand / Bulk Volume Discount */}
                 <View style={styles.costRow}>
                   <View style={styles.costLabelCol}>
                     <Ionicons name="trending-up-outline" size={20} color="#3B6029" />
-                    <Text style={styles.costName}>{t.costMarketDemand}</Text>
+                    <Text style={styles.costName}>
+                      {isBulkOrder ? `${t.bulkDiscountTag || 'Volume Discount'} (${bulkDiscPctStr})` : t.costMarketDemand}
+                    </Text>
                   </View>
-                  <Text style={[styles.costValue, { color: '#3B6029' }]}>+₹{demandEst}</Text>
+                  <Text style={[styles.costValue, { color: '#3B6029' }]}>
+                    {isBulkOrder ? `-${bulkDiscPctStr}` : `+₹${demandEst}`}
+                  </Text>
                 </View>
 
                 <View style={styles.costDivider} />
@@ -1049,10 +1249,10 @@ export default function AddProductVoiceScreen() {
                 {/* Total Chosen Price */}
                 <View style={styles.totalPriceRow}>
                   <Text style={styles.totalPriceLabel}>
-                    {selectedPriceOption === 'AI' ? t.selectedAiPriceLabel : t.selectedArtisanPriceLabel}
+                    {selectedPriceOption !== 'ARTISAN' ? t.selectedAiPriceLabel : t.selectedArtisanPriceLabel}
                   </Text>
-                  <Text style={[styles.totalPriceValue, { color: selectedPriceOption === 'AI' ? '#3B6029' : '#E65100' }]}>
-                    ₹{chosenFinalPrice}
+                  <Text style={[styles.totalPriceValue, { color: selectedPriceOption !== 'ARTISAN' ? '#3B6029' : '#E65100' }]}>
+                    ₹{chosenFinalPrice.toLocaleString()}
                   </Text>
                 </View>
               </View>

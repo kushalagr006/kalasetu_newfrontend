@@ -20,6 +20,13 @@ export interface ProductItem {
   category_en?: string;
   materialUsed_en?: string;
   translations_json?: string;
+  unitPrice?: number;
+  isBulkOrder?: boolean;
+  bulkDiscountPct?: string;
+  bulkOrderTotal?: number;
+  artisanPrice?: number;
+  aiSuggestedPrice?: number;
+  guidanceText?: string;
 }
 
 const DEFAULT_PRODUCTS: ProductItem[] = [];
@@ -45,6 +52,13 @@ export async function addPublishedProduct(newProduct: {
   image: string;
   aiEnhanced?: boolean;
   sourceLanguage?: LangCode;
+  unitPrice?: number;
+  isBulkOrder?: boolean;
+  bulkDiscountPct?: string;
+  bulkOrderTotal?: number;
+  artisanPrice?: number;
+  aiSuggestedPrice?: number;
+  guidanceText?: string;
 }): Promise<ProductItem> {
   const formattedPrice = newProduct.price.startsWith('₹')
     ? newProduct.price
@@ -64,6 +78,13 @@ export async function addPublishedProduct(newProduct: {
     aiEnhanced: newProduct.aiEnhanced ?? true,
     createdAt: new Date().toISOString(),
     sourceLanguage: srcLang,
+    unitPrice: newProduct.unitPrice,
+    isBulkOrder: newProduct.isBulkOrder,
+    bulkDiscountPct: newProduct.bulkDiscountPct,
+    bulkOrderTotal: newProduct.bulkOrderTotal,
+    artisanPrice: newProduct.artisanPrice,
+    aiSuggestedPrice: newProduct.aiSuggestedPrice,
+    guidanceText: newProduct.guidanceText,
     names: {
       [srcLang]: newProduct.title,
       hi: newProduct.title,
