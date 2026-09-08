@@ -61,43 +61,46 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
   totalOrderValLabel?: string;
   wholesaleProfitLabel?: string;
   quantityPcsLabel?: string;
+  summaryTitle?: string;
 }> = {
   hi: {
-    listening: 'सुन रहा हूँ... बोलना समाप्त करने के लिए पुनः टैप करें',
-    recorded: 'उत्तर दर्ज हो गया है! नीचे देखें',
-    tapMic: 'बोलने के लिए माइक पर टैप करें',
-    yourRecordedResponse: 'आपकी रिकॉर्ड की गई जानकारी:',
+    listening: 'सुन रहे हैं... बोलना बंद करने के लिए फिर टैप करें',
+    recorded: 'उत्तर दर्ज हो गया! नीचे पूर्वावलोकन देखें',
+    tapMic: 'बोलना शुरू करने के लिए माइक बटन पर टैप करें',
+    yourRecordedResponse: 'आपकी दर्ज की गई प्रतिक्रिया:',
     reRecord: 'पुनः बोलें (Re-record)',
     viewEstimatedPrice: 'मूल्य अनुमान देखें →',
-    aiPredictedTitle: '✨ AI द्वारा भविष्यवाणित अंतिम कीमत',
+    aiPredictedTitle: 'AI द्वारा भविष्यवाणित अंतिम कीमत',
     aiPredictedSub: 'शिल्प गुणवत्ता, सामग्री व बाज़ार मांग के आधार पर AI की सटीक कीमत',
     yourQuotedPrice: 'आपकी बताई कीमत:',
-    aiSellingPrice: '🔥 AI द्वारा अनुशंसित अंतिम बिक्री मूल्य',
-    profitBadge: '✨ +22% अतिरिक्त मुनाफा (शहरों व टेंडर के लिए बेस्ट)',
+    aiSellingPrice: 'AI द्वारा अनुशंसित अंतिम बिक्री मूल्य',
+    profitBadge: '+22% अतिरिक्त मुनाफा (शहरों व टेंडर के लिए बेस्ट)',
     pricingIntelligence: 'AI मूल्य विश्लेषण एवं लागत विवरण',
     costRawMaterial: 'सामग्री लागत (Raw Material)',
     costCraftsmanship: 'हस्तशिल्प व कारीगरी (Craftsmanship)',
     costFinishing: 'फिनिशिंग व बायो-पॉलिश',
     costMarketDemand: 'शहरी बाज़ार मांग व प्रीमियम',
     finalPredictedPrice: 'AI अनुमानित अंतिम मूल्य:',
-    publishToCatalog: 'कीमत से कैटलॉग में जोड़ें',
+    publishToCatalog: 'उत्पाद पब्लिश करें',
     editAnswers: 'जानकारी में सुधार करें (Edit Answers)',
     selectSellingPrice: 'अपनी अंतिम बिक्री कीमत चुनें:',
-    optionATitle: '✨ विकल्प A: AI फेयर मार्केट प्राइस',
+    optionATitle: 'AI फेयर मार्केट रिटेल प्राइस (AI Fair Market Retail Price)',
     recommendedBadge: 'अनुशंसित (Recommended)',
     moreProfitTag: 'अतिरिक्त मुनाफ़ा',
     fairMarketRange: 'फेयर मार्केट रेंज:',
-    optionBTitle: '🗣️ विकल्प B: आपकी बताई मूल कीमत',
+    optionBTitle: 'आपकी बताई मूल कीमत (Your Original Quoted Price)',
     optionBSub: 'आपकी द्वारा बताई गई मूल बिक्री कीमत',
-    guidanceHeader: '💡 KalaSetu AI बाज़ार सलाह (Guidance):',
+    optionCTitle: 'AI अनुशंसित थोक बिक्री दर (AI Recommended Wholesale Bulk Rate)',
+    guidanceHeader: 'KalaSetu AI बाज़ार सलाह (Guidance):',
     selectedAiPriceLabel: 'चयनित AI फेयर प्राइस:',
     selectedArtisanPriceLabel: 'चयनित आपकी कीमत:',
-    wholesaleBadge: '📦 थोक बिक्री ऑर्डर (5+ पीस - Bulk Wholesale)',
+    wholesaleBadge: 'थोक बिक्री ऑर्डर (5+ पीस - Bulk Wholesale)',
     bulkDiscountTag: 'विशेष थोक डिस्काउंट',
     unitPriceLabel: 'थोक दर प्रति पीस (Unit Price)',
     totalOrderValLabel: 'कुल थोक ऑर्डर मूल्य (Total Order Value)',
     wholesaleProfitLabel: 'अनुमानित कुल थोक मुनाफ़ा (Wholesale Profit)',
     quantityPcsLabel: 'मात्रा (Quantity)',
+    summaryTitle: 'Final Product Details',
   },
   en: {
     listening: 'Listening... Tap again to stop speaking',
@@ -106,35 +109,37 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     yourRecordedResponse: 'Your Recorded Response:',
     reRecord: 'Re-record',
     viewEstimatedPrice: 'View Estimated Price →',
-    aiPredictedTitle: '✨ Final AI Predicted Market Price',
+    aiPredictedTitle: 'Final AI Predicted Market Price',
     aiPredictedSub: 'Calculated optimal price based on craft quality & market demand',
     yourQuotedPrice: 'Your Quoted Price:',
-    aiSellingPrice: '🔥 AI PREDICTED SELLING PRICE',
-    profitBadge: '✨ +22% Higher Profit (Best for Urban & Govt Tenders)',
+    aiSellingPrice: 'AI PREDICTED SELLING PRICE',
+    profitBadge: '+22% Higher Profit (Best for Urban & Govt Tenders)',
     pricingIntelligence: 'AI Pricing Intelligence & Cost Analysis',
     costRawMaterial: 'Raw Material Cost',
     costCraftsmanship: 'Labor & Craftsmanship',
     costFinishing: 'Finishing & Bio Polish',
     costMarketDemand: 'Urban Market Demand Premium',
     finalPredictedPrice: 'Final AI Predicted Price:',
-    publishToCatalog: 'Publish to Catalog at Price',
+    publishToCatalog: 'Publish Product',
     editAnswers: 'Edit Answers',
     selectSellingPrice: 'Select Your Final Selling Price:',
-    optionATitle: '✨ Option A: AI Fair Market Price',
+    optionATitle: 'AI Fair Market Retail Price',
     recommendedBadge: 'RECOMMENDED',
     moreProfitTag: 'More Profit',
     fairMarketRange: 'Fair market range:',
-    optionBTitle: '🗣️ Option B: Your Quoted Price',
+    optionBTitle: 'Your Original Quoted Price',
     optionBSub: 'Your original self-quoted selling price',
-    guidanceHeader: '💡 KalaSetu AI Market Guidance:',
+    optionCTitle: 'AI Recommended Wholesale Bulk Rate',
+    guidanceHeader: 'KalaSetu AI Market Guidance:',
     selectedAiPriceLabel: 'Selected AI Fair Price:',
     selectedArtisanPriceLabel: 'Selected Your Quoted Price:',
-    wholesaleBadge: '📦 Wholesale Bulk Order (5+ Pcs)',
+    wholesaleBadge: 'Wholesale Bulk Order (5+ Pcs)',
     bulkDiscountTag: 'Bulk Volume Discount',
     unitPriceLabel: 'Bulk Rate per Piece (Unit Price)',
     totalOrderValLabel: 'Total Wholesale Order Value',
     wholesaleProfitLabel: 'Total Wholesale Estimated Profit',
     quantityPcsLabel: 'Order Quantity',
+    summaryTitle: 'Final Product Details',
   },
   bn: {
     listening: 'শুনছি... কথা বলা শেষ করতে আবার ট্যাপ করুন',
@@ -143,29 +148,37 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     yourRecordedResponse: 'আপনার রেকর্ড করা তথ্য:',
     reRecord: 'আবার বলুন',
     viewEstimatedPrice: 'আনুমানিক মূল্য দেখুন →',
-    aiPredictedTitle: '✨ AI দ্বারা নির্ধারিত চূড়ান্ত বাজার মূল্য',
+    aiPredictedTitle: 'AI দ্বারা নির্ধারিত চূড়ান্ত বাজার মূল্য',
     aiPredictedSub: 'পণ্যের গুণমান ও চাহিদার ভিত্তিতে সেরা মূল্য',
     yourQuotedPrice: 'আপনার প্রস্তাবিত মূল্য:',
-    aiSellingPrice: '🔥 AI প্রস্তাবিত চূড়ান্ত বিক্রয় মূল্য',
-    profitBadge: '✨ +২২% অতিরিক্ত লাভ',
+    aiSellingPrice: 'AI প্রস্তাবিত চূড়ান্ত বিক্রয় মূল্য',
+    profitBadge: '+২২% অতিরিক্ত লাভ',
     pricingIntelligence: 'AI মূল্য বিশ্লেষণ ও খরচ বিবরণ',
     costRawMaterial: 'কাঁচামালের খরচ',
     costCraftsmanship: 'হস্তশিল্প ও কারুশিল্পের পারিশ্রমিক',
     costFinishing: 'ফিনিশিং ও পালিশ',
     costMarketDemand: 'শহুরে বাজারের চাহিদা প্রিমিয়াম',
     finalPredictedPrice: 'AI নির্ধারিত চূড়ান্ত মূল্য:',
-    publishToCatalog: 'মূল্যে ক্যাটালগে প্রকাশ করুন',
+    publishToCatalog: 'Publish Product',
     editAnswers: 'উত্তরগুলি সম্পাদনা করুন',
     selectSellingPrice: 'আপনার চূড়ান্ত বিক্রয় মূল্য নির্বাচন করুন:',
-    optionATitle: '✨ বিকল্প A: AI ন্যায্য বাজার মূল্য',
+    optionATitle: 'AI Fair Market Retail Price',
     recommendedBadge: 'অনুমোদিত (Recommended)',
     moreProfitTag: 'অতিরিক্ত লাভ',
     fairMarketRange: 'ন্যায্য বাজার পরিসীমা:',
-    optionBTitle: '🗣️ বিকল্প B: আপনার প্রস্তাবিত মূল্য',
+    optionBTitle: 'Your Original Quoted Price',
     optionBSub: 'আপনার মূল প্রস্তাবিত বিক্রয় মূল্য',
-    guidanceHeader: '💡 KalaSetu AI বাজার পরামর্শ (Guidance):',
+    optionCTitle: 'AI Recommended Wholesale Bulk Rate',
+    guidanceHeader: 'KalaSetu AI বাজার পরামর্শ (Guidance):',
     selectedAiPriceLabel: 'নির্বাচিত AI ন্যায্য মূল্য:',
     selectedArtisanPriceLabel: 'নির্বাচিত আপনার প্রস্তাবিত মূল্য:',
+    wholesaleBadge: 'পাইকারি অর্ডার (Wholesale Order)',
+    bulkDiscountTag: 'বাল্ক ছাড় প্রযোজ্য',
+    unitPriceLabel: 'প্রতি পিস দাম',
+    totalOrderValLabel: 'মোট অর্ডারের মূল্য',
+    wholesaleProfitLabel: 'মোট আনুমানিক লাভ',
+    quantityPcsLabel: 'পরিমাণ',
+    summaryTitle: 'Final Product Details',
   },
   bho: {
     listening: 'सुनत बानी... बोला के खतम करे खातिर फिर छुईं',
@@ -174,29 +187,37 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     yourRecordedResponse: 'रउआ के दर्ज जानकारी:',
     reRecord: 'फिर से बोलीं',
     viewEstimatedPrice: 'अनुमानित भाव देखीं →',
-    aiPredictedTitle: '✨ AI द्वारा तय अंतिम भाव',
+    aiPredictedTitle: 'AI द्वारा तय अंतिम भाव',
     aiPredictedSub: 'शिल्प गुणवत्ता आ बाजार मांग अनुसार सही कीमत',
     yourQuotedPrice: 'रउआ के बतावल भाव:',
-    aiSellingPrice: '🔥 AI अनुशंसित अंतिम बिक्री भाव',
-    profitBadge: '✨ +22% जादे मुनाफा',
+    aiSellingPrice: 'AI अनुशंसित अंतिम बिक्री भाव',
+    profitBadge: '+22% जादे मुनाफा',
     pricingIntelligence: 'AI मूल्य विश्लेषण आ लागत विवरण',
     costRawMaterial: 'सामग्री लागत',
     costCraftsmanship: 'कारीगरी आ मेहनत',
     costFinishing: 'फिनिशिंग आ पॉलिश',
     costMarketDemand: 'शहरी बाज़ार मांग',
     finalPredictedPrice: 'AI अनुमानित अंतिम भाव:',
-    publishToCatalog: 'भाव से कैटलॉग में प्रकाशित करीं',
+    publishToCatalog: 'Publish Product',
     editAnswers: 'जानकारी में सुधार करीं',
     selectSellingPrice: 'आपण अंतिम बिक्री भाव चुनीं:',
-    optionATitle: '✨ विकल्प A: AI उचित बाज़ार भाव',
+    optionATitle: 'AI Fair Market Retail Price',
     recommendedBadge: 'सलाह दीहल (Recommended)',
     moreProfitTag: 'जादे मुनाफा',
     fairMarketRange: 'उचित बाज़ार रेंज:',
-    optionBTitle: '🗣️ विकल्प B: रउआ बतावल भाव',
+    optionBTitle: 'Your Original Quoted Price',
     optionBSub: 'रउआ खुद से बतावल मूल बिक्री भाव',
-    guidanceHeader: '💡 KalaSetu AI बाज़ार सलाह (Guidance):',
+    optionCTitle: 'AI Recommended Wholesale Bulk Rate',
+    guidanceHeader: 'KalaSetu AI बाज़ार सलाह (Guidance):',
     selectedAiPriceLabel: 'चुनल AI उचित भाव:',
     selectedArtisanPriceLabel: 'चुनल रउआ बतावल भाव:',
+    wholesaleBadge: 'थोक बिक्री (Wholesale Order)',
+    bulkDiscountTag: 'बल्क छूट लागल बा',
+    unitPriceLabel: 'प्रति पीस भाव',
+    totalOrderValLabel: 'कुल ऑर्डर मूल्य',
+    wholesaleProfitLabel: 'कुल अनुमानित मुनाफा',
+    quantityPcsLabel: 'मात्रा',
+    summaryTitle: 'Final Product Details',
   },
   mr: {
     listening: 'ऐकत आहे... बोलणे थांबवण्यासाठी पुन्हा टॅप करा',
@@ -205,29 +226,37 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     yourRecordedResponse: 'तुमची नोंदवलेली माहिती:',
     reRecord: 'पुन्हा बोला',
     viewEstimatedPrice: 'अंदाजित किंमत पहा →',
-    aiPredictedTitle: '✨ AI द्वारे अंदाजित अंतिम बाजार किंमत',
+    aiPredictedTitle: 'AI द्वारे अंदाजित अंतिम बाजार किंमत',
     aiPredictedSub: 'शिल्प गुणवत्ता आणि बाजारातील मागणीनुसार अचूक किंमत',
     yourQuotedPrice: 'तुमची सांगितलेली किंमत:',
-    aiSellingPrice: '🔥 AI शिफारस केलेली अंतिम विक्री किंमत',
-    profitBadge: '✨ +२२% अधिक नफा',
+    aiSellingPrice: 'AI शिफारस केलेली अंतिम विक्री किंमत',
+    profitBadge: '+२२% अधिक नफा',
     pricingIntelligence: 'AI मूल्य विश्लेषण आणि खर्च तपशील',
     costRawMaterial: 'कच्च्या मालाचा खर्च',
     costCraftsmanship: 'हस्तकला आणि कारागिरी',
     costFinishing: 'फिनिशिंग आणि बायो-पॉलिश',
     costMarketDemand: 'शहरी बाजार मागणी प्रीमियम',
     finalPredictedPrice: 'AI अंदाजित अंतिम किंमत:',
-    publishToCatalog: 'किमतीत कॅटलॉगमध्ये प्रकाशित करा',
+    publishToCatalog: 'Publish Product',
     editAnswers: 'उत्तरे संपादित करा',
     selectSellingPrice: 'तुमची अंतिम विक्री किंमत निवडा:',
-    optionATitle: '✨ पर्याय A: AI वाजवी बाजार किंमत',
+    optionATitle: 'AI Fair Market Retail Price',
     recommendedBadge: 'शिफारस केलेले (Recommended)',
     moreProfitTag: 'अधिक नफा',
     fairMarketRange: 'वाजवी बाजार श्रेणी:',
-    optionBTitle: '🗣️ पर्याय B: तुमची मूळ सांगितलेली किंमत',
+    optionBTitle: 'Your Original Quoted Price',
     optionBSub: 'तुमची स्वतः सांगितलेली मूळ विक्री किंमत',
-    guidanceHeader: '💡 KalaSetu AI बाजार सल्ला (Guidance):',
+    optionCTitle: 'AI Recommended Wholesale Bulk Rate',
+    guidanceHeader: 'KalaSetu AI बाजार सल्ला (Guidance):',
     selectedAiPriceLabel: 'निवडलेली AI वाजवी किंमत:',
     selectedArtisanPriceLabel: 'निवडलेली तुमची मूळ किंमत:',
+    wholesaleBadge: 'घाऊक ऑर्डर (Wholesale Order)',
+    bulkDiscountTag: 'बल्क सूट लागू',
+    unitPriceLabel: 'प्रति नग दर',
+    totalOrderValLabel: 'एकूण ऑर्डर मूल्य',
+    wholesaleProfitLabel: 'एकूण अंदाजित नफा',
+    quantityPcsLabel: 'प्रमाण',
+    summaryTitle: 'Final Product Details',
   },
   gu: {
     listening: 'સાંભળી રહ્યો છું... બોલવાનું બંધ કરવા ફરી ટૅપ કરો',
@@ -236,29 +265,37 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     yourRecordedResponse: 'તમારી નોંધાયેલી વિગત:',
     reRecord: 'ફરીથી બોલો',
     viewEstimatedPrice: 'અંદાજિત કિંમત જુઓ →',
-    aiPredictedTitle: '✨ AI દ્વારા અનુમાનિત અંતિમ બજાર કિંમત',
+    aiPredictedTitle: 'AI દ્વારા અનુમાનિત અંતિમ બજાર કિંમત',
     aiPredictedSub: 'ગુણવત્તા અને બજાર માંગ પર આધારિત શ્રેષ્ઠ કિંમત',
     yourQuotedPrice: 'તમારી જણાવેલ કિંમત:',
-    aiSellingPrice: '🔥 AI ભલામણ કરેલ વેચાણ કિંમત',
-    profitBadge: '✨ +૨૨% વધુ નફો',
+    aiSellingPrice: 'AI ભલામણ કરેલ વેચાણ કિંમત',
+    profitBadge: '+૨૨% વધુ નફો',
     pricingIntelligence: 'AI કિંમત વિશ્લેષણ અને ખર્ચ વિગતો',
     costRawMaterial: 'કાચા માલનો ખર્ચ',
     costCraftsmanship: 'કારીગરી અને મહેનત',
     costFinishing: 'ફિનિશિંગ અને બાયો-પોલિશ',
     costMarketDemand: 'શહેરી બજાર માંગ પ્રીમિયમ',
     finalPredictedPrice: 'AI અનુમાનિત અંતિમ કિંમત:',
-    publishToCatalog: 'કિંમતે કેટલોગમાં પ્રકાશિત કરો',
+    publishToCatalog: 'Publish Product',
     editAnswers: 'જવાબો સુધારો',
     selectSellingPrice: 'તમારી અંતિમ વેચાણ કિંમત પસંદ કરો:',
-    optionATitle: '✨ વિકલ્પ A: AI વાજબી બજાર કિંમત',
+    optionATitle: 'AI Fair Market Retail Price',
     recommendedBadge: 'ભલામણ કરેલ (Recommended)',
     moreProfitTag: 'વધુ નફો',
     fairMarketRange: 'વાજબી બજાર રેન્જ:',
-    optionBTitle: '🗣️ વિકલ્પ B: તમારી મૂળ જણાવેલ કિંમત',
+    optionBTitle: 'Your Original Quoted Price',
     optionBSub: 'તમારી મૂળ જણાવેલ વેચાણ કિંમત',
-    guidanceHeader: '💡 KalaSetu AI બજાર સલાહ (Guidance):',
+    optionCTitle: 'AI Recommended Wholesale Bulk Rate',
+    guidanceHeader: 'KalaSetu AI બજાર સલાહ (Guidance):',
     selectedAiPriceLabel: 'પસંદ કરેલ AI વાજબી કિંમત:',
     selectedArtisanPriceLabel: 'પસંદ કરેલ તમારી કિંમત:',
+    wholesaleBadge: 'જથ્થાબંધ ઓર્ડર (Wholesale Order)',
+    bulkDiscountTag: 'બલ્ક ડિસ્કાઉન્ટ ઉપલબ્ધ',
+    unitPriceLabel: 'પ્રતિ પીસ દર',
+    totalOrderValLabel: 'કુલ ઓર્ડર કિંમત',
+    wholesaleProfitLabel: 'કુલ અંદાજિત નફો',
+    quantityPcsLabel: 'જથ્થો',
+    summaryTitle: 'Final Product Details',
   },
   raj: {
     listening: 'सुणूं लाग्यो हूं... बोलणो बंद करबा सारू पाछो दबाओ',
@@ -267,29 +304,37 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     yourRecordedResponse: 'आपरी दर्ज जानकारी:',
     reRecord: 'पाछो बोलो',
     viewEstimatedPrice: 'भाव रो अंदाजो देखो →',
-    aiPredictedTitle: '✨ AI द्वारा तय अंतिम भाव',
+    aiPredictedTitle: 'AI द्वारा तय अंतिम भाव',
     aiPredictedSub: 'कारीगरी अर बजार मांग रे आधार पर सटीक भाव',
     yourQuotedPrice: 'आपरो बतायोड़ो भाव:',
-    aiSellingPrice: '🔥 AI अनुशंसित बिक्री भाव',
-    profitBadge: '✨ +२२% जादा नफो',
+    aiSellingPrice: 'AI अनुशंसित बिक्री भाव',
+    profitBadge: '+२२% जादा नफो',
     pricingIntelligence: 'AI भाव विश्लेषण अर लागत ब्योरो',
     costRawMaterial: 'सामान रो भाव',
     costCraftsmanship: 'कारीगरी अर मेहनत',
     costFinishing: 'फिनिशिंग अर पॉलिश',
     costMarketDemand: 'शहरी बजार मांग',
     finalPredictedPrice: 'AI अनुमानित अंतिम भाव:',
-    publishToCatalog: 'भाव सूं कैटलॉग में जोड़ो',
+    publishToCatalog: 'Publish Product',
     editAnswers: 'ब्योरो बदलो',
     selectSellingPrice: 'आपरो अंतिम बिक्री भाव चुणो:',
-    optionATitle: '✨ विकल्प A: AI वाजिब बजार भाव',
+    optionATitle: 'AI Fair Market Retail Price',
     recommendedBadge: 'सलाह दीधोड़ो (Recommended)',
     moreProfitTag: 'जादा नफो',
     fairMarketRange: 'वाजिब बजार रेंज:',
-    optionBTitle: '🗣️ विकल्प B: आपरो बतायोड़ो भाव',
+    optionBTitle: 'Your Original Quoted Price',
     optionBSub: 'आपरी खुद री बतायोड़ी मूल बिक्री भाव',
-    guidanceHeader: '💡 KalaSetu AI बजार सलाह:',
+    optionCTitle: 'AI Recommended Wholesale Bulk Rate',
+    guidanceHeader: 'KalaSetu AI बजार सलाह:',
     selectedAiPriceLabel: 'चुन्योड़ो AI वाजिब भाव:',
     selectedArtisanPriceLabel: 'चुन्योड़ो आपरो बतायोड़ो भाव:',
+    wholesaleBadge: 'थोक बिक्री (Wholesale Order)',
+    bulkDiscountTag: 'बल्क छूट लागू',
+    unitPriceLabel: 'प्रति पीस भाव',
+    totalOrderValLabel: 'कुल थोक भाव',
+    wholesaleProfitLabel: 'कुल अनुमानित मुनाफा',
+    quantityPcsLabel: 'मात्रा',
+    summaryTitle: 'Final Product Details',
   },
   kn: {
     listening: 'ಕೇಳಿಸಿಕೊಳ್ಳುತ್ತಿದ್ದೇನೆ... ಮಾತನಾಡುವುದು ಮುಗಿಸಲು ಮತ್ತೆ ಟ್ಯಾಪ್ ಮಾಡಿ',
@@ -298,29 +343,37 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     yourRecordedResponse: 'ನಿಮ್ಮ ದಾಖಲಾದ ಮಾಹಿತಿ:',
     reRecord: 'ಮತ್ತೆ ಮಾತನಾಡಿ',
     viewEstimatedPrice: 'ಅಂದಾಜು ಬೆಲೆ ನೋಡಿ →',
-    aiPredictedTitle: '✨ AI ನಿಂದ ಅಂದಾಜು ಮಾಡಿದ ಅಂತಿಮ ಮಾರುಕಟ್ಟೆ ಬೆಲೆ',
+    aiPredictedTitle: 'AI ನಿಂದ ಅಂದಾಜು ಮಾಡಿದ ಅಂತಿಮ ಮಾರುಕಟ್ಟೆ ಬೆಲೆ',
     aiPredictedSub: 'ಕರಕುಶಲ ಗುಣಮಟ್ಟ ಮತ್ತು ಬೇಡಿಕೆಯ ಆಧಾರದ ಮೇಲೆ ಸೂಕ್ತ ಬೆಲೆ',
     yourQuotedPrice: 'ನಿಮ್ಮ ಬೆಲೆ:',
-    aiSellingPrice: '🔥 AI ಶಿಫಾರಸು ಮಾಡಿದ ಮಾರಾಟ ಬೆಲೆ',
-    profitBadge: '✨ +೨೨% ಹೆಚ್ಚಿನ ಲಾಭ',
+    aiSellingPrice: 'AI ಶಿಫಾರಸು ಮಾಡಿದ ಮಾರಾಟ ಬೆಲೆ',
+    profitBadge: '+೨೨% ಹೆಚ್ಚಿನ ಲಾಭ',
     pricingIntelligence: 'AI ಬೆಲೆ ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ವೆಚ್ಚ ವಿವರ',
     costRawMaterial: 'ಕಚ್ಚಾ ವಸ್ತುಗಳ ವೆಚ್ಚ',
     costCraftsmanship: 'ಕರಕುಶಲತೆ ಮತ್ತು ಶ್ರಮ',
     costFinishing: 'ಫಿನಿಶಿಂಗ್ ಮತ್ತು ಬಯೋ-ಪಾಲಿಶ್',
     costMarketDemand: 'ನಗರ ಮಾರುಕಟ್ಟೆ ಬೇಡಿಕೆ ಪ್ರೀಮಿಯಂ',
     finalPredictedPrice: 'AI ಅಂದಾಜು ಅಂತಿಮ ಬೆಲೆ:',
-    publishToCatalog: 'ಬೆಲೆಯಲ್ಲಿ ಕ್ಯಾಟಲಾಗ್‌ಗೆ ಪ್ರಕಟಿಸಿ',
+    publishToCatalog: 'Publish Product',
     editAnswers: 'ಮಾಹಿತಿ ತಿದ್ದುಪಡಿ ಮಾಡಿ',
     selectSellingPrice: 'ನಿಮ್ಮ ಅಂತಿಮ ಮಾರಾಟ ಬೆಲೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ:',
-    optionATitle: '✨ ಆಯ್ಕೆ A: AI ನ್ಯಾಯಯುತ ಮಾರುಕಟ್ಟೆ ಬೆಲೆ',
+    optionATitle: 'AI Fair Market Retail Price',
     recommendedBadge: 'ಶಿಫಾರಸು ಮಾಡಲಾಗಿದೆ (Recommended)',
     moreProfitTag: 'ಹೆಚ್ಚಿನ ಲಾಭ',
     fairMarketRange: 'ನ್ಯಾಯಯುತ ಮಾರುಕಟ್ಟೆ ಶ್ರೇಣಿ:',
-    optionBTitle: '🗣️ ಆಯ್ಕೆ B: ನಿಮ್ಮ ಮೂಲ ಅಂದಾಜು ಬೆಲೆ',
+    optionBTitle: 'Your Original Quoted Price',
     optionBSub: 'ನಿಮ್ಮ ಸ್ವಯಂ ಅಂದಾಜು ಮಾಡಿದ ಮಾರಾಟ ಬೆಲೆ',
-    guidanceHeader: '💡 KalaSetu AI ಮಾರುಕಟ್ಟೆ ಮಾರ್ಗದರ್ಶನ:',
+    optionCTitle: 'AI Recommended Wholesale Bulk Rate',
+    guidanceHeader: 'KalaSetu AI ಮಾರುಕಟ್ಟೆ ಮಾರ್ಗದರ್ಶನ:',
     selectedAiPriceLabel: 'ಆಯ್ಕೆಮಾಡಿದ AI ನ್ಯಾಯಯುತ ಬೆಲೆ:',
     selectedArtisanPriceLabel: 'ಆಯ್ಕೆಮಾಡಿದ ನಿಮ್ಮ ಅಂದಾಜು ಬೆಲೆ:',
+    wholesaleBadge: 'ಸಗಟು ಆದೇಶ (Wholesale Bulk Order)',
+    bulkDiscountTag: 'ಬಲ್ಕ್ ರಿಯಾಯಿತಿ ಅನ್ವಯಿಸಲಾಗಿದೆ',
+    unitPriceLabel: 'ಪ್ರತಿ ಪೀಸ್ ಬೆಲೆ',
+    totalOrderValLabel: 'ಒಟ್ಟು ಆದೇಶದ ಮೌಲ್ಯ',
+    wholesaleProfitLabel: 'ಒಟ್ಟು ಅಂದಾಜು ಲಾಭ',
+    quantityPcsLabel: 'ಪ್ರಮಾಣ',
+    summaryTitle: 'Final Product Details',
   },
 };
 
@@ -965,6 +1018,18 @@ export default function AddProductVoiceScreen() {
                 </View>
               </View>
 
+              {/* AI Prediction Header Banner */}
+              <View style={styles.priceHeaderBanner}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.priceBannerTitle}>
+                    {t.aiPredictedTitle}
+                  </Text>
+                  <Text style={styles.priceBannerSub}>
+                    {t.aiPredictedSub}
+                  </Text>
+                </View>
+              </View>
+
               {/* Wholesale Bulk Order Summary Banner Card */}
               {isBulkOrder && (
                 <View style={{
@@ -975,27 +1040,24 @@ export default function AddProductVoiceScreen() {
                   padding: 14,
                   marginBottom: 16,
                 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-                    <MaterialCommunityIcons name="package-variant-closed" size={28} color="#2E7D32" style={{ marginRight: 10 }} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#1B5E20' }}>
-                        📦 थोक बल्क ऑर्डर ({qtyVal} पीस)
-                      </Text>
-                      <Text style={{ fontSize: 12, color: '#2E7D32', fontWeight: '600' }}>
-                        ⚡ बल्क डिस्काउंट: {bulkDiscPctStr} OFF लागू ({qtyVal} पीस के थोक ऑर्डर पर)
-                      </Text>
-                    </View>
+                  <View style={{ marginBottom: 6 }}>
+                    <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#1B5E20' }}>
+                      Wholesale Bulk Order ({qtyVal} Pcs)
+                    </Text>
+                    <Text style={{ fontSize: 12, color: '#2E7D32', fontWeight: '600', marginTop: 2 }}>
+                      Bulk Discount: {bulkDiscPctStr} OFF ({qtyVal} Pcs)
+                    </Text>
                   </View>
                   
                   <View style={{ backgroundColor: '#FFFFFF', padding: 10, borderRadius: 10, borderWidth: 1, borderColor: '#A5D6A7' }}>
                     <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#1B5E20' }}>
-                      💡 सुझाई गई थोक दर: ₹{bulkPricePerPiece} / pc
+                      Suggested Wholesale Rate: ₹{bulkPricePerPiece} / pc
                     </Text>
                     <Text style={{ fontSize: 12, fontWeight: '600', color: '#2E7D32', marginTop: 2 }}>
-                      💵 कुल थोक ऑर्डर मूल्य: ₹{bulkOrderTotal.toLocaleString()} ({qtyVal} Pcs)
+                      Total Order Value: ₹{bulkOrderTotal.toLocaleString()} ({qtyVal} Pcs)
                     </Text>
-                    <Text style={{ fontSize: 11, color: '#388E3C', fontStyle: 'italic', marginTop: 2 }}>
-                      "इस रेट पर थोक में बेचने से ग्राहक और आपका दोनों का फ़ायदा होगा!"
+                    <Text style={{ fontSize: 11, color: '#388E3C', marginTop: 2 }}>
+                      Optimal rate for bulk wholesale transactions
                     </Text>
                   </View>
                 </View>
@@ -1021,13 +1083,13 @@ export default function AddProductVoiceScreen() {
                     {recordedAnswers[0] || questions[0]?.hint || 'Product'}
                   </Text>
                   <Text style={styles.productCat}>
-                    📁 {recordedAnswers[2] || questions[2]?.hint || 'Category'}
+                    {recordedAnswers[2] || questions[2]?.hint || 'Category'}
                   </Text>
                   <Text style={styles.productMat} numberOfLines={2}>
-                    🧱 {recordedAnswers[3] || questions[3]?.hint || 'Materials'}
+                    {recordedAnswers[3] || questions[3]?.hint || 'Materials'}
                   </Text>
                   <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#E65100', marginTop: 4 }}>
-                    🗣️ {t.yourQuotedPrice} ₹{artisanPriceVal} {isBulkOrder ? `(Qty: ${qtyVal} Pcs)` : ''}
+                    {t.yourQuotedPrice} ₹{artisanPriceVal} {isBulkOrder ? `(Qty: ${qtyVal} Pcs)` : ''}
                   </Text>
                 </View>
               </View>
@@ -1035,7 +1097,7 @@ export default function AddProductVoiceScreen() {
               {/* 3 Price Selection Options (Option A, Option B, Option C) */}
               <View style={{ marginBottom: 16 }}>
                 <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#1A1A1A', marginBottom: 10 }}>
-                  💰 {t.selectSellingPrice}
+                  {t.selectSellingPrice}
                 </Text>
 
                 {/* Option A: AI Fair Market Retail Price */}
@@ -1056,8 +1118,8 @@ export default function AddProductVoiceScreen() {
                 >
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                      <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#3B6029', textTransform: 'uppercase' }}>
-                        {t.optionATitle || '✨ Option A: AI Fair Retail Price'}
+                      <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#3B6029' }}>
+                        {t.optionATitle || 'AI Fair Market Retail Price'}
                       </Text>
                       <View style={{ backgroundColor: '#3B6029', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, marginLeft: 8 }}>
                         <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>{t.recommendedBadge}</Text>
@@ -1070,7 +1132,7 @@ export default function AddProductVoiceScreen() {
 
                     {gainVal > 0 && (
                       <Text style={{ fontSize: 12, color: '#3B6029', fontWeight: '700', marginTop: 2 }}>
-                        ✨ +₹{gainVal} ({gainPct}%) {t.moreProfitTag}
+                        +₹{gainVal} ({gainPct}%) {t.moreProfitTag}
                       </Text>
                     )}
 
@@ -1085,7 +1147,7 @@ export default function AddProductVoiceScreen() {
                   />
                 </TouchableOpacity>
 
-                {/* Option B: Artisan Original Quoted Price */}
+                {/* Option B: Your Original Quoted Price */}
                 <TouchableOpacity
                   style={{
                     backgroundColor: selectedPriceOption === 'ARTISAN' ? '#FFFDF5' : '#FFFFFF',
@@ -1102,8 +1164,8 @@ export default function AddProductVoiceScreen() {
                   activeOpacity={0.88}
                 >
                   <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#E65100', textTransform: 'uppercase', marginBottom: 4 }}>
-                      {t.optionBTitle || '🗣️ Option B: Your Original Quoted Price'}
+                    <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#E65100', marginBottom: 4 }}>
+                      {t.optionBTitle || 'Your Original Quoted Price'}
                     </Text>
                     
                     <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#1A1A1A' }}>
@@ -1111,7 +1173,7 @@ export default function AddProductVoiceScreen() {
                     </Text>
 
                     <Text style={{ fontSize: 12, color: '#666666', marginTop: 2 }}>
-                      {t.optionBSub || 'Your original input price'}
+                      {t.optionBSub || 'Your self-estimated selling price'}
                     </Text>
                   </View>
                   <Ionicons
@@ -1139,8 +1201,8 @@ export default function AddProductVoiceScreen() {
                 >
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                      <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#2E7D32', textTransform: 'uppercase' }}>
-                        {t.optionCTitle || '📦 Option C: AI Wholesale Bulk Rate'}
+                      <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#2E7D32' }}>
+                        {t.optionCTitle || 'AI Recommended Wholesale Bulk Rate'}
                       </Text>
                       <View style={{ backgroundColor: '#2E7D32', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, marginLeft: 8 }}>
                         <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>{bulkDiscPctStr} OFF</Text>
@@ -1152,7 +1214,7 @@ export default function AddProductVoiceScreen() {
                     </Text>
 
                     <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#2E7D32', marginTop: 2 }}>
-                      💵 Total Order Value: ₹{bulkOrderTotal.toLocaleString()} ({qtyVal} Pcs)
+                      Total Order Value: ₹{bulkOrderTotal.toLocaleString()} ({qtyVal} Pcs)
                     </Text>
                     <Text style={{ fontSize: 11, color: '#388E3C', marginTop: 2 }}>
                       Best rate for bulk wholesale orders (Fair profit for you & buyer)
@@ -1175,10 +1237,7 @@ export default function AddProductVoiceScreen() {
                   borderRadius: 14,
                   padding: 14,
                   marginBottom: 16,
-                  flexDirection: 'row',
-                  alignItems: 'flex-start',
                 }}>
-                  <Ionicons name="bulb" size={24} color="#E65100" style={{ marginRight: 10, marginTop: 2 }} />
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#E65100', marginBottom: 2 }}>
                       {t.guidanceHeader}
@@ -1207,7 +1266,6 @@ export default function AddProductVoiceScreen() {
                 {/* Line Item 1: Raw Material Cost */}
                 <View style={styles.costRow}>
                   <View style={styles.costLabelCol}>
-                    <MaterialCommunityIcons name="cube-outline" size={20} color="#3B6029" />
                     <Text style={styles.costName}>{t.costRawMaterial} {isBulkOrder ? `(x${qtyVal})` : ''}</Text>
                   </View>
                   <Text style={styles.costValue}>₹{materialEst * (isBulkOrder ? qtyVal : 1)}</Text>
@@ -1216,7 +1274,6 @@ export default function AddProductVoiceScreen() {
                 {/* Line Item 2: Labor Cost */}
                 <View style={styles.costRow}>
                   <View style={styles.costLabelCol}>
-                    <Ionicons name="construct-outline" size={20} color="#3B6029" />
                     <Text style={styles.costName}>{t.costCraftsmanship} {isBulkOrder ? `(x${qtyVal})` : ''}</Text>
                   </View>
                   <Text style={styles.costValue}>₹{laborEst * (isBulkOrder ? qtyVal : 1)}</Text>
@@ -1225,7 +1282,6 @@ export default function AddProductVoiceScreen() {
                 {/* Line Item 3: Finishing & Bio Polish */}
                 <View style={styles.costRow}>
                   <View style={styles.costLabelCol}>
-                    <Ionicons name="color-palette-outline" size={20} color="#3B6029" />
                     <Text style={styles.costName}>{t.costFinishing} {isBulkOrder ? `(x${qtyVal})` : ''}</Text>
                   </View>
                   <Text style={styles.costValue}>₹{finishingEst * (isBulkOrder ? qtyVal : 1)}</Text>
@@ -1234,7 +1290,6 @@ export default function AddProductVoiceScreen() {
                 {/* Line Item 4: Market Demand / Bulk Volume Discount */}
                 <View style={styles.costRow}>
                   <View style={styles.costLabelCol}>
-                    <Ionicons name="trending-up-outline" size={20} color="#3B6029" />
                     <Text style={styles.costName}>
                       {isBulkOrder ? `${t.bulkDiscountTag || 'Volume Discount'} (${bulkDiscPctStr})` : t.costMarketDemand}
                     </Text>
@@ -1263,9 +1318,8 @@ export default function AddProductVoiceScreen() {
                 onPress={handlePublishCatalog}
                 activeOpacity={0.88}
               >
-                <Ionicons name="checkmark-done" size={22} color="#FFFFFF" style={{ marginRight: 8 }} />
                 <Text style={styles.publishBtnText}>
-                  {`${t.publishToCatalog} (₹${chosenFinalPrice})`}
+                  Publish Product
                 </Text>
               </TouchableOpacity>
 

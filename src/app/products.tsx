@@ -72,10 +72,10 @@ const TRANSLATIONS: Record<LangCode, {
     pricingSummaryTitle: 'उत्पाद मूल्य एवं थोक बिक्री विवरण',
     unitPriceLabel: 'प्रति पीस दर (Single Piece Rate)',
     stockQtyLabel: 'कुल उपलब्ध स्टॉक',
-    wholesaleSectionTitle: '📦 थोक बिक्री विवरण (Wholesale Order Guidance)',
+    wholesaleSectionTitle: 'थोक बिक्री विवरण (Wholesale Order Guidance)',
     bulkDiscountLabel: 'बल्क छूट:',
     totalOrderValLabel: 'कुल थोक ऑर्डर मूल्य:',
-    aiGuidanceHeader: '💡 KalaSetu AI मार्केट गाइडेंस:',
+    aiGuidanceHeader: 'KalaSetu AI मार्केट गाइडेंस:',
     costBreakdownTitle: 'AI मूल्य विश्लेषण एवं लागत विवरण',
     closeModalBtn: 'बंद करें',
     costRawMaterial: 'कच्चा माल लागत (30%)',
@@ -104,10 +104,10 @@ const TRANSLATIONS: Record<LangCode, {
     pricingSummaryTitle: 'Product Pricing & Wholesale Summary',
     unitPriceLabel: 'Single Piece Unit Price',
     stockQtyLabel: 'Total Stock Count',
-    wholesaleSectionTitle: '📦 Wholesale Order Guidance',
+    wholesaleSectionTitle: 'Wholesale Order Guidance',
     bulkDiscountLabel: 'Bulk Discount:',
     totalOrderValLabel: 'Total Bulk Order Value:',
-    aiGuidanceHeader: '💡 KalaSetu AI Market Guidance:',
+    aiGuidanceHeader: 'KalaSetu AI Market Guidance:',
     costBreakdownTitle: 'AI Cost Breakdown & Intelligence',
     closeModalBtn: 'Close',
     costRawMaterial: 'Raw Materials (30%)',
@@ -136,10 +136,10 @@ const TRANSLATIONS: Record<LangCode, {
     pricingSummaryTitle: 'পণ্যের মূল্য ও পাইকারি বিবরণ',
     unitPriceLabel: 'প্রতি পিসের দাম (Single Piece Rate)',
     stockQtyLabel: 'মোট স্টক পরিমাণ',
-    wholesaleSectionTitle: '📦 পাইকারি অর্ডারের বিবরণ (Wholesale Guidance)',
+    wholesaleSectionTitle: 'পাইকারি অর্ডারের বিবরণ (Wholesale Guidance)',
     bulkDiscountLabel: 'বাল্ক ছাড়:',
     totalOrderValLabel: 'মোট পাইকারি অর্ডারের মূল্য:',
-    aiGuidanceHeader: '💡 KalaSetu AI মার্কেট নির্দেশিকা:',
+    aiGuidanceHeader: 'KalaSetu AI মার্কেট নির্দেশিকা:',
     costBreakdownTitle: 'AI খরচ বিশ্লেষণ ও মূল্য বিবরণ',
     closeModalBtn: 'বন্ধ করুন',
     costRawMaterial: 'কাঁচামাল খরচ (30%)',
@@ -168,10 +168,10 @@ const TRANSLATIONS: Record<LangCode, {
     pricingSummaryTitle: 'सामान के दाम आ थोक बिक्री विवरण',
     unitPriceLabel: 'प्रति पीस दर (Single Piece Rate)',
     stockQtyLabel: 'कुल उपलब्ध स्टॉक',
-    wholesaleSectionTitle: '📦 थोक ऑर्डर विवरण (Wholesale Order Guidance)',
+    wholesaleSectionTitle: 'थोक ऑर्डर विवरण (Wholesale Order Guidance)',
     bulkDiscountLabel: 'बल्क छूट:',
     totalOrderValLabel: 'कुल थोक ऑर्डर के दाम:',
-    aiGuidanceHeader: '💡 KalaSetu AI मार्केट गाइडेंस:',
+    aiGuidanceHeader: 'KalaSetu AI मार्केट गाइडेंस:',
     costBreakdownTitle: 'AI लागत विश्लेषण आ विवरण',
     closeModalBtn: 'बंद करीं',
     costRawMaterial: 'कच्चा माल लागत (30%)',
@@ -200,10 +200,10 @@ const TRANSLATIONS: Record<LangCode, {
     pricingSummaryTitle: 'उत्पादन किंमत आणि घाऊक विक्री तपशील',
     unitPriceLabel: 'प्रति नग दर (Single Piece Rate)',
     stockQtyLabel: 'एकूण उपलब्ध साठा',
-    wholesaleSectionTitle: '📦 घाऊक ऑर्डर मार्गदर्शन (Wholesale Order Guidance)',
+    wholesaleSectionTitle: 'घाऊक ऑर्डर मार्गदर्शन (Wholesale Order Guidance)',
     bulkDiscountLabel: 'बल्क सूट:',
     totalOrderValLabel: 'एकूण घाऊक ऑर्डर मूल्य:',
-    aiGuidanceHeader: '💡 KalaSetu AI मार्केट मार्गदर्शन:',
+    aiGuidanceHeader: 'KalaSetu AI मार्केट मार्गदर्शन:',
     costBreakdownTitle: 'AI खर्च विश्लेषण आणि तपशील',
     closeModalBtn: 'बंद करा',
     costRawMaterial: 'कच्चा माल खर्च (30%)',
@@ -232,10 +232,10 @@ const TRANSLATIONS: Record<LangCode, {
     pricingSummaryTitle: 'ઉત્પાદન કિંમત અને જથ્થાબંધ માહિતી',
     unitPriceLabel: 'પ્રતિ પીસ દર (Single Piece Rate)',
     stockQtyLabel: 'કુલ ઉપલબ્ધ સ્ટોક',
-    wholesaleSectionTitle: '📦 જથ્થાબંધ ઓર્ડર માર્ગદર્શન (Wholesale Guidance)',
+    wholesaleSectionTitle: 'જથ્થાબંધ ઓર્ડર માર્ગદર્શન (Wholesale Guidance)',
     bulkDiscountLabel: 'બલ્ક ડિસ્કાઉન્ટ:',
     totalOrderValLabel: 'કુલ જથ્થાબંધ ઓર્ડર મૂલ્ય:',
-    aiGuidanceHeader: '💡 KalaSetu AI માર્કેટ માર્ગદર્શન:',
+    aiGuidanceHeader: 'KalaSetu AI માર્કેટ માર્ગદર્શન:',
     costBreakdownTitle: 'AI ખર્ચ વિશ્લેષણ અને વિગતો',
     closeModalBtn: 'બંધ કરો',
     costRawMaterial: 'કાચો માલ ખર્ચ (30%)',
@@ -264,10 +264,10 @@ const TRANSLATIONS: Record<LangCode, {
     pricingSummaryTitle: 'सामान रो भाव अर थोक बिक्री ब्योरो',
     unitPriceLabel: 'प्रति पीस भाव (Single Piece Rate)',
     stockQtyLabel: 'सगळो उपलब्ध स्टॉक',
-    wholesaleSectionTitle: '📦 थोक ऑर्डर ब्योरो (Wholesale Order Guidance)',
+    wholesaleSectionTitle: 'थोक ऑर्डर ब्योरो (Wholesale Order Guidance)',
     bulkDiscountLabel: 'बल्क छूट:',
     totalOrderValLabel: 'सगळो थोक ऑर्डर भाव:',
-    aiGuidanceHeader: '💡 KalaSetu AI मार्केट गाइडेंस:',
+    aiGuidanceHeader: 'KalaSetu AI मार्केट गाइडेंस:',
     costBreakdownTitle: 'AI लागत ब्योरो अर विश्लेषण',
     closeModalBtn: 'बंद करो',
     costRawMaterial: 'कच्चो माल लागत (30%)',
@@ -296,10 +296,10 @@ const TRANSLATIONS: Record<LangCode, {
     pricingSummaryTitle: 'ಉತ್ಪನ್ನ ಬೆಲೆ ಮತ್ತು ಸಗಟು ವಿವರಣೆ',
     unitPriceLabel: 'ಪ್ರತಿ ತುಂಡಿನ ದರ (Single Piece Rate)',
     stockQtyLabel: 'ಒಟ್ಟು ಲಭ್ಯವಿರುವ ಸ್ಟಾಕ್',
-    wholesaleSectionTitle: '📦 ಸಗಟು ಆರ್ಡರ್ ಮಾರ್ಗದರ್ಶನ (Wholesale Guidance)',
+    wholesaleSectionTitle: 'ಸಗಟು ಆರ್ಡರ್ ಮಾರ್ಗದರ್ಶನ (Wholesale Guidance)',
     bulkDiscountLabel: 'ಬಲ್ಕ್ ರಿಯಾಯಿತಿ:',
     totalOrderValLabel: 'ಒಟ್ಟು ಸಗಟು ಆರ್ಡರ್ ಮೌಲ್ಯ:',
-    aiGuidanceHeader: '💡 KalaSetu AI ಮಾರುಕಟ್ಟೆ ಮಾರ್ಗದರ್ಶನ:',
+    aiGuidanceHeader: 'KalaSetu AI ಮಾರುಕಟ್ಟೆ ಮಾರ್ಗದರ್ಶನ:',
     costBreakdownTitle: 'AI ವೆಚ್ಚ ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ವಿವರಣೆ',
     closeModalBtn: 'ಮುಚ್ಚಿ',
     costRawMaterial: 'ಕಚ್ಚಾ ವಸ್ತುಗಳ ವೆಚ್ಚ (30%)',
@@ -426,7 +426,7 @@ export default function ProductsScreen() {
 
                         {(displayCategory || displayMaterial) && (
                           <Text style={{ fontSize: 11, color: '#666666', marginTop: 2 }} numberOfLines={1}>
-                            {displayCategory ? `📁 ${displayCategory}` : ''} {displayMaterial ? `• 🧱 ${displayMaterial}` : ''}
+                            {displayCategory ? `${displayCategory}` : ''} {displayMaterial ? `• ${displayMaterial}` : ''}
                           </Text>
                         )}
 
@@ -584,7 +584,7 @@ export default function ProductsScreen() {
                       </Text>
                       {selectedProductSummary.category && (
                         <Text style={styles.modalProductMeta}>
-                          📁 {selectedProductSummary.category} {selectedProductSummary.materialUsed ? `• 🧱 ${selectedProductSummary.materialUsed}` : ''}
+                          {selectedProductSummary.category} {selectedProductSummary.materialUsed ? `• ${selectedProductSummary.materialUsed}` : ''}
                         </Text>
                       )}
                       <View style={[styles.activeStatusBadge, { alignSelf: 'flex-start', marginTop: 4 }]}>
