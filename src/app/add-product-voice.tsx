@@ -44,6 +44,16 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
   finalPredictedPrice: string;
   publishToCatalog: string;
   editAnswers: string;
+  selectSellingPrice: string;
+  optionATitle: string;
+  recommendedBadge: string;
+  moreProfitTag: string;
+  fairMarketRange: string;
+  optionBTitle: string;
+  optionBSub: string;
+  guidanceHeader: string;
+  selectedAiPriceLabel: string;
+  selectedArtisanPriceLabel: string;
 }> = {
   hi: {
     listening: 'सुन रहा हूँ... बोलना समाप्त करने के लिए पुनः टैप करें',
@@ -63,8 +73,18 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     costFinishing: 'फिनिशिंग व बायो-पॉलिश',
     costMarketDemand: 'शहरी बाज़ार मांग व प्रीमियम',
     finalPredictedPrice: 'AI अनुमानित अंतिम मूल्य:',
-    publishToCatalog: 'AI कीमत (₹550) से कैटलॉग में जोड़ें',
+    publishToCatalog: 'कीमत से कैटलॉग में जोड़ें',
     editAnswers: 'जानकारी में सुधार करें (Edit Answers)',
+    selectSellingPrice: 'अपनी अंतिम बिक्री कीमत चुनें:',
+    optionATitle: '✨ विकल्प A: AI फेयर मार्केट प्राइस',
+    recommendedBadge: 'अनुशंसित (Recommended)',
+    moreProfitTag: 'अतिरिक्त मुनाफ़ा',
+    fairMarketRange: 'फेयर मार्केट रेंज:',
+    optionBTitle: '🗣️ विकल्प B: आपकी बताई मूल कीमत',
+    optionBSub: 'आपकी द्वारा बताई गई मूल बिक्री कीमत',
+    guidanceHeader: '💡 KalaSetu AI बाज़ार सलाह (Guidance):',
+    selectedAiPriceLabel: 'चयनित AI फेयर प्राइस:',
+    selectedArtisanPriceLabel: 'चयनित आपकी कीमत:',
   },
   en: {
     listening: 'Listening... Tap again to stop speaking',
@@ -84,8 +104,18 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     costFinishing: 'Finishing & Bio Polish',
     costMarketDemand: 'Urban Market Demand Premium',
     finalPredictedPrice: 'Final AI Predicted Price:',
-    publishToCatalog: 'Publish to Catalog at AI Price (₹550)',
+    publishToCatalog: 'Publish to Catalog at Price',
     editAnswers: 'Edit Answers',
+    selectSellingPrice: 'Select Your Final Selling Price:',
+    optionATitle: '✨ Option A: AI Fair Market Price',
+    recommendedBadge: 'RECOMMENDED',
+    moreProfitTag: 'More Profit',
+    fairMarketRange: 'Fair market range:',
+    optionBTitle: '🗣️ Option B: Your Quoted Price',
+    optionBSub: 'Your original self-quoted selling price',
+    guidanceHeader: '💡 KalaSetu AI Market Guidance:',
+    selectedAiPriceLabel: 'Selected AI Fair Price:',
+    selectedArtisanPriceLabel: 'Selected Your Quoted Price:',
   },
   bn: {
     listening: 'শুনছি... কথা বলা শেষ করতে আবার ট্যাপ করুন',
@@ -105,8 +135,18 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     costFinishing: 'ফিনিশিং ও পালিশ',
     costMarketDemand: 'শহুরে বাজারের চাহিদা প্রিমিয়াম',
     finalPredictedPrice: 'AI নির্ধারিত চূড়ান্ত মূল্য:',
-    publishToCatalog: 'AI মূল্যে ক্যাটালগে যুক্ত করুন (₹৫৫০)',
+    publishToCatalog: 'মূল্যে ক্যাটালগে প্রকাশ করুন',
     editAnswers: 'উত্তরগুলি সম্পাদনা করুন',
+    selectSellingPrice: 'আপনার চূড়ান্ত বিক্রয় মূল্য নির্বাচন করুন:',
+    optionATitle: '✨ বিকল্প A: AI ন্যায্য বাজার মূল্য',
+    recommendedBadge: 'অনুমোদিত (Recommended)',
+    moreProfitTag: 'অতিরিক্ত লাভ',
+    fairMarketRange: 'ন্যায্য বাজার পরিসীমা:',
+    optionBTitle: '🗣️ বিকল্প B: আপনার প্রস্তাবিত মূল্য',
+    optionBSub: 'আপনার মূল প্রস্তাবিত বিক্রয় মূল্য',
+    guidanceHeader: '💡 KalaSetu AI বাজার পরামর্শ (Guidance):',
+    selectedAiPriceLabel: 'নির্বাচিত AI ন্যায্য মূল্য:',
+    selectedArtisanPriceLabel: 'নির্বাচিত আপনার প্রস্তাবিত মূল্য:',
   },
   bho: {
     listening: 'सुनत बानी... बोला के खतम करे खातिर फिर छुईं',
@@ -126,8 +166,18 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     costFinishing: 'फिनिशिंग आ पॉलिश',
     costMarketDemand: 'शहरी बाज़ार मांग',
     finalPredictedPrice: 'AI अनुमानित अंतिम भाव:',
-    publishToCatalog: 'AI भाव से कैटलॉग में जोड़ीं (₹550)',
+    publishToCatalog: 'भाव से कैटलॉग में प्रकाशित करीं',
     editAnswers: 'जानकारी में सुधार करीं',
+    selectSellingPrice: 'आपण अंतिम बिक्री भाव चुनीं:',
+    optionATitle: '✨ विकल्प A: AI उचित बाज़ार भाव',
+    recommendedBadge: 'सलाह दीहल (Recommended)',
+    moreProfitTag: 'जादे मुनाफा',
+    fairMarketRange: 'उचित बाज़ार रेंज:',
+    optionBTitle: '🗣️ विकल्प B: रउआ बतावल भाव',
+    optionBSub: 'रउआ खुद से बतावल मूल बिक्री भाव',
+    guidanceHeader: '💡 KalaSetu AI बाज़ार सलाह (Guidance):',
+    selectedAiPriceLabel: 'चुनल AI उचित भाव:',
+    selectedArtisanPriceLabel: 'चुनल रउआ बतावल भाव:',
   },
   mr: {
     listening: 'ऐकत आहे... बोलणे थांबवण्यासाठी पुन्हा टॅप करा',
@@ -147,8 +197,18 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     costFinishing: 'फिनिशिंग आणि बायो-पॉलिश',
     costMarketDemand: 'शहरी बाजार मागणी प्रीमियम',
     finalPredictedPrice: 'AI अंदाजित अंतिम किंमत:',
-    publishToCatalog: 'AI किमतीत कॅटलॉगमध्ये जोडा (₹५५०)',
+    publishToCatalog: 'किमतीत कॅटलॉगमध्ये प्रकाशित करा',
     editAnswers: 'उत्तरे संपादित करा',
+    selectSellingPrice: 'तुमची अंतिम विक्री किंमत निवडा:',
+    optionATitle: '✨ पर्याय A: AI वाजवी बाजार किंमत',
+    recommendedBadge: 'शिफारस केलेले (Recommended)',
+    moreProfitTag: 'अधिक नफा',
+    fairMarketRange: 'वाजवी बाजार श्रेणी:',
+    optionBTitle: '🗣️ पर्याय B: तुमची मूळ सांगितलेली किंमत',
+    optionBSub: 'तुमची स्वतः सांगितलेली मूळ विक्री किंमत',
+    guidanceHeader: '💡 KalaSetu AI बाजार सल्ला (Guidance):',
+    selectedAiPriceLabel: 'निवडलेली AI वाजवी किंमत:',
+    selectedArtisanPriceLabel: 'निवडलेली तुमची मूळ किंमत:',
   },
   gu: {
     listening: 'સાંભળી રહ્યો છું... બોલવાનું બંધ કરવા ફરી ટૅપ કરો',
@@ -168,8 +228,18 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     costFinishing: 'ફિનિશિંગ અને બાયો-પોલિશ',
     costMarketDemand: 'શહેરી બજાર માંગ પ્રીમિયમ',
     finalPredictedPrice: 'AI અનુમાનિત અંતિમ કિંમત:',
-    publishToCatalog: 'AI કિંમતે કેટલોગમાં ઉમેરો (₹૫૫૦)',
+    publishToCatalog: 'કિંમતે કેટલોગમાં પ્રકાશિત કરો',
     editAnswers: 'જવાબો સુધારો',
+    selectSellingPrice: 'તમારી અંતિમ વેચાણ કિંમત પસંદ કરો:',
+    optionATitle: '✨ વિકલ્પ A: AI વાજબી બજાર કિંમત',
+    recommendedBadge: 'ભલામણ કરેલ (Recommended)',
+    moreProfitTag: 'વધુ નફો',
+    fairMarketRange: 'વાજબી બજાર રેન્જ:',
+    optionBTitle: '🗣️ વિકલ્પ B: તમારી મૂળ જણાવેલ કિંમત',
+    optionBSub: 'તમારી મૂળ જણાવેલ વેચાણ કિંમત',
+    guidanceHeader: '💡 KalaSetu AI બજાર સલાહ (Guidance):',
+    selectedAiPriceLabel: 'પસંદ કરેલ AI વાજબી કિંમત:',
+    selectedArtisanPriceLabel: 'પસંદ કરેલ તમારી કિંમત:',
   },
   raj: {
     listening: 'सुणूं लाग्यो हूं... बोलणो बंद करबा सारू पाछो दबाओ',
@@ -189,8 +259,18 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     costFinishing: 'फिनिशिंग अर पॉलिश',
     costMarketDemand: 'शहरी बजार मांग',
     finalPredictedPrice: 'AI अनुमानित अंतिम भाव:',
-    publishToCatalog: 'AI भाव सूं कैटलॉग में जोड़ो (₹५५०)',
+    publishToCatalog: 'भाव सूं कैटलॉग में जोड़ो',
     editAnswers: 'ब्योरो बदलो',
+    selectSellingPrice: 'आपरो अंतिम बिक्री भाव चुणो:',
+    optionATitle: '✨ विकल्प A: AI वाजिब बजार भाव',
+    recommendedBadge: 'सलाह दीधोड़ो (Recommended)',
+    moreProfitTag: 'जादा नफो',
+    fairMarketRange: 'वाजिब बजार रेंज:',
+    optionBTitle: '🗣️ विकल्प B: आपरो बतायोड़ो भाव',
+    optionBSub: 'आपरी खुद री बतायोड़ी मूल बिक्री भाव',
+    guidanceHeader: '💡 KalaSetu AI बजार सलाह:',
+    selectedAiPriceLabel: 'चुन्योड़ो AI वाजिब भाव:',
+    selectedArtisanPriceLabel: 'चुन्योड़ो आपरो बतायोड़ो भाव:',
   },
   kn: {
     listening: 'ಕೇಳಿಸಿಕೊಳ್ಳುತ್ತಿದ್ದೇನೆ... ಮಾತನಾಡುವುದು ಮುಗಿಸಲು ಮತ್ತೆ ಟ್ಯಾಪ್ ಮಾಡಿ',
@@ -210,10 +290,21 @@ const VOICE_EXTRA_STRINGS: Record<LangCode, {
     costFinishing: 'ಫಿನಿಶಿಂಗ್ ಮತ್ತು ಬಯೋ-ಪಾಲಿಶ್',
     costMarketDemand: 'ನಗರ ಮಾರುಕಟ್ಟೆ ಬೇಡಿಕೆ ಪ್ರೀಮಿಯಂ',
     finalPredictedPrice: 'AI ಅಂದಾಜು ಅಂತಿಮ ಬೆಲೆ:',
-    publishToCatalog: 'AI ಬೆಲೆಯಲ್ಲಿ ಕ್ಯಾಟಲಾಗ್‌ಗೆ ಸೇರಿಸಿ (₹೫೫೦)',
+    publishToCatalog: 'ಬೆಲೆಯಲ್ಲಿ ಕ್ಯಾಟಲಾಗ್‌ಗೆ ಪ್ರಕಟಿಸಿ',
     editAnswers: 'ಮಾಹಿತಿ ತಿದ್ದುಪಡಿ ಮಾಡಿ',
+    selectSellingPrice: 'ನಿಮ್ಮ ಅಂತಿಮ ಮಾರಾಟ ಬೆಲೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ:',
+    optionATitle: '✨ ಆಯ್ಕೆ A: AI ನ್ಯಾಯಯುತ ಮಾರುಕಟ್ಟೆ ಬೆಲೆ',
+    recommendedBadge: 'ಶಿಫಾರಸು ಮಾಡಲಾಗಿದೆ (Recommended)',
+    moreProfitTag: 'ಹೆಚ್ಚಿನ ಲಾಭ',
+    fairMarketRange: 'ನ್ಯಾಯಯುತ ಮಾರುಕಟ್ಟೆ ಶ್ರೇಣಿ:',
+    optionBTitle: '🗣️ ಆಯ್ಕೆ B: ನಿಮ್ಮ ಮೂಲ ಅಂದಾಜು ಬೆಲೆ',
+    optionBSub: 'ನಿಮ್ಮ ಸ್ವಯಂ ಅಂದಾಜು ಮಾಡಿದ ಮಾರಾಟ ಬೆಲೆ',
+    guidanceHeader: '💡 KalaSetu AI ಮಾರುಕಟ್ಟೆ ಮಾರ್ಗದರ್ಶನ:',
+    selectedAiPriceLabel: 'ಆಯ್ಕೆಮಾಡಿದ AI ನ್ಯಾಯಯುತ ಬೆಲೆ:',
+    selectedArtisanPriceLabel: 'ಆಯ್ಕೆಮಾಡಿದ ನಿಮ್ಮ ಅಂದಾಜು ಬೆಲೆ:',
   },
 };
+
 
 export default function AddProductVoiceScreen() {
   const router = useRouter();
@@ -505,6 +596,68 @@ export default function AddProductVoiceScreen() {
   const finishingEst = Math.round(chosenFinalPrice * 0.10);
   const demandEst = Math.max(0, chosenFinalPrice - (materialEst + laborEst + finishingEst));
 
+  const getLocalizedGuidanceText = (
+    lang: LangCode,
+    artisanP: number,
+    aiP: number,
+    mRef: number,
+    gain: number,
+    gainP: number,
+    backendGuidance?: { hindi?: string; english?: string }
+  ): string => {
+    if (lang === 'en') {
+      if (backendGuidance?.english) return backendGuidance.english;
+      if (gain > 0) {
+        return `Advice: You quoted ₹${artisanP}, while online market listings sell around ₹${mRef || aiP}. We recommend pricing at ₹${aiP} to capture +₹${gain} (+${gainP}%) additional direct profit!`;
+      }
+      return `Advice: Your quoted price of ₹${artisanP} is well aligned with prevailing online market rates.`;
+    }
+    if (lang === 'hi') {
+      if (backendGuidance?.hindi) return backendGuidance.hindi;
+      if (gain > 0) {
+        return `सलाह: आप इसे ₹${artisanP} में बेच रहे हैं, जबकि बाज़ार में यह ₹${mRef || aiP} तक बिकता है। आप इसे कम से कम ₹${aiP} में बेचें। आपको ₹${gain} का सीधा अतिरिक्त मुनाफ़ा होगा!`;
+      }
+      return `सलाह: आपका दाम (₹${artisanP}) बाज़ार के बिल्कुल सही स्तर पर है। आप ₹${aiP} में आसानी से बेच सकते हैं।`;
+    }
+    if (lang === 'bn') {
+      if (gain > 0) {
+        return `পরামর্শ: আপনি ₹${artisanP} মূল্য প্রস্তাব করছেন, যখন বাজারে এটি ₹${mRef || aiP} পর্যন্ত বিক্রি হয়। ₹${aiP} মূল্যে বিক্রি করলে আপনার ₹${gain} (+${gainP}%) অতিরিক্ত সরাসরি লাভ হবে!`;
+      }
+      return `পরামর্শ: আপনার মূল্য (₹${artisanP}) বাজারের মানদণ্ডের সাথে মানানসই। আপনি ₹${aiP} এ বিক্রি করতে পারেন।`;
+    }
+    if (lang === 'bho') {
+      if (gain > 0) {
+        return `सलाह: रउआ एकरा के ₹${artisanP} में बेचत बानी, जबकि बाज़ार में ई ₹${mRef || aiP} तक बिकाला। रउआ एकरा के ₹${aiP} में बेचीं। रउआ के ₹${gain} के सीधा जादे मुनाफा होई!`;
+      }
+      return `सलाह: रउआ के भाव (₹${artisanP}) बाज़ार के बिल्कुल सही स्तर पर बा। रउआ ₹${aiP} में बेच सकत बानी।`;
+    }
+    if (lang === 'mr') {
+      if (gain > 0) {
+        return `सल्ला: तुम्ही हे ₹${artisanP} ला विकत आहात, तर बाजारात हे ₹${mRef || aiP} पर्यंत विकले जाते. ₹${aiP} ला विकल्यास तुम्हाला ₹${gain} (+${gainP}%) थेट अतिरिक्त नफा मिळेल!`;
+      }
+      return `सल्ला: तुमची किंमत (₹${artisanP}) बाजाराच्या मानकांशी सुसंगत आहे. तुम्ही ₹${aiP} ला विकू शकता.`;
+    }
+    if (lang === 'gu') {
+      if (gain > 0) {
+        return `સલાહ: તમે આ ₹${artisanP} માં વેચી રહ્યા છો, જ્યારે બજારમાં તે ₹${mRef || aiP} સુધી વેચાય છે. ₹${aiP} માં વેચવાથી તમને ₹${gain} (+${gainP}%) વધારાનો નફો મળશે!`;
+      }
+      return `સલાહ: તમારી કિંમત (₹${artisanP}) બજારના ધોરણો સાથે યોગ્ય રીતે મેળ ખાતી રહે છે. તમે ₹${aiP} માં વેચી શકો છો.`;
+    }
+    if (lang === 'raj') {
+      if (gain > 0) {
+        return `सलाह: आप इने ₹${artisanP} में बेच रिया हो, जदके बजार में ओ ₹${mRef || aiP} ताईं बिकै। आप इने ₹${aiP} में बेचो। आपने ₹${gain} रो सीधो जादा नफो होवेला!`;
+      }
+      return `सलाह: आपरो भाव (₹${artisanP}) बजार रे हिसाब सूं बिल्कुल सही है। आप ₹${aiP} में बेच सको हो।`;
+    }
+    if (lang === 'kn') {
+      if (gain > 0) {
+        return `ಸಲಹೆ: ನೀವು ₹${artisanP} ಬೆಲೆ ನಿಗದಿಪಡಿಸಿದ್ದೀರಿ, ಆದರೆ ಮಾರುಕಟ್ಟೆಯಲ್ಲಿ ಇದು ₹${mRef || aiP} ವರೆಗೆ ಮಾರಾಟವಾಗುತ್ತದೆ. ₹${aiP} ಬೆಲೆಯಲ್ಲಿ ಮಾರಾಟ ಮಾಡುವುದರಿಂದ ನಿಮಗೆ ₹${gain} (+${gainP}%) ಹೆಚ್ಚುವರಿ ಲಾಭ ಸಿಗುತ್ತದೆ!`;
+      }
+      return `ಸಲಹೆ: ನಿಮ್ಮ ಬೆಲೆ (₹${artisanP}) ಮಾರುಕಟ್ಟೆ ಮಾನದಂಡಗಳಿಗೆ ಸಂಪೂರ್ಣವಾಗಿ ಹೊಂದಿಕೆಯಾಗುತ್ತದೆ. ನೀವು ₹${aiP} ರಲ್ಲಿ ಮಾರಾಟ ಮಾಡಬಹುದು.`;
+    }
+    return `Advice: You quoted ₹${artisanP}. Recommended fair selling target is ₹${aiP}.`;
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" translucent={false} />
@@ -735,7 +888,7 @@ export default function AddProductVoiceScreen() {
               {/* Dual Price Selection Cards (Option A vs Option B) */}
               <View style={{ marginBottom: 16 }}>
                 <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#1A1A1A', marginBottom: 10 }}>
-                  💰 {globalLang === 'hi' ? 'अपनी अंतिम बिक्री कीमत चुनें:' : 'Select Your Selling Price:'}
+                  💰 {t.selectSellingPrice}
                 </Text>
 
                 {/* Option A: AI Fair Market Price (Recommended) */}
@@ -757,10 +910,10 @@ export default function AddProductVoiceScreen() {
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
                       <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#3B6029', textTransform: 'uppercase' }}>
-                        ✨ Option A: AI Fair Market Price
+                        {t.optionATitle}
                       </Text>
                       <View style={{ backgroundColor: '#3B6029', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, marginLeft: 8 }}>
-                        <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>RECOMMENDED</Text>
+                        <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>{t.recommendedBadge}</Text>
                       </View>
                     </View>
                     <Text style={{ fontSize: 30, fontWeight: 'bold', color: '#1A1A1A' }}>
@@ -768,11 +921,11 @@ export default function AddProductVoiceScreen() {
                     </Text>
                     {gainVal > 0 && (
                       <Text style={{ fontSize: 12, color: '#3B6029', fontWeight: '700', marginTop: 2 }}>
-                        ✨ +₹{gainVal} ({gainPct}%) {globalLang === 'hi' ? 'अतिरिक्त मुनाफ़ा' : 'More Profit'}
+                        ✨ +₹{gainVal} ({gainPct}%) {t.moreProfitTag}
                       </Text>
                     )}
                     <Text style={{ fontSize: 11, color: '#666666', marginTop: 4 }}>
-                      Fair market range: ₹{pricingEstimate?.recommended_min || Math.round(artisanPriceVal * 1.05)} – ₹{pricingEstimate?.recommended_max || Math.round(artisanPriceVal * 1.45)}
+                      {t.fairMarketRange} ₹{pricingEstimate?.recommended_min || Math.round(artisanPriceVal * 1.05)} – ₹{pricingEstimate?.recommended_max || Math.round(artisanPriceVal * 1.45)}
                     </Text>
                   </View>
                   <Ionicons
@@ -800,13 +953,13 @@ export default function AddProductVoiceScreen() {
                 >
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#E65100', textTransform: 'uppercase', marginBottom: 4 }}>
-                      🗣️ Option B: Your Quoted Price
+                      {t.optionBTitle}
                     </Text>
                     <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#1A1A1A' }}>
                       ₹{artisanPriceVal}
                     </Text>
                     <Text style={{ fontSize: 12, color: '#666666', marginTop: 2 }}>
-                      {globalLang === 'hi' ? 'आपकी द्वारा बताई गई मूल कीमत' : 'Your original self-quoted selling price'}
+                      {t.optionBSub}
                     </Text>
                   </View>
                   <Ionicons
@@ -817,8 +970,8 @@ export default function AddProductVoiceScreen() {
                 </TouchableOpacity>
               </View>
 
-              {/* Hindi AI Guidance Banner */}
-              {pricingEstimate?.guidance?.hindi ? (
+              {/* Language-Specific AI Guidance Banner */}
+              {pricingEstimate ? (
                 <View style={{
                   backgroundColor: '#FFF8E7',
                   borderColor: '#FFE082',
@@ -832,10 +985,18 @@ export default function AddProductVoiceScreen() {
                   <Ionicons name="bulb" size={24} color="#E65100" style={{ marginRight: 10, marginTop: 2 }} />
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#E65100', marginBottom: 2 }}>
-                      💡 KalaSetu AI Market Guidance (बाज़ार सलाह):
+                      {t.guidanceHeader}
                     </Text>
                     <Text style={{ fontSize: 13, color: '#424242', lineHeight: 19, fontWeight: '500' }}>
-                      {pricingEstimate.guidance.hindi}
+                      {getLocalizedGuidanceText(
+                        globalLang,
+                        artisanPriceVal,
+                        aiPriceVal,
+                        pricingEstimate?.pricing?.market_reference_price || aiPriceVal,
+                        gainVal,
+                        gainPct,
+                        pricingEstimate?.guidance
+                      )}
                     </Text>
                   </View>
                 </View>
@@ -888,7 +1049,7 @@ export default function AddProductVoiceScreen() {
                 {/* Total Chosen Price */}
                 <View style={styles.totalPriceRow}>
                   <Text style={styles.totalPriceLabel}>
-                    {selectedPriceOption === 'AI' ? 'Selected AI Fair Price:' : 'Selected Artisan Price:'}
+                    {selectedPriceOption === 'AI' ? t.selectedAiPriceLabel : t.selectedArtisanPriceLabel}
                   </Text>
                   <Text style={[styles.totalPriceValue, { color: selectedPriceOption === 'AI' ? '#3B6029' : '#E65100' }]}>
                     ₹{chosenFinalPrice}
@@ -904,9 +1065,7 @@ export default function AddProductVoiceScreen() {
               >
                 <Ionicons name="checkmark-done" size={22} color="#FFFFFF" style={{ marginRight: 8 }} />
                 <Text style={styles.publishBtnText}>
-                  {globalLang === 'hi'
-                    ? `₹${chosenFinalPrice} कीमत से कैटलॉग में प्रकाशित करें`
-                    : `Publish to Catalog at ₹${chosenFinalPrice}`}
+                  {`${t.publishToCatalog} (₹${chosenFinalPrice})`}
                 </Text>
               </TouchableOpacity>
 
