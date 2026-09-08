@@ -1,17 +1,36 @@
 import { useState, useEffect } from 'react';
 
-export type LangCode = 'hi' | 'en';
+export type LangCode = 'en' | 'hi' | 'bn' | 'bho' | 'mr' | 'gu' | 'raj' | 'kn';
 
-let currentGlobalLang: LangCode = typeof window !== 'undefined' ? 'en' : 'hi';
-const listeners: Array<(lang: LangCode) => void> = [];
+export const ALL_LANGUAGES: { code: LangCode; nativeName: string; englishName: string }[] = [
+  { code: 'en', nativeName: 'English', englishName: 'English' },
+  { code: 'hi', nativeName: 'हिंदी', englishName: 'Hindi' },
+  { code: 'bn', nativeName: 'বাংলা', englishName: 'Bengali' },
+  { code: 'bho', nativeName: 'भोजपुरी', englishName: 'Bhojpuri' },
+  { code: 'mr', nativeName: 'मराठी', englishName: 'Marathi' },
+  { code: 'gu', nativeName: 'ગુજરાતી', englishName: 'Gujarati' },
+  { code: 'raj', nativeName: 'राजस्थानी', englishName: 'Rajasthani' },
+  { code: 'kn', nativeName: 'ಕನ್ನಡ', englishName: 'Kannada' },
+];
 
-// Website is strictly English
-if (typeof window !== 'undefined') {
-  currentGlobalLang = 'en';
+function getStoredLang(): LangCode {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const saved = localStorage.getItem('kalasetu_lang') as LangCode;
+      if (saved && ALL_LANGUAGES.some((l) => l.code === saved)) {
+        return saved;
+      }
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }
+  return 'hi';
 }
 
+let currentGlobalLang: LangCode = getStoredLang();
+const listeners: Array<(lang: LangCode) => void> = [];
+
 export function getGlobalLang(): LangCode {
-  if (typeof window !== 'undefined') return 'en';
   return currentGlobalLang;
 }
 
@@ -21,7 +40,7 @@ export function setGlobalLang(lang: LangCode) {
     try {
       localStorage.setItem('kalasetu_lang', lang);
     } catch (e) {
-      // Ignore storage restrictions
+      // Ignore
     }
   }
   listeners.forEach((listener) => listener(lang));

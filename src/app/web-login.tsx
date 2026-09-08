@@ -15,14 +15,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useGlobalLang, LangCode } from '@/utils/languageStore';
+import { useGlobalLang, ALL_LANGUAGES, LangCode } from '@/utils/languageStore';
 
 type RoleType = 'govt' | 'customer';
 
-const LANGUAGES: { code: LangCode; label: string }[] = [
-  { code: 'en', label: 'English' },
-  { code: 'hi', label: 'हिंदी' },
-];
+const LANGUAGES = ALL_LANGUAGES;
 
 const TRANSLATIONS = {
   en: {
@@ -295,7 +292,8 @@ export default function WebLoginScreen() {
     }
   };
 
-  const currentLangLabel = LANGUAGES.find((l) => l.code === selectedLang)?.label || 'English';
+  const currentLangObj = LANGUAGES.find((l) => l.code === selectedLang) || LANGUAGES[0];
+  const currentLangLabel = `${currentLangObj.nativeName} (${currentLangObj.englishName})`;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -552,7 +550,7 @@ export default function WebLoginScreen() {
                       selectedLang === item.code && styles.langOptionTextActive,
                     ]}
                   >
-                    {item.label}
+                    {item.nativeName} ({item.englishName})
                   </Text>
                   {selectedLang === item.code && (
                     <Ionicons name="checkmark-circle" size={20} color="#1F4D25" />

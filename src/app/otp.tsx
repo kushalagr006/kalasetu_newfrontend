@@ -19,13 +19,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useGlobalLang, setGlobalLang, ALL_LANGUAGES, LangCode } from '@/utils/languageStore';
 
-type LangCode = 'hi' | 'en';
-
-const LANGUAGES: { code: LangCode; label: string }[] = [
-  { code: 'hi', label: 'हिंदी' },
-  { code: 'en', label: 'English' },
-];
+const LANGUAGES = ALL_LANGUAGES;
 
 const TRANSLATIONS: Record<LangCode, {
   tagline: string;
@@ -42,21 +38,6 @@ const TRANSLATIONS: Record<LangCode, {
   verifySuccess: string;
   otpResent: string;
 }> = {
-  hi: {
-    tagline: 'आपकी कला, आपकी पहचान',
-    otpTitle: 'OTP दर्ज करें',
-    otpSubtitlePrefix: 'हमने आपके मोबाइल नंबर +91 ',
-    otpSubtitleSuffix: '\nपर एक 6 अंकों का OTP भेजा है।',
-    secureOtp: 'आपका OTP सुरक्षित है',
-    timerPrefix: 'OTP समाप्त होने में:',
-    resendQuestion: 'OTP नहीं मिला?',
-    resendBtn: 'पुनः भेजें',
-    helpTitle: 'समस्या हो रही है?',
-    helpSubtitle: 'कॉल्स करें हमारी सहायता टीम को',
-    modalTitle: 'भाषा चुनें / Select Language',
-    verifySuccess: 'OTP सफलतापूर्वक सत्यापित हुआ!',
-    otpResent: 'नया 6-अंकों का OTP भेजा गया है!',
-  },
   en: {
     tagline: 'Your Art, Your Identity',
     otpTitle: 'Enter OTP',
@@ -72,25 +53,134 @@ const TRANSLATIONS: Record<LangCode, {
     verifySuccess: 'OTP Verified Successfully!',
     otpResent: 'New 6-digit OTP sent successfully!',
   },
+  hi: {
+    tagline: 'आपकी कला, आपकी पहचान',
+    otpTitle: 'OTP दर्ज करें',
+    otpSubtitlePrefix: 'हमने आपके मोबाइल नंबर +91 ',
+    otpSubtitleSuffix: '\nपर एक 6 अंकों का OTP भेजा है।',
+    secureOtp: 'आपका OTP सुरक्षित है',
+    timerPrefix: 'OTP समाप्त होने में:',
+    resendQuestion: 'OTP नहीं मिला?',
+    resendBtn: 'पुनः भेजें',
+    helpTitle: 'समस्या हो रही है?',
+    helpSubtitle: 'कॉल्स करें हमारी सहायता टीम को',
+    modalTitle: 'भाषा चुनें / Select Language',
+    verifySuccess: 'OTP सफलतापूर्वक सत्यापित हुआ!',
+    otpResent: 'नया 6-अंकों का OTP भेजा गया है!',
+  },
+  bn: {
+    tagline: 'আপনার শিল্প, আপনার পরিচয়',
+    otpTitle: 'ওটিপি লিখুন',
+    otpSubtitlePrefix: 'আমরা আপনার মোবাইল নম্বর +91 ',
+    otpSubtitleSuffix: '\nএ একটি ৬ সংখ্যার OTP পাঠিয়েছি।',
+    secureOtp: 'আপনার OTP সুরক্ষিত',
+    timerPrefix: 'OTP মেয়াদ শেষ হতে:',
+    resendQuestion: 'OTP পাননি?',
+    resendBtn: 'পুনরায় পাঠান',
+    helpTitle: 'সমস্যা হচ্ছে?',
+    helpSubtitle: 'আমাদের সহায়তা দলে কল করুন',
+    modalTitle: 'ভাষা নির্বাচন করুন / Select Language',
+    verifySuccess: 'OTP সফলভাবে যাচাই করা হয়েছে!',
+    otpResent: 'নতুন ৬ সংখ্যার OTP পাঠানো হয়েছে!',
+  },
+  bho: {
+    tagline: 'रउआ कला, रउआ पहचान',
+    otpTitle: 'OTP डालीं',
+    otpSubtitlePrefix: 'हमनी आपके मोबाइल नंबर +91 ',
+    otpSubtitleSuffix: '\nपर एक ६ अंक के OTP भेजले बानी।',
+    secureOtp: 'रउआ OTP सुरक्षित बा',
+    timerPrefix: 'OTP खतम होखे में:',
+    resendQuestion: 'OTP ना मिलल?',
+    resendBtn: 'फिर से भेजीं',
+    helpTitle: 'कवनो दिक्कत बा?',
+    helpSubtitle: 'हमनी के हेल्प टीम के फोन करीं',
+    modalTitle: 'भाषा चुनीं / Select Language',
+    verifySuccess: 'OTP सही सत्यापित भइल!',
+    otpResent: 'नया ६-अंक के OTP भेजल गइल!',
+  },
+  mr: {
+    tagline: 'तुमची कला, तुमची ओळख',
+    otpTitle: 'OTP प्रविष्ट करा',
+    otpSubtitlePrefix: 'आम्ही तुमच्या मोबाईल नंबर +91 ',
+    otpSubtitleSuffix: '\nवर ६ अंकी OTP पाठवला आहे.',
+    secureOtp: 'तुमचा OTP सुरक्षित आहे',
+    timerPrefix: 'OTP संपण्यास शिल्लक वेळ:',
+    resendQuestion: 'OTP मिळाला नाही?',
+    resendBtn: 'पुन्हा पाठवा',
+    helpTitle: 'काही अडचण येत आहे?',
+    helpSubtitle: 'आमच्या सपोर्ट टीमला कॉल करा',
+    modalTitle: 'भाषा निवडा / Select Language',
+    verifySuccess: 'OTP यशस्वीरित्या सत्यापित झाला!',
+    otpResent: 'नवीन ६ अंकी OTP पाठवला आहे!',
+  },
+  gu: {
+    tagline: 'તમારી કળા, તમારી ઓળખ',
+    otpTitle: 'OTP દાખલ કરો',
+    otpSubtitlePrefix: 'અમે તમારા મોબાઇલ નંબર +91 ',
+    otpSubtitleSuffix: '\nપર ૬ અંકનો OTP મોકલ્યો છે.',
+    secureOtp: 'તમારો OTP સુરક્ષિત છે',
+    timerPrefix: 'OTP સમાપ્ત થવામાં સમય:',
+    resendQuestion: 'OTP મળ્યો નથી?',
+    resendBtn: 'ફરીથી મોકલો',
+    helpTitle: 'કોઈ સમસ્યા છે?',
+    helpSubtitle: 'અમારી મદદ ટીમ પર કોલ કરો',
+    modalTitle: 'ભાષા પસંદ કરો / Select Language',
+    verifySuccess: 'OTP સફળતાપૂર્વક ચકાસાયો!',
+    otpResent: 'નવો ૬ અંકનો OTP મોકલવામાં આવ્યો છે!',
+  },
+  raj: {
+    tagline: 'थांरी कला, थांरी पहचान',
+    otpTitle: 'OTP लिखो',
+    otpSubtitlePrefix: 'म्हे थांरा मोबाइल नंबर +91 ',
+    otpSubtitleSuffix: '\nमाथै ६ अंकां रो OTP भेज्यो है।',
+    secureOtp: 'थांरो OTP सुरक्षित है',
+    timerPrefix: 'OTP पूरा होवण मांही समय:',
+    resendQuestion: 'OTP कोनी मिल्यो?',
+    resendBtn: 'पाछो भेजो',
+    helpTitle: 'कांई दिक्कत हो रही है?',
+    helpSubtitle: 'म्हारी सहायता टीम नै फोन करो',
+    modalTitle: 'भाषा चूणो / Select Language',
+    verifySuccess: 'OTP पूरो सत्यापित होयो!',
+    otpResent: 'नयो ६-अंकां रो OTP भेज्यो गयो!',
+  },
+  kn: {
+    tagline: 'ನಿಮ್ಮ ಕಲೆ, ನಿಮ್ಮ ಗುರುತು',
+    otpTitle: 'OTP ನಮೂದಿಸಿ',
+    otpSubtitlePrefix: 'ನಾವು ನಿಮ್ಮ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ +91 ',
+    otpSubtitleSuffix: '\nಗೆ ೬ ಅಂಕಿಯ OTP ಕಳುಹಿಸಿದ್ದೇವೆ.',
+    secureOtp: 'ನಿಮ್ಮ OTP ಸುರಕ್ಷಿತವಾಗಿದೆ',
+    timerPrefix: 'OTP ಗಡುವು ಮುಗಿಯಲು:',
+    resendQuestion: 'OTP ಸ್ವೀಕರಿಸಲಿಲ್ಲವೇ?',
+    resendBtn: 'ಮತ್ತೆ ಕಳುಹಿಸಿ',
+    helpTitle: 'ತೊಂದರೆ ಇದೆಯೇ?',
+    helpSubtitle: 'ನಮ್ಮ ಸಹಾಯ ತಂಡಕ್ಕೆ ಕರೆ ಮಾಡಿ',
+    modalTitle: 'ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ / Select Language',
+    verifySuccess: 'OTP ಯಶಸ್ವಿಯಾಗಿ ಪರಿಶೀಲಿಸಲಾಗಿದೆ!',
+    otpResent: 'ಹೊಸ ೬ ಅಂಕಿಯ OTP ಕಳುಹಿಸಲಾಗಿದೆ!',
+  },
 };
 
 export default function OtpScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ phone?: string; lang?: string; role?: string }>();
-  
-  const rawPhone = params.phone || '98765 43210';
-  const initialLang: LangCode = (params.lang as LangCode) || 'hi';
+  const [globalLang, setGlobalLangState] = useGlobalLang();
 
-  const [selectedLang, setSelectedLang] = useState<LangCode>(initialLang);
+  const rawPhone = params.phone || '98765 43210';
+  const selectedLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
+
   const [isLangModalVisible, setIsLangModalVisible] = useState(false);
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
-  const [timerSeconds, setTimerSeconds] = useState(115); // 01:55
+  const [timerSeconds, setTimerSeconds] = useState(115);
   const [focusedIndex, setFocusedIndex] = useState<number>(0);
 
   const inputRefs = useRef<Array<TextInput | null>>([]);
-  const t = TRANSLATIONS[selectedLang];
+  const t = (TRANSLATIONS as any)[selectedLang] || (TRANSLATIONS as any)[globalLang] || TRANSLATIONS.hi;
 
-  // Live Timer Countdown
+  const handleLangChange = (code: LangCode) => {
+    setGlobalLangState(code);
+    setIsLangModalVisible(false);
+  };
+
   useEffect(() => {
     if (timerSeconds <= 0) return;
     const interval = setInterval(() => {
@@ -112,12 +202,10 @@ export default function OtpScreen() {
     newOtp[index] = digit;
     setOtp(newOtp);
 
-    // Auto-advance to next input
     if (digit && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
 
-    // Auto-submit if all 6 digits entered
     if (newOtp.every((d) => d !== '')) {
       setTimeout(() => {
         if (params.role === 'shg') {
@@ -137,7 +225,7 @@ export default function OtpScreen() {
 
   const handleResend = () => {
     setOtp(['', '', '', '', '', '']);
-    setTimerSeconds(120); // Reset timer to 2 minutes
+    setTimerSeconds(120);
     alert(t.otpResent);
     inputRefs.current[0]?.focus();
   };
@@ -148,9 +236,9 @@ export default function OtpScreen() {
     });
   };
 
-  const currentLangLabel = LANGUAGES.find((l) => l.code === selectedLang)?.label || 'हिंदी';
+  const currentLangObj = LANGUAGES.find((l) => l.code === selectedLang) || LANGUAGES[1];
+  const currentLangLabel = `${currentLangObj.nativeName} (${currentLangObj.englishName})`;
 
-  // Format phone display e.g. "98765 43210"
   const formattedPhoneDisplay = rawPhone.length === 10
     ? `${rawPhone.slice(0, 5)} ${rawPhone.slice(5)}`
     : rawPhone;
@@ -210,86 +298,87 @@ export default function OtpScreen() {
             </Text>
           </View>
 
-          {/* 6-Digit OTP Boxes */}
-          <View style={styles.otpBoxRow}>
-            {otp.map((digit, index) => {
-              const isFocused = focusedIndex === index;
+          {/* 6 Digit OTP Input Boxes */}
+          <View style={styles.otpInputsContainer}>
+            {otp.map((digit, idx) => {
+              const isFocused = focusedIndex === idx;
+              const isFilled = digit !== '';
               return (
                 <TextInput
-                  key={index}
+                  key={idx}
                   ref={(ref) => {
-                    inputRefs.current[index] = ref;
+                    inputRefs.current[idx] = ref;
                   }}
                   style={[
                     styles.otpBox,
-                    digit !== '' && styles.otpBoxFilled,
                     isFocused && styles.otpBoxFocused,
+                    isFilled && styles.otpBoxFilled,
                   ]}
+                  value={digit}
+                  onChangeText={(text) => handleOtpChange(text, idx)}
+                  onKeyPress={(e) => handleKeyPress(e, idx)}
+                  onFocus={() => setFocusedIndex(idx)}
                   keyboardType="number-pad"
                   maxLength={1}
-                  value={digit}
-                  onFocus={() => setFocusedIndex(index)}
-                  onChangeText={(text) => handleOtpChange(text, index)}
-                  onKeyPress={(e) => handleKeyPress(e, index)}
                   selectTextOnFocus
                 />
               );
             })}
           </View>
 
-          {/* Security Shield Divider */}
-          <View style={styles.securityDividerRow}>
-            <View style={styles.dividerLine} />
-            <View style={styles.securityBadge}>
-              <Ionicons name="shield-checkmark-outline" size={16} color="#3B6029" />
-              <Text style={styles.securityText}>{t.secureOtp}</Text>
-            </View>
-            <View style={styles.dividerLine} />
+          {/* Security Badge */}
+          <View style={styles.securityBadgeRow}>
+            <Ionicons name="shield-checkmark" size={16} color="#3B6029" />
+            <Text style={styles.securityBadgeText}>{t.secureOtp}</Text>
           </View>
 
-          {/* Timer Container */}
-          <View style={styles.timerCard}>
-            <Text style={styles.timerLabel}>{t.timerPrefix}</Text>
-            <Text style={styles.timerValue}>{formatTimer(timerSeconds)}</Text>
+          {/* Timer Countdown Display */}
+          <View style={styles.timerContainer}>
+            <Text style={styles.timerText}>
+              {t.timerPrefix} <Text style={styles.timerBoldText}>{formatTimer(timerSeconds)}</Text>
+            </Text>
           </View>
 
-          {/* Resend Link */}
-          <View style={styles.resendRow}>
+          {/* Resend OTP Button Section */}
+          <View style={styles.resendSection}>
             <Text style={styles.resendQuestionText}>{t.resendQuestion}</Text>
-            <TouchableOpacity onPress={handleResend} activeOpacity={0.7}>
-              <Text style={styles.resendBtnText}>{t.resendBtn}</Text>
+            <TouchableOpacity
+              onPress={handleResend}
+              disabled={timerSeconds > 0}
+              activeOpacity={0.7}
+            >
+              <Text
+                style={[
+                  styles.resendBtnText,
+                  timerSeconds > 0 && styles.resendBtnDisabled,
+                ]}
+              >
+                {t.resendBtn}
+              </Text>
             </TouchableOpacity>
           </View>
 
-          {/* Help & Support Card ("समस्या हो रही है?") */}
-          <View style={styles.helpCard}>
-            <Image
-              source={require('@/assets/images/support_phone.png')}
-              style={styles.supportAvatar}
-              resizeMode="cover"
-            />
-            <View style={styles.helpTextContainer}>
-              <Text style={styles.helpTitle}>{t.helpTitle}</Text>
-              <Text style={styles.helpSubtitle}>{t.helpSubtitle}</Text>
-
-              <TouchableOpacity
-                style={styles.callHotlineButton}
-                onPress={handleCallSupport}
-                activeOpacity={0.8}
-              >
-                <View style={styles.callIconBadge}>
-                  <Ionicons name="call" size={14} color="#FFFFFF" />
-                </View>
-                <Text style={styles.callHotlineText}>1800-123-4567</Text>
-              </TouchableOpacity>
+          {/* Support Helpline Card */}
+          <TouchableOpacity
+            style={styles.supportCard}
+            onPress={handleCallSupport}
+            activeOpacity={0.85}
+          >
+            <View style={styles.supportIconCircle}>
+              <Ionicons name="headset" size={24} color="#3B6029" />
             </View>
-          </View>
+            <View style={styles.supportTextCol}>
+              <Text style={styles.supportTitle}>{t.helpTitle}</Text>
+              <Text style={styles.supportSubtitle}>{t.helpSubtitle}</Text>
+            </View>
+            <Ionicons name="call-outline" size={20} color="#3B6029" />
+          </TouchableOpacity>
 
-          {/* Bottom Village Line Art Sketch Overlay */}
-          <View style={styles.sketchWrapper}>
+          {/* Village Scenic Footer Background */}
+          <View style={styles.footerSection}>
             <Image
               source={require('@/assets/images/village_sketch.png')}
-              style={styles.sketchImage}
+              style={styles.villageSketchImage}
               resizeMode="cover"
             />
           </View>
@@ -319,10 +408,7 @@ export default function OtpScreen() {
                     styles.langOption,
                     selectedLang === item.code && styles.langOptionSelected,
                   ]}
-                  onPress={() => {
-                    setSelectedLang(item.code);
-                    setIsLangModalVisible(false);
-                  }}
+                  onPress={() => handleLangChange(item.code)}
                 >
                   <Text
                     style={[
@@ -330,7 +416,7 @@ export default function OtpScreen() {
                       selectedLang === item.code && styles.langOptionTextSelected,
                     ]}
                   >
-                    {item.label}
+                    {item.nativeName} ({item.englishName})
                   </Text>
                   {selectedLang === item.code && (
                     <Ionicons name="checkmark-circle" size={20} color="#3B6029" />
@@ -357,17 +443,23 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 24,
   },
-  /* Header Bar */
   headerBar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight ? 8 : 12) : 8,
-    paddingBottom: 4,
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight ? 8 : 12) : 12,
+    paddingBottom: 8,
   },
   backButton: {
-    padding: 6,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E0D8',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   langSelector: {
     flexDirection: 'row',
@@ -376,13 +468,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2E0D8',
     borderRadius: 20,
-    paddingVertical: 5,
+    paddingVertical: 6,
     paddingHorizontal: 12,
     elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
   },
   langText: {
     fontSize: 13,
@@ -390,216 +478,176 @@ const styles = StyleSheet.create({
     color: '#2C2C2C',
     marginHorizontal: 4,
   },
-  /* Brand Container */
   brandContainer: {
     alignItems: 'center',
-    marginTop: 4,
-    marginBottom: 16,
+    marginTop: 8,
+    marginBottom: 20,
   },
   logoIcon: {
-    width: 75,
-    height: 75,
-    marginBottom: 2,
+    width: 65,
+    height: 65,
+    marginBottom: 6,
   },
   brandTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#4E342E',
     letterSpacing: 0.5,
   },
   brandTagline: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
     color: '#3B6029',
-    marginTop: 1,
+    marginTop: 2,
   },
-  /* OTP Header Section */
   otpHeaderSection: {
     alignItems: 'center',
     paddingHorizontal: 24,
-    marginBottom: 20,
+    marginBottom: 24,
   },
   otpTitle: {
     fontSize: 22,
     fontWeight: 'bold',
     color: '#1A1A1A',
     marginBottom: 8,
-    textAlign: 'center',
   },
   otpSubtitle: {
-    fontSize: 14,
-    color: '#666666',
+    fontSize: 15,
+    color: '#555555',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 22,
   },
-  /* 6-Digit OTP Boxes */
-  otpBoxRow: {
+  otpInputsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 24,
     gap: 8,
+    paddingHorizontal: 20,
+    marginBottom: 16,
   },
   otpBox: {
-    width: 48,
-    height: 54,
-    borderWidth: 1,
-    borderColor: '#D4D0C8',
+    width: 46,
+    height: 52,
     borderRadius: 12,
-    backgroundColor: '#FAF9F6',
-    textAlign: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#D4D0C7',
     fontSize: 22,
     fontWeight: 'bold',
     color: '#1A1A1A',
+    textAlign: 'center',
+    elevation: 1,
+  },
+  otpBoxFocused: {
+    borderColor: '#3B6029',
+    backgroundColor: '#F7FAF5',
   },
   otpBoxFilled: {
     borderColor: '#3B6029',
     backgroundColor: '#FFFFFF',
-    color: '#3B6029',
   },
-  otpBoxFocused: {
-    borderWidth: 1.8,
-    borderColor: '#3B6029',
-    backgroundColor: '#FFFFFF',
-  },
-  /* Security Divider */
-  securityDividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E5E3DC',
-  },
-  securityBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 12,
-  },
-  securityText: {
-    fontSize: 12,
-    color: '#777777',
-    marginLeft: 6,
-    fontWeight: '500',
-  },
-  /* Timer Card */
-  timerCard: {
+  securityBadgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F7F5ED',
-    alignSelf: 'center',
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 24,
     marginBottom: 16,
   },
-  timerLabel: {
-    fontSize: 14,
-    color: '#555555',
-    marginRight: 10,
-  },
-  timerValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  securityBadgeText: {
+    fontSize: 13,
+    fontWeight: '600',
     color: '#3B6029',
+    marginLeft: 6,
   },
-  /* Resend Row */
-  resendRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+  timerContainer: {
     alignItems: 'center',
+    marginBottom: 16,
+  },
+  timerText: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  timerBoldText: {
+    fontWeight: 'bold',
+    color: '#D32F2F',
+  },
+  resendSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 28,
   },
   resendQuestionText: {
     fontSize: 14,
-    color: '#333333',
+    color: '#666666',
     marginRight: 6,
   },
   resendBtnText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#3B6029',
   },
-  /* Help Card */
-  helpCard: {
+  resendBtnDisabled: {
+    color: '#999999',
+  },
+  supportCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FDF7EC',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#F3E8D3',
+    borderColor: '#E2E0D8',
     borderRadius: 16,
-    padding: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     marginHorizontal: 20,
     marginBottom: 24,
+    elevation: 2,
   },
-  supportAvatar: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+  supportIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#EAF2E8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
   },
-  helpTextContainer: {
+  supportTextCol: {
     flex: 1,
-    marginLeft: 14,
   },
-  helpTitle: {
-    fontSize: 17,
+  supportTitle: {
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#1A1A1A',
-    marginBottom: 2,
   },
-  helpSubtitle: {
+  supportSubtitle: {
     fontSize: 13,
-    color: '#555555',
-    marginBottom: 8,
+    color: '#666666',
+    marginTop: 2,
   },
-  callHotlineButton: {
-    flexDirection: 'row',
+  footerSection: {
     alignItems: 'center',
+    marginTop: 8,
   },
-  callIconBadge: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: '#3B6029',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 8,
-  },
-  callHotlineText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#3B6029',
-  },
-  /* Sketch Overlay */
-  sketchWrapper: {
+  villageSketchImage: {
     width: '100%',
-    height: 90,
-    marginTop: 4,
-    overflow: 'hidden',
+    height: 70,
+    opacity: 0.8,
   },
-  sketchImage: {
-    width: '100%',
-    height: '100%',
-    opacity: 0.85,
-  },
-  /* Modal */
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 24,
   },
   modalContent: {
-    width: '85%',
+    width: '100%',
+    maxWidth: 320,
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    maxHeight: 400,
     elevation: 5,
   },
   modalTitle: {
@@ -611,19 +659,19 @@ const styles = StyleSheet.create({
   },
   langOption: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    marginBottom: 6,
+    backgroundColor: '#FAF9F5',
   },
   langOptionSelected: {
-    backgroundColor: '#F4F8F3',
-    borderRadius: 10,
+    backgroundColor: '#EAF2E8',
   },
   langOptionText: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#333333',
   },
   langOptionTextSelected: {

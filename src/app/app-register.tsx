@@ -61,7 +61,7 @@ export default function AppRegisterScreen() {
 
   const selectedLang: LangCode =
     (params.lang as LangCode) || (globalLang === 'en' ? 'en' : 'hi');
-  const t = TRANSLATIONS[selectedLang] || TRANSLATIONS.hi;
+  const t = (TRANSLATIONS as any)[selectedLang] || TRANSLATIONS.hi;
 
   const [aadhaarNumber, setAadhaarNumber] = useState('');
   const [panNumber, setPanNumber] = useState('');

@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useGlobalLang, LangCode } from '@/utils/languageStore';
+import { getPendingProductPhoto } from '@/utils/photoStore';
 
 const TRANSLATIONS = {
   en: {
@@ -42,12 +43,16 @@ const TRANSLATIONS = {
 
 export default function AddProductDetailsScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ lang?: string }>();
+  const params = useLocalSearchParams<{ lang?: string; photoUri?: string }>();
   const [globalLang] = useGlobalLang();
 
   const selectedLang: LangCode =
     (params.lang as LangCode) || (globalLang === 'en' ? 'en' : 'hi');
-  const t = TRANSLATIONS[selectedLang] || TRANSLATIONS.en;
+  const t = (TRANSLATIONS as any)[selectedLang] || TRANSLATIONS.en;
+
+  const pendingPhoto = getPendingProductPhoto();
+  const displayPhotoUri = params.photoUri || pendingPhoto.photoUri;
+  const isAiEnhanced = pendingPhoto.aiEnhanced || !!displayPhotoUri;
 
   const [selectedOption, setSelectedOption] = useState<'voice' | 'text' | null>(null);
 
@@ -90,10 +95,25 @@ export default function AddProductDetailsScreen() {
           {/* Photo Card with Floating Change Photo Button */}
           <View style={styles.photoCard}>
             <Image
-              source={require('@/assets/images/cust_prod_clay.png')}
+              source={displayPhotoUri ? { uri: displayPhotoUri } : require('@/assets/images/cust_prod_clay.png')}
               style={styles.photoImage}
               resizeMode="cover"
             />
+            {isAiEnhanced && (
+              <View style={{
+                position: 'absolute',
+                top: 12,
+                left: 12,
+                backgroundColor: 'rgba(59, 96, 41, 0.9)',
+                paddingVertical: 4,
+                paddingHorizontal: 10,
+                borderRadius: 12,
+              }}>
+                <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: 'bold' }}>
+                  ✨ OpenCV AI Enhanced
+                </Text>
+              </View>
+            )}
             <TouchableOpacity
               style={styles.changePhotoBtn}
               onPress={() => router.back()}

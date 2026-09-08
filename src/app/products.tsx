@@ -15,14 +15,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArtisanFloatingNav } from '@/components/ArtisanFloatingNav';
+import { useGlobalLang, setGlobalLang, ALL_LANGUAGES, LangCode } from '@/utils/languageStore';
 
-type LangCode = 'hi' | 'en';
 type ActiveTab = 'home' | 'products' | 'customers' | 'profile';
-
-const LANGUAGES: { code: LangCode; label: string }[] = [
-  { code: 'hi', label: 'हिंदी' },
-  { code: 'en', label: 'English' },
-];
 
 const TRANSLATIONS: Record<LangCode, {
   headerTitle: string;
@@ -72,12 +67,107 @@ const TRANSLATIONS: Record<LangCode, {
     navProfile: 'Profile',
     modalTitle: 'Select Language / भाषा चुनें',
   },
+  bn: {
+    headerTitle: 'আমার পণ্যসমূহ',
+    totalProducts: 'মোট পণ্য: ১৮',
+    activeStatus: 'সক্রিয়',
+    stockPrefix: 'স্টক: ',
+    pieceSuffix: ' টি',
+    actionView: 'দেখুন',
+    actionEdit: 'সম্পাদনা',
+    actionMore: 'আরও',
+    addNewProduct: 'নতুন পণ্য যোগ করুন',
+    navHome: 'হোম',
+    navProducts: 'পণ্য',
+    navCustomers: 'গ্রাহক',
+    navProfile: 'প্রোফাইল',
+    modalTitle: 'ভাষা নির্বাচন করুন / Select Language',
+  },
+  bho: {
+    headerTitle: 'हमर सामान',
+    totalProducts: 'कुल सामान: 18',
+    activeStatus: 'चालू',
+    stockPrefix: 'स्टॉक: ',
+    pieceSuffix: ' गो',
+    actionView: 'देखीं',
+    actionEdit: 'बदलीं',
+    actionMore: 'और',
+    addNewProduct: 'नया सामान जोड़ीं',
+    navHome: 'होम',
+    navProducts: 'सामान',
+    navCustomers: 'ग्राहक',
+    navProfile: 'प्रोफाइल',
+    modalTitle: 'भाषा चुनीं / Select Language',
+  },
+  mr: {
+    headerTitle: 'माझी उत्पादने',
+    totalProducts: 'एकूण उत्पादने: १८',
+    activeStatus: 'सक्रिय',
+    stockPrefix: 'स्टॉक: ',
+    pieceSuffix: ' नग',
+    actionView: 'पहा',
+    actionEdit: 'संपादित करा',
+    actionMore: 'आणखी',
+    addNewProduct: 'नवीन उत्पादन जोडा',
+    navHome: 'होम',
+    navProducts: 'उत्पादने',
+    navCustomers: 'ग्राहक',
+    navProfile: 'प्रोफाइल',
+    modalTitle: 'भाषा निवडा / Select Language',
+  },
+  gu: {
+    headerTitle: 'મારા ઉત્પાદનો',
+    totalProducts: 'કુલ ઉત્પાદનો: 18',
+    activeStatus: 'સક્રિય',
+    stockPrefix: 'સ્ટોક: ',
+    pieceSuffix: ' પીસ',
+    actionView: 'જુઓ',
+    actionEdit: 'સંપાદિત કરો',
+    actionMore: 'વધુ',
+    addNewProduct: 'નવું ઉત્પાદન ઉમેરો',
+    navHome: 'હોમ',
+    navProducts: 'ઉત્પાદનો',
+    navCustomers: 'ગ્રાહકો',
+    navProfile: 'પ્રોફાઇલ',
+    modalTitle: 'ભાષા પસંદ કરો / Select Language',
+  },
+  raj: {
+    headerTitle: 'म्हारा सामान',
+    totalProducts: 'सगळा सामान: 18',
+    activeStatus: 'चालू',
+    stockPrefix: 'स्टॉक: ',
+    pieceSuffix: ' नग',
+    actionView: 'देखो',
+    actionEdit: 'बदलो',
+    actionMore: 'और',
+    addNewProduct: 'नयो सामान जोड़ो',
+    navHome: 'होम',
+    navProducts: 'सामान',
+    navCustomers: 'ग्राहक',
+    navProfile: 'प्रोफाइल',
+    modalTitle: 'भाषा चूणो / Select Language',
+  },
+  kn: {
+    headerTitle: 'ನನ್ನ ಉತ್ಪನ್ನಗಳು',
+    totalProducts: 'ಒಟ್ಟು ಉತ್ಪನ್ನಗಳು: 18',
+    activeStatus: 'ಸಕ್ರಿಯ',
+    stockPrefix: 'ಸ್ಟಾಕ್: ',
+    pieceSuffix: ' ತುಂಡುಗಳು',
+    actionView: 'ವೀಕ್ಷಿಸಿ',
+    actionEdit: 'ಸಂಪಾದಿಸಿ',
+    actionMore: 'ಇನ್ನಷ್ಟು',
+    addNewProduct: 'ಹೊಸ ಉತ್ಪನ್ನ ಸೇರಿಸಿ',
+    navHome: 'ಹೋಮ್',
+    navProducts: 'ಉತ್ಪನ್ನಗಳು',
+    navCustomers: 'ಗ್ರಾಹಕರು',
+    navProfile: 'ಪ್ರೊಫೈಲ್',
+    modalTitle: 'ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ / Select Language',
+  },
 };
 
 interface ProductItem {
   id: string;
-  nameHi: string;
-  nameEn: string;
+  names: Record<LangCode, string>;
   price: string;
   stockQty: number;
   image: any;
@@ -86,40 +176,80 @@ interface ProductItem {
 const PRODUCTS_LIST: ProductItem[] = [
   {
     id: '1',
-    nameHi: 'बांस की टोकरी',
-    nameEn: 'Bamboo Basket',
+    names: {
+      en: 'Bamboo Basket',
+      hi: 'बांस की टोकरी',
+      bn: 'বাঁশের ঝুড়ি',
+      bho: 'बांस के टोकरी',
+      mr: 'बांबूची टोपली',
+      gu: 'વાંસની ટોપલી',
+      raj: 'बांस री टोकरी',
+      kn: 'ಬಿದಿರಿನ ಬುಟ್ಟಿ',
+    },
     price: '₹350',
     stockQty: 45,
     image: require('@/assets/images/product_basket.png'),
   },
   {
     id: '2',
-    nameHi: 'बांस का डिब्बा',
-    nameEn: 'Bamboo Box Container',
+    names: {
+      en: 'Bamboo Box Container',
+      hi: 'बांस का डिब्बा',
+      bn: 'বাঁশের বাক্স',
+      bho: 'बांस के डिब्बा',
+      mr: 'बांबूचा डब्बा',
+      gu: 'વાંસનું બોક્સ',
+      raj: 'बांस रो डिब्बो',
+      kn: 'ಬಿದಿರಿನ ಪೆಟ್ಟಿಗೆ',
+    },
     price: '₹450',
     stockQty: 30,
     image: require('@/assets/images/product_pot.png'),
   },
   {
     id: '3',
-    nameHi: 'दीवार सजावट',
-    nameEn: 'Wall Hanging Decor',
+    names: {
+      en: 'Wall Hanging Decor',
+      hi: 'दीवार सजावट',
+      bn: 'দেয়াল সজ্জা',
+      bho: 'दीवाल सजावट',
+      mr: 'भिंतीची सजावट',
+      gu: 'દીવાલ શણગાર',
+      raj: 'भींत सजावट',
+      kn: 'ಗೋಡೆಯ ಅಲಂಕಾರ',
+    },
     price: '₹250',
     stockQty: 60,
     image: require('@/assets/images/product_macrame.png'),
   },
   {
     id: '4',
-    nameHi: 'मिट्टी का घड़ा',
-    nameEn: 'Terracotta Clay Pot',
+    names: {
+      en: 'Terracotta Clay Pot',
+      hi: 'मिट्टी का घड़ा',
+      bn: 'পোড়ামাটির পাত্র',
+      bho: 'माटी के घड़ा',
+      mr: 'मातीचे मडके',
+      gu: 'માટીનું માટલું',
+      raj: 'माटी रो घड़ो',
+      kn: 'ಮಣ್ಣಿನ ಮಡಕೆ',
+    },
     price: '₹450',
     stockQty: 15,
     image: require('@/assets/images/product_pot.png'),
   },
   {
     id: '5',
-    nameHi: 'हैंडमेड कपड़ा बैग',
-    nameEn: 'Handmade Fabric Bag',
+    names: {
+      en: 'Handmade Fabric Bag',
+      hi: 'हैंडमेड कपड़ा बैग',
+      bn: 'হাতে তৈরি কাপড়ের ব্যাগ',
+      bho: 'हाथ के बनल कपड़ा बैग',
+      mr: 'हस्तनिर्मित कापडी पिशवी',
+      gu: 'હસ્તનિર્મિત કાપડની થેલી',
+      raj: 'हाथ सूं बन्यो कपड़ो थैलो',
+      kn: 'ಹಸ್ತಾಲಂಕಾರದ ಬಟ್ಟೆಯ ಚೀಲ',
+    },
     price: '₹550',
     stockQty: 25,
     image: require('@/assets/images/product_bag.png'),
@@ -129,14 +259,23 @@ const PRODUCTS_LIST: ProductItem[] = [
 export default function ProductsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ lang?: string }>();
-  const initialLang: LangCode = (params.lang as LangCode) || 'hi';
+  const [globalLang] = useGlobalLang();
+  const initialLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
 
   const [selectedLang, setSelectedLang] = useState<LangCode>(initialLang);
+
+  React.useEffect(() => {
+    if (globalLang) {
+      setSelectedLang(globalLang);
+    }
+  }, [globalLang]);
+
   const [isLangModalVisible, setIsLangModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('products');
 
-  const t = TRANSLATIONS[selectedLang];
-  const currentLangLabel = LANGUAGES.find((l) => l.code === selectedLang)?.label || 'हिंदी';
+  const t = TRANSLATIONS[selectedLang] || TRANSLATIONS.hi;
+  const currentLangObj = ALL_LANGUAGES.find((l) => l.code === selectedLang) || ALL_LANGUAGES[1];
+  const currentLangLabel = `${currentLangObj.nativeName} (${currentLangObj.englishName})`;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -184,7 +323,7 @@ export default function ProductsScreen() {
 
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Text style={styles.productNameText}>{selectedLang === 'hi' ? item.nameHi : item.nameEn}</Text>
+                      <Text style={styles.productNameText}>{item.names[selectedLang] || item.names.hi || item.names.en}</Text>
                       <View style={styles.activeStatusBadge}>
                         <Text style={styles.activeStatusText}>{t.activeStatus}</Text>
                       </View>
@@ -250,7 +389,7 @@ export default function ProductsScreen() {
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>{t.modalTitle}</Text>
               <FlatList
-                data={LANGUAGES}
+                data={ALL_LANGUAGES}
                 keyExtractor={(item) => item.code}
                 renderItem={({ item }) => (
                   <TouchableOpacity
@@ -260,6 +399,7 @@ export default function ProductsScreen() {
                     ]}
                     onPress={() => {
                       setSelectedLang(item.code);
+                      setGlobalLang(item.code);
                       setIsLangModalVisible(false);
                     }}
                   >
@@ -269,7 +409,7 @@ export default function ProductsScreen() {
                         selectedLang === item.code ? styles.langOptionTextSelected : null,
                       ]}
                     >
-                      {item.label}
+                      {item.nativeName} ({item.englishName})
                     </Text>
                     {selectedLang === item.code && (
                       <Ionicons name="checkmark" size={20} color="#3B6029" />

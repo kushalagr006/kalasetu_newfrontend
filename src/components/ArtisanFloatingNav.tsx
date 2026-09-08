@@ -8,35 +8,21 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useGlobalLang } from '@/utils/languageStore';
+import { useGlobalLang, LangCode } from '@/utils/languageStore';
+import { getUITranslations } from '@/utils/translations';
 
 export type ArtisanTabKey = 'home' | 'products' | 'orders' | 'customers' | 'profile' | 'chat';
 
 interface ArtisanFloatingNavProps {
   activeTab: ArtisanTabKey;
-  selectedLang?: 'hi' | 'en';
+  selectedLang?: LangCode;
 }
-
-const TRANSLATIONS = {
-  hi: {
-    home: 'होम',
-    products: 'माय प्रोडक्ट्स',
-    orders: 'ऑर्डर्स',
-    profile: 'प्रोफाइल',
-  },
-  en: {
-    home: 'Home',
-    products: 'My Products',
-    orders: 'Orders',
-    profile: 'Profile',
-  },
-};
 
 export function ArtisanFloatingNav({ activeTab, selectedLang }: ArtisanFloatingNavProps) {
   const router = useRouter();
   const [globalLang] = useGlobalLang();
-  const lang = selectedLang || (globalLang === 'en' ? 'en' : 'hi');
-  const t = TRANSLATIONS[lang] || TRANSLATIONS.hi;
+  const lang = selectedLang || globalLang;
+  const t = getUITranslations(lang);
 
   const navItems: {
     key: 'home' | 'products' | 'orders' | 'profile';
@@ -47,28 +33,28 @@ export function ArtisanFloatingNav({ activeTab, selectedLang }: ArtisanFloatingN
   }[] = [
     {
       key: 'home',
-      label: t.home,
+      label: t.navHome,
       iconOutline: 'home-outline',
       iconSolid: 'home',
       route: '/home',
     },
     {
       key: 'products',
-      label: t.products,
+      label: t.navProducts,
       iconOutline: 'cube-outline',
       iconSolid: 'cube',
       route: '/products',
     },
     {
       key: 'orders',
-      label: t.orders,
+      label: t.navOrders,
       iconOutline: 'clipboard-outline',
       iconSolid: 'clipboard',
       route: '/customers',
     },
     {
       key: 'profile',
-      label: t.profile,
+      label: t.navProfile,
       iconOutline: 'person-outline',
       iconSolid: 'person',
       route: '/profile',

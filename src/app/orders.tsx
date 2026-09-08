@@ -14,14 +14,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArtisanFloatingNav } from '@/components/ArtisanFloatingNav';
+import { useGlobalLang, setGlobalLang, ALL_LANGUAGES, LangCode } from '@/utils/languageStore';
 
-type LangCode = 'hi' | 'en';
 type OrderFilter = 'all' | 'accepted' | 'processing' | 'completed';
-
-const LANGUAGES: { code: LangCode; label: string }[] = [
-  { code: 'hi', label: 'हिंदी' },
-  { code: 'en', label: 'English' },
-];
 
 const TRANSLATIONS: Record<LangCode, {
   headerTitle: string;
@@ -39,6 +34,7 @@ const TRANSLATIONS: Record<LangCode, {
   navCustomers: string;
   navProfile: string;
   modalTitle: string;
+  chatWithBuyer: string;
 }> = {
   hi: {
     headerTitle: 'मेरे ऑर्डर',
@@ -56,6 +52,7 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'ग्राहक',
     navProfile: 'प्रोफ़ाइल',
     modalTitle: 'भाषा चुनें / Select Language',
+    chatWithBuyer: 'ग्राहक से चैट करें',
   },
   en: {
     headerTitle: 'My Orders',
@@ -73,22 +70,127 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'Customers',
     navProfile: 'Profile',
     modalTitle: 'Select Language / भाषा चुनें',
+    chatWithBuyer: 'Chat with Buyer',
+  },
+  bn: {
+    headerTitle: 'আমার অর্ডার',
+    filterAll: 'সব',
+    filterAccepted: 'গৃহীত',
+    filterProcessing: 'প্রস্তুতি চলছে',
+    filterCompleted: 'সম্পন্ন',
+    orderIdPrefix: 'অর্ডার ID: ',
+    datePrefix: 'তারিখ: ',
+    itemPrefix: 'আইটেম: ',
+    qtyPrefix: 'পরিমাণ: ',
+    viewHistory: 'অর্ডার ইতিহাস দেখুন',
+    navHome: 'হোম',
+    navProducts: 'পণ্য',
+    navCustomers: 'গ্রাহক',
+    navProfile: 'প্রোফাইল',
+    modalTitle: 'ভাষা নির্বাচন করুন / Select Language',
+    chatWithBuyer: 'ক্রেতার সাথে চ্যাট করুন',
+  },
+  bho: {
+    headerTitle: 'हमर ऑर्डर',
+    filterAll: 'सब',
+    filterAccepted: 'मंजूर',
+    filterProcessing: 'तैयारी में',
+    filterCompleted: 'पूरा भइल',
+    orderIdPrefix: 'ऑर्डर ID: ',
+    datePrefix: 'तारीख: ',
+    itemPrefix: 'सामान: ',
+    qtyPrefix: 'मात्रा: ',
+    viewHistory: 'ऑर्डर इतिहास देखीं',
+    navHome: 'होम',
+    navProducts: 'सामान',
+    navCustomers: 'ग्राहक',
+    navProfile: 'प्रोफाइल',
+    modalTitle: 'भाषा चुनीं / Select Language',
+    chatWithBuyer: 'ग्राहक से बात करीं',
+  },
+  mr: {
+    headerTitle: 'माझे ऑर्डर्स',
+    filterAll: 'सर्व',
+    filterAccepted: 'स्वीकृत',
+    filterProcessing: 'तयारीत',
+    filterCompleted: 'पूर्ण',
+    orderIdPrefix: 'ऑर्डर ID: ',
+    datePrefix: 'दिनांक: ',
+    itemPrefix: 'वस्तू: ',
+    qtyPrefix: 'प्रमाण: ',
+    viewHistory: 'ऑर्डर इतिहास पहा',
+    navHome: 'होम',
+    navProducts: 'उत्पादने',
+    navCustomers: 'ग्राहक',
+    navProfile: 'प्रोफाइल',
+    modalTitle: 'भाषा निवडा / Select Language',
+    chatWithBuyer: 'ग्राहकाशी चॅट करा',
+  },
+  gu: {
+    headerTitle: 'મારા ઓર્ડર',
+    filterAll: 'બધા',
+    filterAccepted: 'સ્વીકારેલ',
+    filterProcessing: 'તૈયારીમાં',
+    filterCompleted: 'પૂર્ણ',
+    orderIdPrefix: 'ઓર્ડર ID: ',
+    datePrefix: 'તારીખ: ',
+    itemPrefix: 'આઇટમ: ',
+    qtyPrefix: 'જથ્થો: ',
+    viewHistory: 'ઓર્ડર ઇતિહાસ જુઓ',
+    navHome: 'હોમ',
+    navProducts: 'ઉત્પાદનો',
+    navCustomers: 'ગ્રાહકો',
+    navProfile: 'પ્રોફાઇલ',
+    modalTitle: 'ભાષા પસંદ કરો / Select Language',
+    chatWithBuyer: 'ગ્રાહક સાથે ચેટ કરો',
+  },
+  raj: {
+    headerTitle: 'म्हारा ऑर्डर',
+    filterAll: 'सगळा',
+    filterAccepted: 'स्वीकार्य',
+    filterProcessing: 'तैयारी मांय',
+    filterCompleted: 'पूरा',
+    orderIdPrefix: 'ऑर्डर ID: ',
+    datePrefix: 'तारीख: ',
+    itemPrefix: 'सामान: ',
+    qtyPrefix: 'मात्रा: ',
+    viewHistory: 'ऑर्डर इतिहास देखो',
+    navHome: 'होम',
+    navProducts: 'सामान',
+    navCustomers: 'ग्राहक',
+    navProfile: 'प्रोफाइल',
+    modalTitle: 'भाषा चूणो / Select Language',
+    chatWithBuyer: 'ग्राहक सूं बात करो',
+  },
+  kn: {
+    headerTitle: 'ನನ್ನ ಆದೇಶಗಳು',
+    filterAll: 'ಎಲ್ಲಾ',
+    filterAccepted: 'ಸ್ವೀಕರಿಸಲಾಗಿದೆ',
+    filterProcessing: 'ಸಿದ್ಧತೆಯಲ್ಲಿದೆ',
+    filterCompleted: 'ಪೂರ್ಣಗೊಂಡಿದೆ',
+    orderIdPrefix: 'ಆದೇಶ ID: ',
+    datePrefix: 'ದಿನಾಂಕ: ',
+    itemPrefix: 'ವಸ್ತು: ',
+    qtyPrefix: 'ಪ್ರಮಾಣ: ',
+    viewHistory: 'ಆದೇಶದ ಇತಿಹಾಸವನ್ನು ವೀಕ್ಷಿಸಿ',
+    navHome: 'ಹೋಮ್',
+    navProducts: 'ಉತ್ಪನ್ನಗಳು',
+    navCustomers: 'ಗ್ರಾಹಕರು',
+    navProfile: 'ಪ್ರೊಫೈಲ್',
+    modalTitle: 'ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ / Select Language',
+    chatWithBuyer: 'ಖರೀದಿದಾರರೊಂದಿಗೆ ಚಾಟ್ ಮಾಡಿ',
   },
 };
 
 interface OrderItem {
   id: string;
   orderId: string;
-  dateHi: string;
-  dateEn: string;
-  itemHi: string;
-  itemEn: string;
-  qtyHi: string;
-  qtyEn: string;
+  dates: Record<LangCode, string>;
+  items: Record<LangCode, string>;
+  qtys: Record<LangCode, string>;
   price: string;
   status: 'accepted' | 'processing' | 'completed';
-  statusTextHi: string;
-  statusTextEn: string;
+  statusTexts: Record<LangCode, string>;
   image: any;
 }
 
@@ -96,46 +198,142 @@ const ORDERS_LIST: OrderItem[] = [
   {
     id: '1',
     orderId: 'ORD1234',
-    dateHi: '20 मई 2025',
-    dateEn: '20 May 2025',
-    itemHi: 'बांस की टोकरी',
-    itemEn: 'Bamboo Basket',
-    qtyHi: '25 पीस',
-    qtyEn: '25 pcs',
+    dates: {
+      en: '20 May 2025',
+      hi: '20 मई 2025',
+      bn: '২০ মে ২০২৫',
+      bho: '20 मई 2025',
+      mr: '२० मे २०२५',
+      gu: '20 મે 2025',
+      raj: '20 मई 2025',
+      kn: '20 ಮೇ 2025',
+    },
+    items: {
+      en: 'Bamboo Basket',
+      hi: 'बांस की टोकरी',
+      bn: 'বাঁশের ঝুড়ি',
+      bho: 'बांस के टोकरी',
+      mr: 'बांबूची टोपली',
+      gu: 'વાંસની ટોપલી',
+      raj: 'बांस री टोकरी',
+      kn: 'ಬಿದಿರಿನ ಬುಟ್ಟಿ',
+    },
+    qtys: {
+      en: '25 pcs',
+      hi: '25 पीस',
+      bn: '২৫ টি',
+      bho: '25 गो',
+      mr: '२५ नग',
+      gu: '25 પીસ',
+      raj: '25 नग',
+      kn: '25 ತುಂಡುಗಳು',
+    },
     price: '₹ 8,750',
     status: 'accepted',
-    statusTextHi: 'स्वीकृत',
-    statusTextEn: 'Accepted',
+    statusTexts: {
+      en: 'Accepted',
+      hi: 'स्वीकृत',
+      bn: 'গৃহীত',
+      bho: 'मंजूर',
+      mr: 'स्वीकृत',
+      gu: 'સ્વીકારેલ',
+      raj: 'स्वीकार्य',
+      kn: 'ಸ್ವೀಕರಿಸಲಾಗಿದೆ',
+    },
     image: require('@/assets/images/product_basket.png'),
   },
   {
     id: '2',
     orderId: 'ORD1233',
-    dateHi: '18 मई 2025',
-    dateEn: '18 May 2025',
-    itemHi: 'बांस का डिब्बा',
-    itemEn: 'Bamboo Box Container',
-    qtyHi: '40 पीस',
-    qtyEn: '40 pcs',
+    dates: {
+      en: '18 May 2025',
+      hi: '18 मई 2025',
+      bn: '১৮ মে ২০২৫',
+      bho: '18 मई 2025',
+      mr: '१८ मे २०२५',
+      gu: '18 મે 2025',
+      raj: '18 मई 2025',
+      kn: '18 ಮೇ 2025',
+    },
+    items: {
+      en: 'Bamboo Box Container',
+      hi: 'बांस का डिब्बा',
+      bn: 'বাঁশের বাক্স',
+      bho: 'बांस के डिब्बा',
+      mr: 'बांबूचा डब्बा',
+      gu: 'વાંસનું બોક્સ',
+      raj: 'बांस रो डिब्बो',
+      kn: 'ಬಿದಿರಿನ ಪೆಟ್ಟಿಗೆ',
+    },
+    qtys: {
+      en: '40 pcs',
+      hi: '40 पीस',
+      bn: '৪০ টি',
+      bho: '40 गो',
+      mr: '४० नग',
+      gu: '40 પીસ',
+      raj: '40 नग',
+      kn: '40 ತುಂಡುಗಳು',
+    },
     price: '₹ 18,000',
     status: 'processing',
-    statusTextHi: 'तैयारी में',
-    statusTextEn: 'In Prep',
+    statusTexts: {
+      en: 'In Prep',
+      hi: 'तैयारी में',
+      bn: 'প্রস্তুতি চলছে',
+      bho: 'तैयारी में',
+      mr: 'तयारीत',
+      gu: 'તૈયારીમાં',
+      raj: 'तैयारी मांय',
+      kn: 'ಸಿದ್ಧತೆಯಲ್ಲಿದೆ',
+    },
     image: require('@/assets/images/product_pot.png'),
   },
   {
     id: '3',
     orderId: 'ORD1232',
-    dateHi: '10 मई 2025',
-    dateEn: '10 May 2025',
-    itemHi: 'दीवार सजावट',
-    itemEn: 'Wall Hanging Decor',
-    qtyHi: '15 पीस',
-    qtyEn: '15 pcs',
+    dates: {
+      en: '10 May 2025',
+      hi: '10 मई 2025',
+      bn: '১০ মে ২০২৫',
+      bho: '10 मई 2025',
+      mr: '१० मे २०२५',
+      gu: '10 મે 2025',
+      raj: '10 मई 2025',
+      kn: '10 ಮೇ 2025',
+    },
+    items: {
+      en: 'Wall Hanging Decor',
+      hi: 'दीवार सजावट',
+      bn: 'দেয়াল সজ্জা',
+      bho: 'दीवाल सजावट',
+      mr: 'भिंतीची सजावट',
+      gu: 'દીવાલ શણગાર',
+      raj: 'भींत सजावट',
+      kn: 'ಗೋಡೆಯ ಅಲಂಕಾರ',
+    },
+    qtys: {
+      en: '15 pcs',
+      hi: '15 पीस',
+      bn: '১৫ টি',
+      bho: '15 गो',
+      mr: '१५ नग',
+      gu: '15 પીસ',
+      raj: '15 नग',
+      kn: '15 ತುಂಡುಗಳು',
+    },
     price: '₹ 3,750',
     status: 'completed',
-    statusTextHi: 'पूर्ण',
-    statusTextEn: 'Completed',
+    statusTexts: {
+      en: 'Completed',
+      hi: 'पूर्ण',
+      bn: 'সম্পন্ন',
+      bho: 'पूरा भइल',
+      mr: 'पूर्ण',
+      gu: 'પૂર્ણ',
+      raj: 'पूरा',
+      kn: 'ಪೂರ್ಣಗೊಂಡಿದೆ',
+    },
     image: require('@/assets/images/product_macrame.png'),
   },
 ];
@@ -143,15 +341,24 @@ const ORDERS_LIST: OrderItem[] = [
 export default function OrdersScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ lang?: string }>();
-  const initialLang: LangCode = (params.lang as LangCode) || 'hi';
+  const [globalLang] = useGlobalLang();
+  const initialLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
 
   const [selectedLang, setSelectedLang] = useState<LangCode>(initialLang);
+
+  React.useEffect(() => {
+    if (globalLang) {
+      setSelectedLang(globalLang);
+    }
+  }, [globalLang]);
+
   const [isLangModalVisible, setIsLangModalVisible] = useState(false);
   const [activeFilter, setActiveFilter] = useState<OrderFilter>('all');
   const [activeTab, setActiveTab] = useState<'home' | 'myshg' | 'products' | 'orders' | 'profile'>('orders');
 
-  const t = TRANSLATIONS[selectedLang];
-  const currentLangLabel = LANGUAGES.find((l) => l.code === selectedLang)?.label || 'हिंदी';
+  const t = TRANSLATIONS[selectedLang] || TRANSLATIONS.hi;
+  const currentLangObj = ALL_LANGUAGES.find((l) => l.code === selectedLang) || ALL_LANGUAGES[1];
+  const currentLangLabel = `${currentLangObj.nativeName} (${currentLangObj.englishName})`;
 
   const filteredOrders = ORDERS_LIST.filter((o) => {
     if (activeFilter === 'all') return true;
@@ -257,24 +464,24 @@ export default function OrdersScreen() {
                         <Text style={styles.orderIdText}>{t.orderIdPrefix}{order.orderId}</Text>
                         <View style={[styles.statusBadgePill, { backgroundColor: badgeStyle.bg }]}>
                           <Text style={[styles.statusBadgeText, { color: badgeStyle.text }]}>
-                            {selectedLang === 'hi' ? order.statusTextHi : order.statusTextEn}
+                            {order.statusTexts[selectedLang] || order.statusTexts.hi || order.statusTexts.en}
                           </Text>
                         </View>
                       </View>
 
                       <View style={styles.orderMetaItemRow}>
                         <Ionicons name="calendar-outline" size={14} color="#666666" />
-                        <Text style={styles.orderMetaText}>{t.datePrefix}{selectedLang === 'hi' ? order.dateHi : order.dateEn}</Text>
+                        <Text style={styles.orderMetaText}>{t.datePrefix}{order.dates[selectedLang] || order.dates.hi || order.dates.en}</Text>
                       </View>
 
                       <View style={styles.orderMetaItemRow}>
                         <Ionicons name="person-outline" size={14} color="#666666" />
-                        <Text style={styles.orderMetaText}>{t.itemPrefix}{selectedLang === 'hi' ? order.itemHi : order.itemEn}</Text>
+                        <Text style={styles.orderMetaText}>{t.itemPrefix}{order.items[selectedLang] || order.items.hi || order.items.en}</Text>
                       </View>
 
                       <View style={styles.orderMetaItemRow}>
                         <Ionicons name="cube-outline" size={14} color="#666666" />
-                        <Text style={styles.orderMetaText}>{t.qtyPrefix}{selectedLang === 'hi' ? order.qtyHi : order.qtyEn}</Text>
+                        <Text style={styles.orderMetaText}>{t.qtyPrefix}{order.qtys[selectedLang] || order.qtys.hi || order.qtys.en}</Text>
                       </View>
 
                       <Text style={styles.orderPriceText}>{order.price}</Text>
@@ -283,7 +490,7 @@ export default function OrdersScreen() {
                       <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
                         <Ionicons name="chatbubble-ellipses-outline" size={14} color="#3B6029" style={{ marginRight: 4 }} />
                         <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#3B6029' }}>
-                          {selectedLang === 'hi' ? 'ग्राहक से चैट करें' : 'Chat with Buyer'}
+                          {t.chatWithBuyer}
                         </Text>
                       </View>
                     </View>
@@ -321,7 +528,7 @@ export default function OrdersScreen() {
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>{t.modalTitle}</Text>
               <FlatList
-                data={LANGUAGES}
+                data={ALL_LANGUAGES}
                 keyExtractor={(item) => item.code}
                 renderItem={({ item }) => (
                   <TouchableOpacity
@@ -331,6 +538,7 @@ export default function OrdersScreen() {
                     ]}
                     onPress={() => {
                       setSelectedLang(item.code);
+                      setGlobalLang(item.code);
                       setIsLangModalVisible(false);
                     }}
                   >
@@ -340,7 +548,7 @@ export default function OrdersScreen() {
                         selectedLang === item.code ? styles.langOptionTextSelected : null,
                       ]}
                     >
-                      {item.label}
+                      {item.nativeName} ({item.englishName})
                     </Text>
                     {selectedLang === item.code && (
                       <Ionicons name="checkmark" size={20} color="#3B6029" />

@@ -16,12 +16,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useGlobalLang, LangCode } from '@/utils/languageStore';
+import { useGlobalLang, ALL_LANGUAGES, LangCode } from '@/utils/languageStore';
 
-const LANGUAGES: { code: LangCode; label: string }[] = [
-  { code: 'hi', label: 'हिंदी' },
-  { code: 'en', label: 'English' },
-];
+const LANGUAGES = ALL_LANGUAGES;
 
 const TRANSLATIONS: Record<LangCode, {
   tagline: string;
@@ -146,6 +143,264 @@ const TRANSLATIONS: Record<LangCode, {
     errPan: 'Please enter a valid 10-character PAN card number.',
     closeText: 'Close',
   },
+  bn: {
+    tagline: 'আপনার শিল্প, আপনার পরিচয়',
+    formTitle: 'মোবাইল নম্বর লিখুন',
+    placeholder: 'আপনার ১০ সংখ্যার মোবাইল নম্বর লিখুন',
+    button: 'এগিয়ে যান',
+    or: 'অথবা',
+    shgTitle: 'মহিলা এসএইচজি গোষ্ঠী তৈরি করুন',
+    shgSubtitle: 'একসাথে কাজ করুন, বড় অর্ডার পান\nএবং আয় বাড়ান',
+    trust1: 'নিরাপদ ও\nবিশ্বস্ত',
+    trust2: 'ভারতীয় শিল্পীদের\nজন্য',
+    trust3: 'বিক্রি করুন, আয় করুন\nএবং এগিয়ে যান',
+    alertError: 'দয়া করে একটি বৈধ ১০ সংখ্যার মোবাইল নম্বর লিখুন।',
+    alertSuccess: 'ওটিপি পাঠানো হয়েছে:',
+    modalTitle: 'ভাষা নির্বাচন করুন / Select Language',
+    newRegisterPrompt: 'নতুন অ্যাকাউন্ট তৈরি করবেন? ',
+    newRegisterLink: 'এখানে রেজিস্ট্রেশন করুন',
+    regModalTitle: 'নতুন কারিগর রেজিস্ট্রেশন (Artisan Registration)',
+    regModalSub: 'কলাসেতুতে যোগ দিতে আপনার পরিচয় বিবরণ দিন',
+    fullNameLabel: 'সম্পূর্ণ নাম *',
+    fullNamePlaceholder: 'আপনার সম্পূর্ণ নাম লিখুন',
+    mobileLabel: 'মোবাইল নম্বর *',
+    mobilePlaceholder: '১০ সংখ্যার মোবাইল নম্বর',
+    aadhaarLabel: 'আধার কার্ড নম্বর *',
+    aadhaarPlaceholder: '১২ সংখ্যার আধার নম্বর লিখুন',
+    panLabel: 'প্যান কার্ড নম্বর *',
+    panPlaceholder: '১০ অক্ষরের PAN নম্বর (যেমন ABCDE1234F)',
+    gstinLabel: 'জিএসটিআইএন নম্বর (ঐচ্ছিক)',
+    gstinPlaceholder: '১৫ সংখ্যার GSTIN লিখুন (যদি থাকে)',
+    categoryLabel: 'শ্রেণী (Category) *',
+    categories: [
+      { key: 'individual', label: 'ব্যক্তিগত শিল্পী / কারিগর' },
+      { key: 'shg', label: 'মহিলা স্বনির্ভর গোষ্ঠী (Woman SHG)' },
+      { key: 'sc_st', label: 'তপশিলী জাতি / উপজাতি (SC/ST)' },
+      { key: 'obc', label: 'অন্যান্য অনগ্রসর শ্রেণী (OBC)' },
+      { key: 'pwd', label: 'বিশেষভাবে সক্ষম (PWD)' },
+    ],
+    regSubmitBtn: 'এগিয়ে যান →',
+    errFullName: 'দয়া করে আপনার সম্পূর্ণ নাম লিখুন।',
+    errMobile: 'দয়া করে ১০ সংখ্যার একটি বৈধ মোবাইল নম্বর লিখুন।',
+    errAadhaar: 'দয়া করে ১২ সংখ্যার একটি বৈধ আধার নম্বর লিখুন।',
+    errPan: 'দয়া করে ১০ অক্ষরের একটি বৈধ প্যান নম্বর লিখুন।',
+    closeText: 'বন্ধ করুন',
+  },
+  bho: {
+    tagline: 'रउआ कला, रउआ पहचान',
+    formTitle: 'मोबाइल नंबर डालीं',
+    placeholder: 'अपना १० अंक के मोबाइल नंबर लिखीं',
+    button: 'आगे बढ़ीं',
+    or: 'या',
+    shgTitle: 'महिला SHG समूह बनाईं',
+    shgSubtitle: 'संगे काम करीं, बड़का ऑर्डर पावीं\nऔर कमाई बढ़ाईं',
+    trust1: 'सुरक्षित\nऔर भरोसेमंद',
+    trust2: 'भारतीय कलाकारन\nखातिर',
+    trust3: 'बिकीं, कमाईं\nऔर आगे बढ़ीं',
+    alertError: 'कृपया १० अंक के वैध मोबाइल नंबर डालीं।',
+    alertSuccess: 'ओटीपी भेजल गइल:',
+    modalTitle: 'भाषा चुनीं / Select Language',
+    newRegisterPrompt: 'नया खाता बनाईं? ',
+    newRegisterLink: 'इहाँ रजिस्ट्रेशन करीं',
+    regModalTitle: 'नया कारीगर रजिस्ट्रेशन (Artisan Registration)',
+    regModalSub: 'कलासेतु से जुड़े खातिर आपन पहचान विवरण भरीं',
+    fullNameLabel: 'पूरा नाम *',
+    fullNamePlaceholder: 'आपन पूरा नाम डालीं',
+    mobileLabel: 'मोबाइल नंबर *',
+    mobilePlaceholder: '१० अंक के मोबाइल नंबर',
+    aadhaarLabel: 'आधार कार्ड नंबर *',
+    aadhaarPlaceholder: '१२-अंक के आधार नंबर डालीं',
+    panLabel: 'पैन कार्ड नंबर *',
+    panPlaceholder: '१०-अंक के PAN नंबर (जैसे ABCDE1234F)',
+    gstinLabel: 'जीएसटी नंबर (GSTIN - ऐच्छिक)',
+    gstinPlaceholder: '१५-अंक के GSTIN डालीं',
+    categoryLabel: 'श्रेणी (Category) *',
+    categories: [
+      { key: 'individual', label: 'व्यक्तिगत कलाकार / कारीगर' },
+      { key: 'shg', label: 'महिला स्व-सहायता समूह (Woman SHG)' },
+      { key: 'sc_st', label: 'अनुसूचित जाति / जनजाति (SC/ST)' },
+      { key: 'obc', label: 'अन्य पिछड़ा वर्ग (OBC)' },
+      { key: 'pwd', label: 'दिव्यांगजन (PWD)' },
+    ],
+    regSubmitBtn: 'आगे बढ़ीं →',
+    errFullName: 'कृपया आपन पूरा नाम डालीं।',
+    errMobile: 'कृपया १० अंक के वैध मोबाइल नंबर डालीं।',
+    errAadhaar: 'कृपया १२ अंक के वैध आधार नंबर डालीं।',
+    errPan: 'कृपया १० अंक के वैध पैन नंबर डालीं।',
+    closeText: 'बंद करीं',
+  },
+  mr: {
+    tagline: 'तुमची कला, तुमची ओळख',
+    formTitle: 'मोबाईल नंबर प्रविष्ट करा',
+    placeholder: 'तुमचा १० अंकी मोबाईल नंबर टाका',
+    button: 'पुढे जा',
+    or: 'किंवा',
+    shgTitle: 'महिला बचत गट (SHG) तयार करा',
+    shgSubtitle: 'एकत्र काम करा, मोठ्या ऑर्डर्स मिळवा\nआणि उत्पन्न वाढवा',
+    trust1: 'सुरक्षित आणि\nविश्वासार्ह',
+    trust2: 'भारतीय कारागिरांसाठी',
+    trust3: 'विक्री करा, कमवा\nआणि पुढे जा',
+    alertError: 'कृपया १० अंकी वैध मोबाईल नंबर प्रविष्ट करा.',
+    alertSuccess: 'ओटीपी पाठवला:',
+    modalTitle: 'भाषा निवडा / Select Language',
+    newRegisterPrompt: 'नवीन खाते तयार करा? ',
+    newRegisterLink: 'येथे नोंदणी करा',
+    regModalTitle: 'नवीन कारागीर नोंदणी (Artisan Registration)',
+    regModalSub: 'कलासेतू मध्ये जोडण्यासाठी तुमची ओळख माहिती भरा',
+    fullNameLabel: 'पूर्ण नाव *',
+    fullNamePlaceholder: 'तुमचे पूर्ण नाव टाका',
+    mobileLabel: 'मोबाईल नंबर *',
+    mobilePlaceholder: '१० अंकी मोबाईल नंबर',
+    aadhaarLabel: 'आधार कार्ड नंबर *',
+    aadhaarPlaceholder: '१२ अंकी आधार नंबर टाका',
+    panLabel: 'पॅन कार्ड नंबर *',
+    panPlaceholder: '१० अंकी PAN नंबर (उदा. ABCDE1234F)',
+    gstinLabel: 'जीएसटी नंबर (GSTIN - ऐच्छिक)',
+    gstinPlaceholder: '१५ अंकी GSTIN टाका (उपलब्ध असल्यास)',
+    categoryLabel: 'वर्ग (Category) *',
+    categories: [
+      { key: 'individual', label: 'वैयक्तिक कलाकार / कारागीर' },
+      { key: 'shg', label: 'महिला स्वयं सहाय्यता गट (Woman SHG)' },
+      { key: 'sc_st', label: 'अनुसूचित जाती / जमाती (SC/ST)' },
+      { key: 'obc', label: 'इतर मागासवर्ग (OBC)' },
+      { key: 'pwd', label: 'दिव्यांग (PWD)' },
+    ],
+    regSubmitBtn: 'पुढे जा →',
+    errFullName: 'कृपया तुमचे पूर्ण नाव टाका.',
+    errMobile: 'कृपया १० अंकी वैध मोबाईल नंबर टाका.',
+    errAadhaar: 'कृपया १२ अंकी वैध आधार नंबर टाका.',
+    errPan: 'कृपया १० अंकी वैध पॅन नंबर टाका.',
+    closeText: 'बंद करा',
+  },
+  gu: {
+    tagline: 'તમારી કળા, તમારી ઓળખ',
+    formTitle: 'મોબાઇલ નંબર દાખલ કરો',
+    placeholder: 'તમારો ૧૦ અંકનો મોબાઇલ નંબર લખો',
+    button: 'આગળ વધો',
+    or: 'અથવા',
+    shgTitle: 'મહિલા બચત જૂથ (SHG) બનાવો',
+    shgSubtitle: 'સાથે મળીને કામ કરો, મોટા ઓર્ડર મેળવો\nઅને આવક વધારો',
+    trust1: 'સુરક્ષિત અને\nવિશ્વસનીય',
+    trust2: 'ભારતીય કારીગરો\nમાટે',
+    trust3: 'વેચો, કમાઓ\nઅને આગળ વધો',
+    alertError: 'કૃપા કરીને ૧૦ અંકનો માન્ય મોબાઇલ નંબર દાખલ કરો.',
+    alertSuccess: 'ઓટીપી મોકલ્યો:',
+    modalTitle: 'ભાષા પસંદ કરો / Select Language',
+    newRegisterPrompt: 'નવું ખાતું બનાવો? ',
+    newRegisterLink: 'અહીં નોંધણી કરો',
+    regModalTitle: 'નવી કારીગર નોંધણી (Artisan Registration)',
+    regModalSub: 'કલાસેતુ સાથે જોડાવા માટે તમારી ઓળખ વિગતો ભરો',
+    fullNameLabel: 'પૂરું નામ *',
+    fullNamePlaceholder: 'તમારું પૂરું નામ લખો',
+    mobileLabel: 'મોબાઇલ નંબર *',
+    mobilePlaceholder: '૧૦ અંકનો મોબાઇલ નંબર',
+    aadhaarLabel: 'આધાર કાર્ડ નંબર *',
+    aadhaarPlaceholder: '૧૨ અંકનો આધાર નંબર લખો',
+    panLabel: 'પાન કાર્ડ નંબર *',
+    panPlaceholder: '૧૦ અક્ષરનો PAN નંબર (જેમ કે ABCDE1234F)',
+    gstinLabel: 'જીએસટી નંબર (GSTIN - મરજિયાત)',
+    gstinPlaceholder: '૧૫ અંકનો GSTIN લખો (જો હોય તો)',
+    categoryLabel: 'કેટેગરી (Category) *',
+    categories: [
+      { key: 'individual', label: 'વ્યક્તિગત કારીગર' },
+      { key: 'shg', label: 'મહિલા સ્વ-સહાય જૂથ (Woman SHG)' },
+      { key: 'sc_st', label: 'અનુસૂચિત જાતિ / જનજાતિ (SC/ST)' },
+      { key: 'obc', label: 'અન્ય પછાત વર્ગ (OBC)' },
+      { key: 'pwd', label: 'દિવ્યાંગ (PWD)' },
+    ],
+    regSubmitBtn: 'આગળ વધો →',
+    errFullName: 'કૃપા કરીને તમારું પૂરું નામ લખો.',
+    errMobile: 'કૃપા કરીને ૧૦ અંકનો માન્ય મોબાઇલ નંબર લખો.',
+    errAadhaar: 'કૃપા કરીને ૧૨ અંકનો માન્ય આધાર નંબર લખો.',
+    errPan: 'કૃપા કરીને ૧૦ અક્ષરનો માન્ય પાન નંબર લખો.',
+    closeText: 'બંધ કરો',
+  },
+  raj: {
+    tagline: 'थांरी कला, थांरी पहचान',
+    formTitle: 'मोबाइल नंबर लिखो',
+    placeholder: 'आपणो १० अंकां रो मोबाइल नंबर लिखो',
+    button: 'आगे बढ़ो',
+    or: 'या',
+    shgTitle: 'महिला SHG समूह बणावो',
+    shgSubtitle: 'सागे काम करो, बड़ा ऑर्डर पाओ\nऔर आपणी कमाई बढ़ावो',
+    trust1: 'सुरक्षित और\nभरोसेमंद',
+    trust2: 'भारतीय कलाकारां\nखातर',
+    trust3: 'बिको, कमावो\nऔर आगे बढ़ो',
+    alertError: 'कृपया १० अंकां रो वैध मोबाइल नंबर लिखो।',
+    alertSuccess: 'ओटीपी भेज्यो गयो:',
+    modalTitle: 'भाषा चूणो / Select Language',
+    newRegisterPrompt: 'नयो खातो बणावो? ',
+    newRegisterLink: 'अठै रजिस्ट्रेशन करो',
+    regModalTitle: 'नयो कारीगर रजिस्ट्रेशन (Artisan Registration)',
+    regModalSub: 'कलासेतु सूं जुड़बा खातर आपणी पहचान लिखो',
+    fullNameLabel: 'पूरो नाम *',
+    fullNamePlaceholder: 'आपणो पूरो नाम लिखो',
+    mobileLabel: 'मोबाइल नंबर *',
+    mobilePlaceholder: '१० अंकां रो मोबाइल नंबर',
+    aadhaarLabel: 'आधार कार्ड नंबर *',
+    aadhaarPlaceholder: '१२-अंकां रो आधार नंबर लिखो',
+    panLabel: 'पैन कार्ड नंबर *',
+    panPlaceholder: '१०-अंकां रो PAN नंबर (जैसूं ABCDE1234F)',
+    gstinLabel: 'जीएसटी नंबर (GSTIN - ऐच्छिक)',
+    gstinPlaceholder: '१५-अंकां रो GSTIN लिखो',
+    categoryLabel: 'श्रेणी (Category) *',
+    categories: [
+      { key: 'individual', label: 'व्यक्तिगत कलाकार / कारीगर' },
+      { key: 'shg', label: 'महिला स्व-सहायता समूह (Woman SHG)' },
+      { key: 'sc_st', label: 'अनुसूचित जाति / जनजाति (SC/ST)' },
+      { key: 'obc', label: 'अन्य पिछड़ा वर्ग (OBC)' },
+      { key: 'pwd', label: 'दिव्यांगजन (PWD)' },
+    ],
+    regSubmitBtn: 'आगे बढ़ो →',
+    errFullName: 'कृपयाण आपणो पूरो नाम लिखो।',
+    errMobile: 'कृपया १० अंकां रो वैध मोबाइल नंबर लिखो।',
+    errAadhaar: 'कृपया १२ अंकां रो वैध आधार नंबर लिखो।',
+    errPan: 'कृपया १० अंकां रो वैध पैन नंबर लिखो।',
+    closeText: 'बंद करो',
+  },
+  kn: {
+    tagline: 'ನಿಮ್ಮ ಕಲೆ, ನಿಮ್ಮ ಗುರುತು',
+    formTitle: 'ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ',
+    placeholder: 'ನಿಮ್ಮ ೧೦ ಅಂಕಿಯ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ಬರೆಯಿರಿ',
+    button: 'ಮುಂದೆ ಸಾಗಿ',
+    or: 'ಅಥವಾ',
+    shgTitle: 'ಮಹಿಳಾ ಎಸ್‌ಎಚ್‌ಜಿ ಗುಂಪು ರಚಿಸಿ',
+    shgSubtitle: 'ಒಟ್ಟಿಗೆ ಕೆಲಸ ಮಾಡಿ, ದೊಡ್ಡ ಆರ್ಡರ್‌ಗಳನ್ನು ಪಡೆಯಿರಿ\nಮತ್ತು ನಿಮ್ಮ ಆದಾಯವನ್ನು ಹೆಚ್ಚಿಸಿ',
+    trust1: 'ಸುರಕ್ಷಿತ ಮತ್ತು\nನಂಬಿಕಾರ್ಹ',
+    trust2: 'ಭಾರತೀಯ ಕುಶಲಕರ್ಮಿಗಳಿಗಾಗಿ',
+    trust3: 'ಮಾರಿ, ಗಳಿಸಿ\nಮತ್ತು ಬೆಳೆಯಿರಿ',
+    alertError: 'ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ೧೦ ಅಂಕಿಯ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ.',
+    alertSuccess: 'ಒಟಿಪಿ ಕಳುಹಿಸಲಾಗಿದೆ:',
+    modalTitle: 'ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ / Select Language',
+    newRegisterPrompt: 'ಹೊಸ ಬಳಕೆದಾರರೆ? ',
+    newRegisterLink: 'ಇಲ್ಲಿ ನೋಂದಾಯಿಸಿ',
+    regModalTitle: 'ಹೊಸ ಕುಶಲಕರ್ಮಿ ನೋಂದಣಿ (Artisan Registration)',
+    regModalSub: 'ಕಲಾಸೇತು ಸೇರಲು ನಿಮ್ಮ ಗುರುತಿನ ವಿವರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ',
+    fullNameLabel: 'ಪೂರ್ಣ ಹೆಸರು *',
+    fullNamePlaceholder: 'ನಿಮ್ಮ ಪೂರ್ಣ ಹೆಸರನ್ನು ನಮೂದಿಸಿ',
+    mobileLabel: 'ಮೊಬೈಲ್ ಸಂಖ್ಯೆ *',
+    mobilePlaceholder: '೧೦ ಅಂಕಿಯ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ',
+    aadhaarLabel: 'ಆಧಾರ್ ಕಾರ್ಡ್ ಸಂಖ್ಯೆ *',
+    aadhaarPlaceholder: '೧೨ ಅಂಕಿಯ ಆಧಾರ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ',
+    panLabel: 'ಪ್ಯಾನ್ ಕಾರ್ಡ್ ಸಂಖ್ಯೆ *',
+    panPlaceholder: '೧೦ ಅಂಕಿಯ PAN ಸಂಖ್ಯೆ (ಉದಾ. ABCDE1234F)',
+    gstinLabel: 'ಜಿಎಸ್‌ಟಿ ಸಂಖ್ಯೆ (ಐಚ್ಛಿಕ)',
+    gstinPlaceholder: '೧೫ ಅಂಕಿಯ GSTIN ನಮೂದಿಸಿ (ಲಭ್ಯವಿದ್ದರೆ)',
+    categoryLabel: 'ವರ್ಗ (Category) *',
+    categories: [
+      { key: 'individual', label: 'ವೈಯಕ್ತಿಕ ಕುಶಲಕರ್ಮಿ' },
+      { key: 'shg', label: 'ಮಹಿಳಾ ಸ್ವಸಹಾಯ ಗುಂಪು (Woman SHG)' },
+      { key: 'sc_st', label: 'ಪರಿಶಿಷ್ಟ ಜಾತಿ / ಪಂಗಡ (SC/ST)' },
+      { key: 'obc', label: 'ಹಿಂದುಳಿದ ವರ್ಗಗಳು (OBC)' },
+      { key: 'pwd', label: 'ವಿಶೇಷ ಚೇತನರು (PWD)' },
+    ],
+    regSubmitBtn: 'ಮುಂದೆ ಸಾಗಿ →',
+    errFullName: 'ದಯವಿಟ್ಟು ನಿಮ್ಮ ಪೂರ್ಣ ಹೆಸರನ್ನು ನಮೂದಿಸಿ.',
+    errMobile: 'ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ೧೦ ಅಂಕಿಯ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ.',
+    errAadhaar: 'ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ೧೨ ಅಂಕಿಯ ಆಧಾರ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂદಿಸಿ.',
+    errPan: 'ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ೧೦ ಅಂಕಿಯ ಪ್ಯಾನ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ.',
+    closeText: 'ಮುಚ್ಚಿ',
+  },
 };
 
 export default function AppLoginScreen() {
@@ -153,8 +408,9 @@ export default function AppLoginScreen() {
   const params = useLocalSearchParams<{ lang?: string }>();
   const [globalLang, setGlobalLang] = useGlobalLang();
 
-  const initialLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
-  const [selectedLang, setSelectedLang] = useState<LangCode>(initialLang);
+  const selectedLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
+  const t = (TRANSLATIONS as any)[selectedLang] || (TRANSLATIONS as any)[globalLang] || TRANSLATIONS.hi;
+
   const [isLangModalVisible, setIsLangModalVisible] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [countryCode, setCountryCode] = useState('+91');
@@ -168,13 +424,10 @@ export default function AppLoginScreen() {
   const [regGstin, setRegGstin] = useState('');
   const [regCategory, setRegCategory] = useState('individual');
 
-  useEffect(() => {
-    if (params.lang && (params.lang === 'hi' || params.lang === 'en')) {
-      setSelectedLang(params.lang as LangCode);
-    }
-  }, [params.lang]);
-
-  const t = TRANSLATIONS[selectedLang] || TRANSLATIONS.hi;
+  const handleLangChange = (code: LangCode) => {
+    setGlobalLang(code);
+    setIsLangModalVisible(false);
+  };
 
   const handleContinue = () => {
     if (phoneNumber.length < 10) {
@@ -209,7 +462,8 @@ export default function AppLoginScreen() {
     router.push('/home');
   };
 
-  const currentLangLabel = LANGUAGES.find((l) => l.code === selectedLang)?.label || 'हिंदी';
+  const currentLangObj = LANGUAGES.find((l) => l.code === selectedLang) || LANGUAGES[1];
+  const currentLangLabel = `${currentLangObj.nativeName} (${currentLangObj.englishName})`;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -363,11 +617,7 @@ export default function AppLoginScreen() {
                     styles.langOption,
                     selectedLang === item.code && styles.langOptionSelected,
                   ]}
-                  onPress={() => {
-                    setSelectedLang(item.code);
-                    setGlobalLang(item.code);
-                    setIsLangModalVisible(false);
-                  }}
+                  onPress={() => handleLangChange(item.code)}
                 >
                   <Text
                     style={[
@@ -375,7 +625,7 @@ export default function AppLoginScreen() {
                       selectedLang === item.code && styles.langOptionTextSelected,
                     ]}
                   >
-                    {item.label}
+                    {item.nativeName} ({item.englishName})
                   </Text>
                   {selectedLang === item.code && (
                     <Ionicons name="checkmark-circle" size={20} color="#3B6029" />
@@ -493,7 +743,7 @@ export default function AppLoginScreen() {
               {/* Category Selection */}
               <Text style={styles.regFieldLabel}>{t.categoryLabel}</Text>
               <View style={styles.categoryContainer}>
-                {t.categories.map((cat) => (
+                {t.categories.map((cat: { key: string; label: string }) => (
                   <TouchableOpacity
                     key={cat.key}
                     style={[

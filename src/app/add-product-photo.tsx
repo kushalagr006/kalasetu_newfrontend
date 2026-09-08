@@ -8,10 +8,15 @@ import {
   ScrollView,
   StatusBar,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import { enhanceCameraPhotoBase64 } from '@/services/apiClient';
+import { setPendingProductPhoto } from '@/utils/photoStore';
+import { useGlobalLang } from '@/utils/languageStore';
 
 type LangCode = 'hi' | 'en';
 
@@ -28,6 +33,7 @@ const TRANSLATIONS: Record<
     photoCapturedToast: string;
     placeCenterText: string;
     photoCapturedBadge: string;
+    enhancingBadge: string;
   }
 > = {
   hi: {
@@ -40,7 +46,8 @@ const TRANSLATIONS: Record<
     retakeBtnText: 'पुनः फ़ोटो लें',
     photoCapturedToast: 'फ़ोटो खींच ली गई है!',
     placeCenterText: 'उत्पाद को फ्रेम के बीच में रखें',
-    photoCapturedBadge: 'फ़ोटो कैप्चर हुई ✓',
+    photoCapturedBadge: '✨ OpenCV AI एनहांस्ड फोटो ✓',
+    enhancingBadge: 'AI द्वारा फोटो एनहांस हो रही है...',
   },
   en: {
     headerTitle: 'Take a photo of your product',
@@ -52,36 +59,113 @@ const TRANSLATIONS: Record<
     retakeBtnText: 'Retake Photo',
     photoCapturedToast: 'Photo captured successfully!',
     placeCenterText: 'Keep product inside frame center',
-    photoCapturedBadge: 'Photo Captured ✓',
+    photoCapturedBadge: '✨ OpenCV AI Enhanced Photo ✓',
+    enhancingBadge: 'Enhancing with AI...',
   },
 };
 
 export default function AddProductPhotoScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ lang?: string }>();
+  const [globalLang] = useGlobalLang();
 
-  const selectedLang: LangCode = (params.lang as LangCode) === 'en' ? 'en' : 'hi';
-  const t = TRANSLATIONS[selectedLang];
+  const selectedLang = (params.lang as string) || globalLang || 'hi';
+  const t = (TRANSLATIONS as any)[selectedLang] || TRANSLATIONS.hi;
 
   const [hasCapturedPhoto, setHasCapturedPhoto] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
   const [isFlashOn, setIsFlashOn] = useState(false);
+
+  const [localPhotoUri, setLocalPhotoUri] = useState<string | null>(null);
+  const [enhancedPhotoUri, setEnhancedPhotoUri] = useState<string | null>(null);
   const [capturedSource, setCapturedSource] = useState<any>(
     require('@/assets/images/product_pot.png')
   );
 
-  const handleCapturePhoto = () => {
-    setCapturedSource(require('@/assets/images/product_pot.png'));
+  const processPhotoUri = async (rawUri: string) => {
+    setLocalPhotoUri(rawUri);
+    setCapturedSource({ uri: rawUri });
+    setIsEnhancing(true);
     setHasCapturedPhoto(true);
+
+    try {
+      const enhancedBase64 = await enhanceCameraPhotoBase64(rawUri);
+      if (enhancedBase64) {
+        setEnhancedPhotoUri(enhancedBase64);
+        setPendingProductPhoto(enhancedBase64, rawUri, true);
+        setCapturedSource({ uri: enhancedBase64 });
+      } else {
+        setEnhancedPhotoUri(rawUri);
+        setPendingProductPhoto(rawUri, rawUri, false);
+      }
+    } catch {
+      setEnhancedPhotoUri(rawUri);
+      setPendingProductPhoto(rawUri, rawUri, false);
+    } finally {
+      setIsEnhancing(false);
+    }
   };
 
-  const handlePickFromGallery = () => {
-    setCapturedSource(require('@/assets/images/product_basket.png'));
-    setHasCapturedPhoto(true);
+  const handleCapturePhoto = async () => {
+    try {
+      const perm = await ImagePicker.requestCameraPermissionsAsync();
+      if (!perm.granted) {
+        alert(selectedLang === 'hi' ? 'कैमरा अनुमति आवश्यक है' : 'Camera permission is required');
+        return;
+      }
+
+      const res = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        quality: 0.9,
+        base64: true,
+        allowsEditing: false,
+      });
+
+      if (!res.canceled && res.assets && res.assets.length > 0) {
+        const asset = res.assets[0];
+        const uri = asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : asset.uri;
+        await processPhotoUri(uri);
+      }
+    } catch (e) {
+      console.log('Camera error:', e);
+    }
+  };
+
+  const handlePickFromGallery = async () => {
+    try {
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!perm.granted) {
+        alert(selectedLang === 'hi' ? 'गैलरी अनुमति आवश्यक है' : 'Gallery permission is required');
+        return;
+      }
+
+      const res = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 0.9,
+        base64: true,
+        allowsEditing: false,
+      });
+
+      if (!res.canceled && res.assets && res.assets.length > 0) {
+        const asset = res.assets[0];
+        const uri = asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : asset.uri;
+        await processPhotoUri(uri);
+      }
+    } catch (e) {
+      console.log('Gallery error:', e);
+    }
   };
 
   const handleProceedNext = () => {
-    // Navigate to the next page where voice (mic) and text options are present
-    router.push({ pathname: '/add-product', params: { lang: selectedLang } });
+    const finalUri = enhancedPhotoUri || localPhotoUri;
+    setPendingProductPhoto(finalUri, localPhotoUri, true);
+    router.push({
+      pathname: '/add-product-details',
+      params: {
+        lang: selectedLang,
+        ...(finalUri ? { photoUri: finalUri } : {}),
+      },
+    });
   };
 
   return (
@@ -151,10 +235,17 @@ export default function AddProductPhotoScreen() {
 
               {hasCapturedPhoto ? (
                 <View style={styles.previewImageContainer}>
-                  <Image source={capturedSource} style={styles.previewImage} resizeMode="cover" />
-                  <View style={styles.capturedBadge}>
-                    <Text style={styles.capturedBadgeText}>{t.photoCapturedBadge}</Text>
-                  </View>
+                  <Image source={capturedSource} style={styles.previewImage} resizeMode="contain" />
+                  {isEnhancing ? (
+                    <View style={styles.enhancingBadgeContainer}>
+                      <ActivityIndicator size="small" color="#FFFFFF" style={{ marginRight: 6 }} />
+                      <Text style={styles.enhancingBadgeText}>{t.enhancingBadge}</Text>
+                    </View>
+                  ) : (
+                    <View style={styles.capturedBadge}>
+                      <Text style={styles.capturedBadgeText}>{t.photoCapturedBadge}</Text>
+                    </View>
+                  )}
                 </View>
               ) : (
                 <View style={styles.cameraLivePlaceholder}>
@@ -250,6 +341,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
+    backgroundColor: '#F0EBE1',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -258,70 +350,61 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '700',
     color: '#1A1A1A',
-    textAlign: 'center',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 4,
-    paddingBottom: 32,
+    paddingHorizontal: 16,
+    paddingBottom: 24,
   },
-  /* Subtitle Banner */
   subtitleBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAF5',
-    borderWidth: 1,
-    borderColor: '#EAEFE8',
-    borderRadius: 14,
-    paddingVertical: 10,
+    backgroundColor: '#EBF3E8',
     paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 10,
     marginBottom: 16,
   },
   subtitleText: {
-    flex: 1,
     fontSize: 13,
-    color: '#444444',
+    color: '#2D4B1E',
     fontWeight: '500',
-    lineHeight: 18,
+    flex: 1,
   },
-  /* Camera Viewfinder Card */
   cameraFrameCard: {
-    backgroundColor: '#0F172A',
-    borderRadius: 24,
-    overflow: 'hidden',
+    backgroundColor: '#1E241B',
+    borderRadius: 16,
+    padding: 12,
     marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
     elevation: 4,
-    ...Platform.select({
-      web: { boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.15)' },
-      default: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 8 },
-    }),
   },
   viewfinderTopBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 10,
+    marginBottom: 10,
   },
   controlIconBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   guidelineBadge: {
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    paddingVertical: 4,
+    backgroundColor: 'rgba(0,0,0,0.4)',
     paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: 12,
   },
   guidelineText: {
@@ -331,13 +414,84 @@ const styles = StyleSheet.create({
   },
   viewportBox: {
     height: 280,
-    marginHorizontal: 14,
-    backgroundColor: '#1E293B',
-    borderRadius: 16,
+    backgroundColor: '#0F130E',
+    borderRadius: 12,
     overflow: 'hidden',
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  cornerReticle: {
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    borderColor: '#84CC16',
+    borderWidth: 3,
+    zIndex: 10,
+  },
+  cornerTL: {
+    top: 12,
+    left: 12,
+    borderRightWidth: 0,
+    borderBottomWidth: 0,
+  },
+  cornerTR: {
+    top: 12,
+    right: 12,
+    borderLeftWidth: 0,
+    borderBottomWidth: 0,
+  },
+  cornerBL: {
+    bottom: 12,
+    left: 12,
+    borderRightWidth: 0,
+    borderTopWidth: 0,
+  },
+  cornerBR: {
+    bottom: 12,
+    right: 12,
+    borderLeftWidth: 0,
+    borderTopWidth: 0,
+  },
+  previewImageContainer: {
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+    backgroundColor: '#FAFAFA',
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+  },
+  capturedBadge: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    backgroundColor: 'rgba(59, 96, 41, 0.92)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  capturedBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  enhancingBadgeContainer: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(30, 64, 175, 0.92)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+  },
+  enhancingBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
   },
   cameraLivePlaceholder: {
     width: '100%',
@@ -347,7 +501,7 @@ const styles = StyleSheet.create({
   sampleLiveStreamImage: {
     width: '100%',
     height: '100%',
-    opacity: 0.8,
+    opacity: 0.85,
   },
   gridOverlay: {
     ...StyleSheet.absoluteFill,
@@ -358,91 +512,32 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 1,
     height: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
   },
   gridLineH: {
     position: 'absolute',
     height: 1,
     width: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-  },
-  cornerReticle: {
-    position: 'absolute',
-    width: 24,
-    height: 24,
-    borderColor: '#3B6029',
-    zIndex: 10,
-  },
-  cornerTL: {
-    top: 12,
-    left: 12,
-    borderTopWidth: 3,
-    borderLeftWidth: 3,
-    borderTopLeftRadius: 6,
-  },
-  cornerTR: {
-    top: 12,
-    right: 12,
-    borderTopWidth: 3,
-    borderRightWidth: 3,
-    borderTopRightRadius: 6,
-  },
-  cornerBL: {
-    bottom: 12,
-    left: 12,
-    borderBottomWidth: 3,
-    borderLeftWidth: 3,
-    borderBottomLeftRadius: 6,
-  },
-  cornerBR: {
-    bottom: 12,
-    right: 12,
-    borderBottomWidth: 3,
-    borderRightWidth: 3,
-    borderBottomRightRadius: 6,
-  },
-  previewImageContainer: {
-    width: '100%',
-    height: '100%',
-    position: 'relative',
-  },
-  previewImage: {
-    width: '100%',
-    height: '100%',
-  },
-  capturedBadge: {
-    position: 'absolute',
-    top: 12,
-    alignSelf: 'center',
-    backgroundColor: '#3B6029',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-  },
-  capturedBadgeText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    backgroundColor: 'rgba(255,255,255,0.15)',
   },
   shutterRow: {
-    paddingVertical: 18,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingTop: 12,
   },
   shutterButtonOuter: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    borderWidth: 4,
-    borderColor: '#FFFFFF',
-    padding: 3,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#84CC16',
+    padding: 4,
     alignItems: 'center',
     justifyContent: 'center',
   },
   shutterButtonInner: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 30,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
@@ -451,42 +546,40 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingVertical: 8,
     paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
   },
   retakeBtnText: {
-    fontSize: 14,
-    fontWeight: '600',
     color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
   },
-  /* Gallery Card */
   galleryCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E2E0D8',
-    borderRadius: 16,
     padding: 14,
-    marginBottom: 20,
-    elevation: 1,
+    borderRadius: 14,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   galleryIconCircle: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#EEF5EC',
+    backgroundColor: '#EBF3E8',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+    marginRight: 12,
   },
   galleryTextGroup: {
     flex: 1,
   },
   galleryTitle: {
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: '#1A1A1A',
     marginBottom: 2,
   },
@@ -494,23 +587,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666666',
   },
-  /* Proceed Button */
   proceedButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#3B6029',
+    paddingVertical: 14,
     borderRadius: 14,
-    height: 54,
-    elevation: 3,
-    ...Platform.select({
-      web: { boxShadow: '0px 3px 5px rgba(59, 96, 41, 0.25)' },
-      default: { shadowColor: '#3B6029', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.25, shadowRadius: 5 },
-    }),
   },
   proceedButtonText: {
-    fontSize: 17,
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 });

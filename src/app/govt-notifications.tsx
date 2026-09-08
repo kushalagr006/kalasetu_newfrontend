@@ -124,7 +124,7 @@ export default function GovtNotificationsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [notifList, setNotifList] = useState(INITIAL_NOTIFICATIONS);
 
-  const t = TRANSLATIONS[selectedLang as keyof typeof TRANSLATIONS];
+  const t = (TRANSLATIONS as any)[selectedLang] || TRANSLATIONS.hi;
   const isHindi = selectedLang === 'hi';
 
   const filteredNotifs = notifList.filter((item) => {

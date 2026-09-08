@@ -109,7 +109,7 @@ export default function GovtSettingsScreen() {
   const [orderUpdates, setOrderUpdates] = useState(true);
   const [tenderUpdates, setTenderUpdates] = useState(true);
 
-  const t = TRANSLATIONS[selectedLang as keyof typeof TRANSLATIONS];
+  const t = (TRANSLATIONS as any)[selectedLang] || TRANSLATIONS.hi;
   const isHindi = selectedLang === 'hi';
 
   return (

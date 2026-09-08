@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useGlobalLang } from '@/utils/languageStore';
 
 type LangCode = 'hi' | 'en';
 
@@ -72,9 +73,10 @@ const TRANSLATIONS: Record<LangCode, {
 export default function IdentityDetailsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ phone?: string; lang?: string }>();
-  const lang: LangCode = (params.lang as LangCode) === 'hi' ? 'hi' : 'en';
+  const [globalLang] = useGlobalLang();
+  const lang = (params.lang as string) || globalLang || 'hi';
 
-  const t = TRANSLATIONS[lang];
+  const t = (TRANSLATIONS as any)[lang] || TRANSLATIONS.hi;
 
   const [aadhaar, setAadhaar] = useState('');
   const [pan, setPan] = useState('');

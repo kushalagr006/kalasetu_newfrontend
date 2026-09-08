@@ -15,14 +15,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArtisanFloatingNav } from '@/components/ArtisanFloatingNav';
+import { useGlobalLang, setGlobalLang, ALL_LANGUAGES, LangCode } from '@/utils/languageStore';
 
-type LangCode = 'hi' | 'en';
 type ActiveTab = 'home' | 'products' | 'customers' | 'profile';
-
-const LANGUAGES: { code: LangCode; label: string }[] = [
-  { code: 'hi', label: 'हिंदी' },
-  { code: 'en', label: 'English' },
-];
 
 const TRANSLATIONS: Record<LangCode, {
   headerTitle: string;
@@ -108,19 +103,196 @@ const TRANSLATIONS: Record<LangCode, {
     navProfile: 'Profile',
     modalTitle: 'Select Language / भाषा चुनें',
   },
+  bn: {
+    headerTitle: 'প্রোফাইল',
+    shgName: 'সুনীতা দেবী (কারুশিল্পী)',
+    location: 'রামপুর, ধামতরি',
+    members: 'কারুশিল্পী সদস্য',
+    joined: 'যুক্ত হয়েছেন: মে ২০২৫',
+    editBtn: 'সম্পাদনা করুন',
+    contactHeader: 'যোগাযোগের তথ্য',
+    phoneLabel: 'মোবাইল নম্বর',
+    emailLabel: 'ইমেইল (ঐচ্ছিক)',
+    addressLabel: 'সম্পূর্ণ ঠিকানা',
+    addressVal: 'রামপুর গ্রাম, ধামতরি,\nছত্রিশগড় - ৪৯৩৭৭৩',
+    shgHeader: 'প্রোফাইল বিবরণ',
+    craftLabel: 'হস্তশিল্পের ধরন',
+    craftVal: 'হস্তশিল্প সামগ্রী',
+    memberCountLabel: 'অভিজ্ঞতা',
+    aboutLabel: 'আমাদের সম্পর্কে',
+    aboutVal: 'আমরা সুন্দর এবং উচ্চমানের হাতে তৈরি পণ্য তৈরি করি।',
+    logoutBtn: 'লগ আউট (Log Out)',
+    logoutTitle: 'লগ আউট করবেন?',
+    logoutMsg: 'আপনি কি নিশ্চিত যে অ্যাপ থেকে লগ আউট করতে চান?',
+    cancel: 'বাতিল',
+    navHome: 'হোম',
+    navProducts: 'পণ্য',
+    navCustomers: 'গ্রাহক',
+    navProfile: 'প্রোফাইল',
+    modalTitle: 'ভাষা নির্বাচন করুন / Select Language',
+  },
+  bho: {
+    headerTitle: 'प्रोफाइल',
+    shgName: 'सुनीता देवी (कारीगर)',
+    location: 'रामपुर, धमतरी',
+    members: 'कारीगर सदस्य',
+    joined: 'जुड़ल: मई 2025',
+    editBtn: 'बदलीं',
+    contactHeader: 'संपर्क जानकारी',
+    phoneLabel: 'मोबाइल नंबर',
+    emailLabel: 'ईमेल (यदि बा)',
+    addressLabel: 'पूरा पता',
+    addressVal: 'रामपुर गांव, धमतरी,\nछत्तीसगढ़ - 493773',
+    shgHeader: 'प्रोफाइल विवरण',
+    craftLabel: 'हस्तशिल्प प्रकार',
+    craftVal: 'हैंडिक्राफ्ट सामान',
+    memberCountLabel: 'अनुभव',
+    aboutLabel: 'हमरा बारे में',
+    aboutVal: 'हमनी सुंदर अउरी बढ़िया क्वालिटी के हाथ के बनल सामान बनाइले।',
+    logoutBtn: 'लॉग आउट (Log Out)',
+    logoutTitle: 'लॉग आउट करीं?',
+    logoutMsg: 'का रउआ सचमुच ऐप से लॉग आउट करे के चाहत बानी?',
+    cancel: 'रद्द करीं',
+    navHome: 'होम',
+    navProducts: 'सामान',
+    navCustomers: 'ग्राहक',
+    navProfile: 'प्रोफाइल',
+    modalTitle: 'भाषा चुनीं / Select Language',
+  },
+  mr: {
+    headerTitle: 'प्रोफाइल',
+    shgName: 'सुनिता देवी (कारागीर)',
+    location: 'रामपूर, धमतरी',
+    members: 'कारागीर सदस्य',
+    joined: 'सामील: मे २०२५',
+    editBtn: 'संपादित करा',
+    contactHeader: 'संपर्क माहिती',
+    phoneLabel: 'मोबाईल नंबर',
+    emailLabel: 'ईमेल (ऐच्छिक)',
+    addressLabel: 'पूर्ण पत्ता',
+    addressVal: 'रामपूर गाव, धमतरी,\nछत्तीसगड - ४९३७त्७३',
+    shgHeader: 'प्रोफाइल तपशील',
+    craftLabel: 'हस्तकला प्रकार',
+    craftVal: 'हस्तकला वस्तू',
+    memberCountLabel: 'अनुभव',
+    aboutLabel: 'आमच्याबद्दल',
+    aboutVal: 'आम्ही सुंदर आणि उच्च दर्जाच्या हस्तनिर्मित वस्तू बनवतो.',
+    logoutBtn: 'लॉग आउट (Log Out)',
+    logoutTitle: 'लॉग आउट करायचे?',
+    logoutMsg: 'तुम्हाला खरोखर ॲपवरून लॉग आउट करायचे आहे का?',
+    cancel: 'रद्द करा',
+    navHome: 'होम',
+    navProducts: 'उत्पादने',
+    navCustomers: 'ग्राहक',
+    navProfile: 'प्रोफाइल',
+    modalTitle: 'भाषा निवडा / Select Language',
+  },
+  gu: {
+    headerTitle: 'પ્રોફાઇલ',
+    shgName: 'સુનિતા દેવી (કારીગર)',
+    location: 'રામપુર, ધમતરી',
+    members: 'કારીગર સભ્ય',
+    joined: 'જોડાયા: મે 2025',
+    editBtn: 'સંપાદિત કરો',
+    contactHeader: 'સંપર્ક માહિતી',
+    phoneLabel: 'મોબાઇલ નંબર',
+    emailLabel: 'ઇમેઇલ (વૈકલ્પિક)',
+    addressLabel: 'પૂરું સરનામું',
+    addressVal: 'રામપુર ગામ, ધમતરી,\nછત્તીસગઢ - 493773',
+    shgHeader: 'પ્રોફાઇલ વિગતો',
+    craftLabel: 'હસ્તકળા પ્રકાર',
+    craftVal: 'હસ્તકળા વસ્તુઓ',
+    memberCountLabel: 'અનુભવ',
+    aboutLabel: 'અમારા વિશે',
+    aboutVal: 'અમે સુંદર અને ઉચ્ચ ગુણવત્તાવાળા હસ્તનિર્મિત ઉત્પાદનો બનાવીએ છીએ.',
+    logoutBtn: 'લોગ આઉટ (Log Out)',
+    logoutTitle: 'લોગ આઉટ કરવું છે?',
+    logoutMsg: 'શું તમે ખરેખર એપમાંથી લોગ આઉટ કરવા માંગો છો?',
+    cancel: 'રદ કરો',
+    navHome: 'હોમ',
+    navProducts: 'ઉત્પાદનો',
+    navCustomers: 'ગ્રાહકો',
+    navProfile: 'પ્રોફાઇલ',
+    modalTitle: 'ભાષા પસંદ કરો / Select Language',
+  },
+  raj: {
+    headerTitle: 'प्रोफाइल',
+    shgName: 'सुनीता देवी (कारीगर)',
+    location: 'रामपुर, धमतरी',
+    members: 'कारीगर सदस्य',
+    joined: 'जुड़्या: मई 2025',
+    editBtn: 'बदलो',
+    contactHeader: 'संपर्क जाणकारी',
+    phoneLabel: 'मोबाइल नंबर',
+    emailLabel: 'ईमेल (यदि है)',
+    addressLabel: 'पूरो पत्तो',
+    addressVal: 'रामपुर गांव, धमतरी,\nछत्तीसगढ़ - 493773',
+    shgHeader: 'प्रोफाइल विवरण',
+    craftLabel: 'हस्तशिल्प प्रकार',
+    craftVal: 'हैंडिक्राफ्ट सामान',
+    memberCountLabel: 'अनुभव',
+    aboutLabel: 'म्हांरा बारे मांय',
+    aboutVal: 'म्हे चोखा अर बढ़िया क्वालिटी रा हाथ सूं बन्योड़ा सामानां बनावां।',
+    logoutBtn: 'लॉग आउट (Log Out)',
+    logoutTitle: 'लॉग आउट करोला?',
+    logoutMsg: 'कां आप सचमुच ऐप सूं लॉग आउट करबो चाहो?',
+    cancel: 'रद्द करो',
+    navHome: 'होम',
+    navProducts: 'सामान',
+    navCustomers: 'ग्राहक',
+    navProfile: 'प्रोफाइल',
+    modalTitle: 'भाषा चूणो / Select Language',
+  },
+  kn: {
+    headerTitle: 'ಪ್ರೊಫೈಲ್',
+    shgName: 'ಸುನೀತಾ ದೇವಿ (ಕುಶಲಕರ್ಮಿ)',
+    location: 'ರಾಮಪುರ, ಧಮ್ತರಿ',
+    members: 'ಕುಶಲಕರ್ಮಿ ಸದಸ್ಯೆ',
+    joined: 'ಸೇರ್ಪಡೆ: ಮೇ 2025',
+    editBtn: 'ಸಂಪಾದಿಸಿ',
+    contactHeader: 'ಸಂಪರ್ಕ ಮಾಹಿತಿ',
+    phoneLabel: 'ಮೊಬೈಲ್ ಸಂಖ್ಯೆ',
+    emailLabel: 'ಇಮೇಲ್ (ಐಚ್ಛಿಕ)',
+    addressLabel: 'ಪೂರ್ಣ ವಿಳಾಸ',
+    addressVal: 'ರಾಮಪುರ ಗ್ರಾಮ, ಧಮ್ತರಿ,\nಛತ್ತೀಸ್‌ಗಢ - 493773',
+    shgHeader: 'ಪ್ರೊಫೈಲ್ ವಿವರಗಳು',
+    craftLabel: 'ಕರಕುಶಲ ಪ್ರಕಾರ',
+    craftVal: 'ಕರಕುಶಲ ವಸ್ತುಗಳು',
+    memberCountLabel: 'ಅನುಭವ',
+    aboutLabel: 'ನಮ್ಮ ಬಗ್ಗೆ',
+    aboutVal: 'ನಾವು ಸುಂದರವಾದ ಮತ್ತು ಉತ್ತಮ ಗುಣಮಟ್ಟದ ಹಸ್ತಾಲಂಕಾರದ ಉತ್ಪನ್ನಗಳನ್ನು ತಯಾರಿಸುತ್ತೇವೆ.',
+    logoutBtn: 'ಲಾಗ್ ಔಟ್ (Log Out)',
+    logoutTitle: 'ಲಾಗ್ ಔಟ್ ಮಾಡಬೇಕೇ?',
+    logoutMsg: 'ನೀವು ನಿಜವಾಗಿಯೂ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಲಾಗ್ ಔಟ್ ಮಾಡಲು ಬಯಸುತ್ತೀರಾ?',
+    cancel: 'ರದ್ದುಗೊಳಿಸಿ',
+    navHome: 'ಹೋಮ್',
+    navProducts: 'ಉತ್ಪನ್ನಗಳು',
+    navCustomers: 'ಗ್ರಾಹಕರು',
+    navProfile: 'ಪ್ರೊಫೈಲ್',
+    modalTitle: 'ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ / Select Language',
+  },
 };
 
 export default function ProfileScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ lang?: string }>();
-  const initialLang: LangCode = (params.lang as LangCode) || 'hi';
+  const [globalLang] = useGlobalLang();
+  const initialLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
 
   const [selectedLang, setSelectedLang] = useState<LangCode>(initialLang);
+
+  React.useEffect(() => {
+    if (globalLang) {
+      setSelectedLang(globalLang);
+    }
+  }, [globalLang]);
+
   const [isLangModalVisible, setIsLangModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('profile');
 
-  const t = TRANSLATIONS[selectedLang];
-  const currentLangLabel = LANGUAGES.find((l) => l.code === selectedLang)?.label || 'हिंदी';
+  const t = TRANSLATIONS[selectedLang] || TRANSLATIONS.hi;
+  const currentLangObj = ALL_LANGUAGES.find((l) => l.code === selectedLang) || ALL_LANGUAGES[1];
+  const currentLangLabel = `${currentLangObj.nativeName} (${currentLangObj.englishName})`;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -285,7 +457,7 @@ export default function ProfileScreen() {
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>{t.modalTitle}</Text>
               <FlatList
-                data={LANGUAGES}
+                data={ALL_LANGUAGES}
                 keyExtractor={(item) => item.code}
                 renderItem={({ item }) => (
                   <TouchableOpacity
@@ -295,6 +467,7 @@ export default function ProfileScreen() {
                     ]}
                     onPress={() => {
                       setSelectedLang(item.code);
+                      setGlobalLang(item.code);
                       setIsLangModalVisible(false);
                     }}
                   >
@@ -304,7 +477,7 @@ export default function ProfileScreen() {
                         selectedLang === item.code ? styles.langOptionTextSelected : null,
                       ]}
                     >
-                      {item.label}
+                      {item.nativeName} ({item.englishName})
                     </Text>
                     {selectedLang === item.code && (
                       <Ionicons name="checkmark" size={20} color="#3B6029" />

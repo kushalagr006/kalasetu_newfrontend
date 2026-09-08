@@ -16,13 +16,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useGlobalLang, LangCode } from '@/utils/languageStore';
+import { enhanceCameraPhotoBase64 } from '@/services/apiClient';
+import { setPendingProductPhoto } from '@/utils/photoStore';
+import { ActivityIndicator } from 'react-native';
 
 const LANGUAGES: { code: LangCode; label: string }[] = [
   { code: 'hi', label: 'हिंदी' },
   { code: 'en', label: 'English' },
 ];
 
-const TRANSLATIONS: Record<LangCode, {
+const TRANSLATIONS: Record<string, {
   headerTitle: string;
   camHint: string;
   camSub: string;
@@ -63,7 +66,7 @@ export default function AddProductCameraScreen() {
     (params.lang as LangCode) || (globalLang === 'en' ? 'en' : 'hi');
   const [isLangModalVisible, setIsLangModalVisible] = useState(false);
 
-  const t = TRANSLATIONS[selectedLang] || TRANSLATIONS.hi;
+  const t = (TRANSLATIONS as any)[selectedLang] || TRANSLATIONS.hi;
   const currentLangLabel = LANGUAGES.find((l) => l.code === selectedLang)?.label || 'हिंदी';
 
   const videoRef = useRef<any>(null);
@@ -71,6 +74,31 @@ export default function AddProductCameraScreen() {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [hasSnapped, setHasSnapped] = useState(false);
   const [isWebCamActive, setIsWebCamActive] = useState(false);
+
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
+
+  const processAndEnhanceImage = async (rawUri: string) => {
+    setCapturedImage(rawUri);
+    setHasSnapped(true);
+    setIsEnhancing(true);
+
+    try {
+      const enhancedBase64 = await enhanceCameraPhotoBase64(rawUri);
+      if (enhancedBase64) {
+        setEnhancedImage(enhancedBase64);
+        setPendingProductPhoto(enhancedBase64, rawUri, true);
+      } else {
+        setEnhancedImage(rawUri);
+        setPendingProductPhoto(rawUri, rawUri, false);
+      }
+    } catch {
+      setEnhancedImage(rawUri);
+      setPendingProductPhoto(rawUri, rawUri, false);
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
 
   // Initialize Web RTC Camera if running in web browser
   useEffect(() => {
@@ -137,11 +165,13 @@ export default function AddProductCameraScreen() {
         mediaTypes: ['images'],
         allowsEditing: false,
         quality: 0.8,
+        base64: true,
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        setCapturedImage(result.assets[0].uri);
-        setHasSnapped(true);
+        const asset = result.assets[0];
+        const uri = asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : asset.uri;
+        await processAndEnhanceImage(uri);
       }
     } catch (err) {
       console.log('Error launching camera:', err);
@@ -165,11 +195,13 @@ export default function AddProductCameraScreen() {
         mediaTypes: ['images'],
         allowsEditing: false,
         quality: 0.8,
+        base64: true,
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        setCapturedImage(result.assets[0].uri);
-        setHasSnapped(true);
+        const asset = result.assets[0];
+        const uri = asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : asset.uri;
+        await processAndEnhanceImage(uri);
       }
     } catch (err) {
       console.log('Error opening gallery:', err);
@@ -180,6 +212,7 @@ export default function AddProductCameraScreen() {
     if (hasSnapped) {
       // Retake photo
       setCapturedImage(null);
+      setEnhancedImage(null);
       setHasSnapped(false);
       if (Platform.OS !== 'web') {
         launchNativeCamera();
@@ -197,8 +230,7 @@ export default function AddProductCameraScreen() {
         if (ctx) {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
           const dataUrl = canvas.toDataURL('image/jpeg');
-          setCapturedImage(dataUrl);
-          setHasSnapped(true);
+          processAndEnhanceImage(dataUrl);
           return;
         }
       } catch (err) {
@@ -211,9 +243,16 @@ export default function AddProductCameraScreen() {
   };
 
   const handleNext = () => {
+    const finalUri = enhancedImage || capturedImage;
+    if (finalUri) {
+      setPendingProductPhoto(finalUri, capturedImage, true);
+    }
     router.push({
       pathname: '/add-product-details',
-      params: { lang: selectedLang },
+      params: {
+        lang: selectedLang,
+        ...(finalUri ? { photoUri: finalUri } : {}),
+      },
     });
   };
 
@@ -271,12 +310,50 @@ export default function AddProductCameraScreen() {
               onPress={handleSnapPhoto}
               activeOpacity={0.9}
             >
-              {hasSnapped && capturedImage ? (
-                <Image
-                  source={{ uri: capturedImage }}
-                  style={styles.capturedPhoto}
-                  resizeMode="cover"
-                />
+              {hasSnapped && (enhancedImage || capturedImage) ? (
+                <View style={{ width: '100%', height: '100%', position: 'relative' }}>
+                  <Image
+                    source={{ uri: enhancedImage || capturedImage || '' }}
+                    style={styles.capturedPhoto}
+                    resizeMode="cover"
+                  />
+                  {isEnhancing ? (
+                    <View style={{
+                      position: 'absolute',
+                      bottom: 12,
+                      left: 12,
+                      right: 12,
+                      backgroundColor: 'rgba(0,0,0,0.75)',
+                      borderRadius: 8,
+                      paddingVertical: 6,
+                      paddingHorizontal: 12,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <ActivityIndicator size="small" color="#FFFFFF" style={{ marginRight: 8 }} />
+                      <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: 'bold' }}>
+                        {selectedLang === 'hi' ? 'AI द्वारा फोटो एनहांस हो रही है...' : 'Enhancing with AI...'}
+                      </Text>
+                    </View>
+                  ) : enhancedImage ? (
+                    <View style={{
+                      position: 'absolute',
+                      bottom: 12,
+                      left: 12,
+                      right: 12,
+                      backgroundColor: '#3B6029',
+                      borderRadius: 8,
+                      paddingVertical: 6,
+                      paddingHorizontal: 12,
+                      alignItems: 'center',
+                    }}>
+                      <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: 'bold' }}>
+                        {selectedLang === 'hi' ? '✨ OpenCV AI एनहांस्ड फोटो ✓' : '✨ OpenCV AI Enhanced Photo ✓'}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
               ) : Platform.OS === 'web' && isWebCamActive ? (
                 React.createElement('video', {
                   ref: videoRef,

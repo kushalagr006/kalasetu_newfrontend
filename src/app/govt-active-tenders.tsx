@@ -190,7 +190,7 @@ export default function GovtActiveTendersScreen() {
   const [categoryFilter] = useState('All');
   const [statusFilter] = useState('All');
 
-  const t = TRANSLATIONS[selectedLang as keyof typeof TRANSLATIONS];
+  const t = (TRANSLATIONS as any)[selectedLang] || TRANSLATIONS.hi;
   const isHindi = selectedLang === 'hi';
 
   const filteredTenders = TENDERS_LIST.filter((item) => {

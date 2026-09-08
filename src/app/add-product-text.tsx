@@ -8,18 +8,22 @@ import {
   StatusBar,
   Platform,
   TextInput,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { getPendingProductPhoto } from '@/utils/photoStore';
+import { useGlobalLang } from '@/utils/languageStore';
 
 type LangCode = 'hi' | 'en';
 
 export default function AddProductTextScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ lang?: string }>();
+  const [globalLang] = useGlobalLang();
 
-  const selectedLang: LangCode = (params.lang as LangCode) || 'hi';
+  const selectedLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
   const isHindi = selectedLang === 'hi';
 
   const [productName, setProductName] = useState('');
@@ -42,6 +46,9 @@ export default function AddProductTextScreen() {
     );
     router.push({ pathname: '/products', params: { lang: selectedLang } });
   };
+
+  const pendingPhoto = getPendingProductPhoto();
+  const photoUri = pendingPhoto.photoUri;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -76,6 +83,35 @@ export default function AddProductTextScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
+          {/* Enhanced Photo Banner Preview */}
+          {photoUri && (
+            <View style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: '#FFFFFF',
+              borderRadius: 14,
+              padding: 10,
+              marginBottom: 16,
+              borderWidth: 1,
+              borderColor: '#EFECE6',
+              elevation: 2,
+            }}>
+              <Image
+                source={{ uri: photoUri }}
+                style={{ width: 64, height: 64, borderRadius: 10, backgroundColor: '#F0F0F0' }}
+                resizeMode="cover"
+              />
+              <View style={{ marginLeft: 12, flex: 1 }}>
+                <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#3B6029' }}>
+                  {isHindi ? '✨ AI एनहांस्ड फोटो संलग्न' : '✨ AI Enhanced Photo Attached'}
+                </Text>
+                <Text style={{ fontSize: 11, color: '#666666', marginTop: 2 }}>
+                  {isHindi ? 'यह फोटो आपके उत्पाद के साथ दिखेगी' : 'This photo will be displayed with your product'}
+                </Text>
+              </View>
+            </View>
+          )}
+
           {/* Top Info Banner Card */}
           <View style={styles.infoBanner}>
             <View style={styles.pencilCircleSmall}>

@@ -11,45 +11,45 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { setGlobalLang, LangCode } from '@/utils/languageStore';
+import { getUITranslations } from '@/utils/translations';
 
 type LangOption = {
-  id: string;
-  code: string;
+  id: LangCode;
+  code: LangCode;
   nativeName: string;
   englishName: string;
-  isOther?: boolean;
 };
 
 const LANGUAGE_LIST: LangOption[] = [
-  { id: 'hi', code: 'hi', nativeName: 'हिंदी', englishName: 'Hindi' },
   { id: 'en', code: 'en', nativeName: 'English', englishName: 'English' },
+  { id: 'hi', code: 'hi', nativeName: 'हिंदी', englishName: 'Hindi' },
   { id: 'bn', code: 'bn', nativeName: 'বাংলা', englishName: 'Bengali' },
+  { id: 'bho', code: 'bho', nativeName: 'भोजपुरी', englishName: 'Bhojpuri' },
   { id: 'mr', code: 'mr', nativeName: 'मराठी', englishName: 'Marathi' },
   { id: 'gu', code: 'gu', nativeName: 'ગુજરાતી', englishName: 'Gujarati' },
-  { id: 'ta', code: 'ta', nativeName: 'தமிழ்', englishName: 'Tamil' },
-  { id: 'te', code: 'te', nativeName: 'తెలుగు', englishName: 'Telugu' },
+  { id: 'raj', code: 'raj', nativeName: 'राजस्थानी', englishName: 'Rajasthani' },
   { id: 'kn', code: 'kn', nativeName: 'ಕನ್ನಡ', englishName: 'Kannada' },
-  { id: 'ml', code: 'ml', nativeName: 'മലയാളം', englishName: 'Malayalam' },
-  { id: 'pa', code: 'pa', nativeName: 'ਪੰਜਾਬੀ', englishName: 'Punjabi' },
-  { id: 'or', code: 'or', nativeName: 'ଓଡ଼ିଆ', englishName: 'Odia' },
-  { id: 'other', code: 'other', nativeName: 'अन्य भाषा', englishName: 'Other', isOther: true },
 ];
 
 export default function LanguageSelectScreen() {
   const router = useRouter();
-
-  const [selectedLangId, setSelectedLangId] = useState<string>('hi');
+  const [selectedLangId, setSelectedLangId] = useState<LangCode>('hi');
   const [isLangDropdownVisible, setIsLangDropdownVisible] = useState<boolean>(false);
 
+  const t = getUITranslations(selectedLangId);
+
   const handleProceed = () => {
-    const langCode = (selectedLangId === 'other' ? 'hi' : selectedLangId) as LangCode;
-    setGlobalLang(langCode);
-    router.replace({ pathname: '/app-login', params: { lang: langCode } });
+    setGlobalLang(selectedLangId);
+    if (Platform.OS === 'web') {
+      router.replace({ pathname: '/web-login', params: { lang: selectedLangId } });
+    } else {
+      router.replace({ pathname: '/app-login', params: { lang: selectedLangId } });
+    }
   };
 
-  const selectedItem = LANGUAGE_LIST.find((item) => item.id === selectedLangId) || LANGUAGE_LIST[0];
+  const selectedItem = LANGUAGE_LIST.find((item) => item.id === selectedLangId) || LANGUAGE_LIST[1];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -106,19 +106,17 @@ export default function LanguageSelectScreen() {
               style={styles.logoIcon}
               resizeMode="contain"
             />
-            <Text style={styles.brandTitle}>कलासेतु</Text>
-            <Text style={styles.brandTagline}>आपकी कला, आपकी पहचान</Text>
+            <Text style={styles.brandTitle}>{t.appName}</Text>
+            <Text style={styles.brandTagline}>{t.tagline}</Text>
           </View>
 
           {/* Main Title & Subtitle */}
           <View style={styles.titleSection}>
-            <Text style={styles.mainTitle}>
-              आप किस भाषा में{'\n'}ऐप चलाना चाहते हैं?
-            </Text>
-            <Text style={styles.subtitle}>अपनी सुविधा के अनुसार भाषा चुनें</Text>
+            <Text style={styles.mainTitle}>{t.selectLanguageTitle}</Text>
+            <Text style={styles.subtitle}>{t.selectLanguageSubtitle}</Text>
           </View>
 
-          {/* 3-Column Language Grid */}
+          {/* Language Selection Grid */}
           <View style={styles.gridContainer}>
             {LANGUAGE_LIST.map((item) => {
               const isSelected = selectedLangId === item.id;
@@ -147,27 +145,18 @@ export default function LanguageSelectScreen() {
                     {item.nativeName}
                   </Text>
                   <Text style={styles.englishNameText}>{item.englishName}</Text>
-
-                  {item.isOther && (
-                    <Ionicons
-                      name="chevron-forward"
-                      size={16}
-                      color="#666666"
-                      style={styles.otherArrowIcon}
-                    />
-                  )}
                 </TouchableOpacity>
               );
             })}
           </View>
 
-          {/* Primary Action Button: "आगे बढ़ें →" */}
+          {/* Primary Action Button: Proceed */}
           <TouchableOpacity
             style={styles.proceedButton}
             onPress={handleProceed}
             activeOpacity={0.88}
           >
-            <Text style={styles.proceedButtonText}>आगे बढ़ें</Text>
+            <Text style={styles.proceedButtonText}>{t.proceed}</Text>
             <Ionicons name="arrow-forward" size={20} color="#FFFFFF" style={{ marginLeft: 8 }} />
           </TouchableOpacity>
 
@@ -175,7 +164,7 @@ export default function LanguageSelectScreen() {
           <View style={styles.footerSection}>
             <View style={styles.dividerRow}>
               <View style={styles.dividerDash} />
-              <Text style={styles.footerMotto}>रहेंगे साथ, बढ़ेगी कला</Text>
+              <Text style={styles.footerMotto}>{t.motto}</Text>
               <View style={styles.dividerDash} />
             </View>
 
@@ -206,7 +195,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 16,
   },
-  /* Header Bar */
   headerBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -225,10 +213,6 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 12,
     elevation: 1,
-    ...Platform.select({
-      web: { boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05)' },
-      default: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2 },
-    }),
   },
   langSelectorText: {
     fontSize: 13,
@@ -244,10 +228,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2E0D8',
     elevation: 6,
-    ...Platform.select({
-      web: { boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)' },
-      default: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 },
-    }),
     zIndex: 1000,
     minWidth: 160,
     paddingVertical: 6,
@@ -264,7 +244,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#3B6029',
   },
-  /* Brand Container */
   brandContainer: {
     alignItems: 'center',
     marginTop: 4,
@@ -287,7 +266,6 @@ const styles = StyleSheet.create({
     color: '#3B6029',
     marginTop: 1,
   },
-  /* Title Section */
   titleSection: {
     alignItems: 'center',
     paddingHorizontal: 24,
@@ -306,7 +284,6 @@ const styles = StyleSheet.create({
     color: '#777777',
     textAlign: 'center',
   },
-  /* 3-Column Language Grid */
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -316,17 +293,18 @@ const styles = StyleSheet.create({
     rowGap: 10,
   },
   langCard: {
-    width: '31%',
-    minHeight: 74,
+    width: '48%',
+    minHeight: 70,
     backgroundColor: '#FAF9F5',
     borderWidth: 1,
     borderColor: '#EAE7DF',
     borderRadius: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
+    marginBottom: 8,
   },
   langCardSelected: {
     backgroundColor: '#F0F6EE',
@@ -345,7 +323,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   nativeNameText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: 'bold',
     color: '#1A1A1A',
     marginBottom: 2,
@@ -359,12 +337,6 @@ const styles = StyleSheet.create({
     color: '#777777',
     textAlign: 'center',
   },
-  otherArrowIcon: {
-    position: 'absolute',
-    right: 8,
-    bottom: 8,
-  },
-  /* Proceed Button */
   proceedButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -381,7 +353,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
-  /* Footer Section */
   footerSection: {
     alignItems: 'center',
     marginTop: 8,

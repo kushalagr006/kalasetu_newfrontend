@@ -123,7 +123,7 @@ export default function GovtProfileScreen() {
 
   const [selectedLang] = useGlobalLang();
 
-  const t = TRANSLATIONS[selectedLang as keyof typeof TRANSLATIONS];
+  const t = (TRANSLATIONS as any)[selectedLang] || TRANSLATIONS.hi;
   const isHindi = selectedLang === 'hi';
 
   return (

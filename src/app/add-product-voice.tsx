@@ -12,6 +12,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { getPendingProductPhoto } from '@/utils/photoStore';
+import { useGlobalLang } from '@/utils/languageStore';
 
 type LangCode = 'hi' | 'en';
 
@@ -62,13 +64,23 @@ const QUESTIONS: VoiceQuestion[] = [
     dummyAnswerHi: 'प्राकृतिक काली मिट्टी, टेराकोटा जैविक रंग, हर्बल पॉलिश',
     dummyAnswerEn: 'Organic Black Clay, Terracotta Bio Colors, Herbal Polish',
   },
+  {
+    id: 5,
+    questionHi: 'उत्पाद की अनुमानित कीमत बताएं (Price of Product)',
+    questionEn: 'Tell us the expected price of your product',
+    hintHi: 'जैसे: ₹450, ₹1,000 या जितने में आप इस उत्पाद को बेचना चाहते हैं',
+    hintEn: 'e.g. ₹450, ₹1,000 or your expected selling price for this product',
+    dummyAnswerHi: '₹450 (चार सौ पचास रुपये)',
+    dummyAnswerEn: '₹450 (Four hundred fifty rupees)',
+  },
 ];
 
 export default function AddProductVoiceScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ lang?: string }>();
+  const [globalLang] = useGlobalLang();
 
-  const selectedLang: LangCode = (params.lang as LangCode) || 'hi';
+  const selectedLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
   const isHindi = selectedLang === 'hi';
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0); // 0..3 for Qs, 4 for Price Summary
@@ -195,6 +207,35 @@ export default function AddProductVoiceScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
+          {/* Enhanced Photo Thumbnail Preview */}
+          {getPendingProductPhoto().photoUri && (
+            <View style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: '#FFFFFF',
+              borderRadius: 14,
+              padding: 10,
+              marginBottom: 16,
+              borderWidth: 1,
+              borderColor: '#EFECE6',
+              elevation: 2,
+            }}>
+              <Image
+                source={{ uri: getPendingProductPhoto().photoUri! }}
+                style={{ width: 56, height: 56, borderRadius: 10, backgroundColor: '#F0F0F0' }}
+                resizeMode="cover"
+              />
+              <View style={{ marginLeft: 12, flex: 1 }}>
+                <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#3B6029' }}>
+                  {isHindi ? '✨ AI एनहांस्ड फोटो संलग्न' : '✨ AI Enhanced Photo Attached'}
+                </Text>
+                <Text style={{ fontSize: 11, color: '#666666', marginTop: 2 }}>
+                  {isHindi ? 'यह फोटो आपके उत्पाद के साथ दिखेगी' : 'This photo will be displayed with your product'}
+                </Text>
+              </View>
+            </View>
+          )}
+
           {isQuestionScreen ? (
             /* ================= QUESTION VOICE STEPS (1-4) ================= */
             <View>
@@ -325,19 +366,19 @@ export default function AddProductVoiceScreen() {
               )}
             </View>
           ) : (
-            /* ================= STEP 5: FINAL AI PRICE ESTIMATION SUMMARY ================= */
+            /* ================= STEP 6: FINAL AI PRICE PREDICTED DISPLAY SUMMARY ================= */
             <View>
-              {/* Success Badge Banner */}
+              {/* AI Prediction Header Banner */}
               <View style={styles.priceHeaderBanner}>
-                <Ionicons name="sparkles" size={24} color="#3B6029" />
+                <Ionicons name="sparkles" size={26} color="#3B6029" />
                 <View style={{ flex: 1, marginLeft: 10 }}>
                   <Text style={styles.priceBannerTitle}>
-                    {isHindi ? 'आपके सामान की अनुमानित कीमत' : 'AI Estimated Product Price'}
+                    {isHindi ? '✨ AI द्वारा भविष्यवाणित अंतिम कीमत' : '✨ Final AI Predicted Market Price'}
                   </Text>
                   <Text style={styles.priceBannerSub}>
                     {isHindi
-                      ? 'आपके द्वारा दी गई जानकारी के आधार पर तैयार की गई मूल्य सूची'
-                      : 'Calculated breakdown based on your voice details'}
+                      ? 'शिल्प गुणवत्ता, सामग्री व बाज़ार मांग के आधार पर AI की सटीक कीमत'
+                      : 'Calculated optimal price based on craft quality & market demand'}
                   </Text>
                 </View>
               </View>
@@ -359,13 +400,37 @@ export default function AddProductVoiceScreen() {
                   <Text style={styles.productMat} numberOfLines={2}>
                     🧱 {recordedAnswers[3] || (isHindi ? 'प्राकृतिक मिट्टी' : 'Organic Clay')}
                   </Text>
+                  <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#E65100', marginTop: 4 }}>
+                    🗣️ {isHindi ? 'आपकी बताई कीमत:' : 'Your Quoted Price:'} {recordedAnswers[4] || '₹450'}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Prominent AI Predicted Price Hero Banner */}
+              <View style={{
+                backgroundColor: '#3B6029',
+                borderRadius: 20,
+                padding: 18,
+                marginBottom: 16,
+                alignItems: 'center',
+              }}>
+                <Text style={{ fontSize: 13, color: '#EAF2E8', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                  {isHindi ? '🔥 AI द्वारा अनुशंसित अंतिम बिक्री मूल्य' : '🔥 AI PREDICTED SELLING PRICE'}
+                </Text>
+                <Text style={{ fontSize: 34, fontWeight: 'bold', color: '#FFFFFF', marginVertical: 6 }}>
+                  ₹550
+                </Text>
+                <View style={{ backgroundColor: '#EAF2E8', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 }}>
+                  <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#3B6029' }}>
+                    {isHindi ? '✨ +22% अतिरिक्त मुनाफा (शहरों व टेंडर के लिए बेस्ट)' : '✨ +22% Higher Profit (Best for Urban & Govt Tenders)'}
+                  </Text>
                 </View>
               </View>
 
               {/* Itemized Price Breakdown Card */}
               <View style={styles.priceBreakdownCard}>
                 <Text style={styles.breakdownHeading}>
-                  {isHindi ? 'मूल्य का विस्तृत विवरण (Cost Breakdown)' : 'Itemized Cost Breakdown'}
+                  {isHindi ? 'AI मूल्य विश्लेषण एवं लागत विवरण' : 'AI Pricing Intelligence & Cost Analysis'}
                 </Text>
 
                 {/* Line Item 1: Raw Material Cost */}
@@ -373,10 +438,10 @@ export default function AddProductVoiceScreen() {
                   <View style={styles.costLabelCol}>
                     <MaterialCommunityIcons name="cube-outline" size={20} color="#3B6029" />
                     <Text style={styles.costName}>
-                      {isHindi ? 'रॉ मटेरियल लागत (Raw Material)' : 'Raw Material Cost'}
+                      {isHindi ? 'सामग्री लागत (Raw Material)' : 'Raw Material Cost'}
                     </Text>
                   </View>
-                  <Text style={styles.costValue}>₹350</Text>
+                  <Text style={styles.costValue}>₹150</Text>
                 </View>
 
                 {/* Line Item 2: Labor Cost */}
@@ -384,10 +449,10 @@ export default function AddProductVoiceScreen() {
                   <View style={styles.costLabelCol}>
                     <Ionicons name="construct-outline" size={20} color="#3B6029" />
                     <Text style={styles.costName}>
-                      {isHindi ? 'बनाने की मज़दूरी (Labor & Craft)' : 'Labor & Craftsmanship'}
+                      {isHindi ? 'हस्तशिल्प व कारीगरी (Craftsmanship)' : 'Labor & Craftsmanship'}
                     </Text>
                   </View>
-                  <Text style={styles.costValue}>₹450</Text>
+                  <Text style={styles.costValue}>₹200</Text>
                 </View>
 
                 {/* Line Item 3: Developing & Enhancement */}
@@ -395,31 +460,31 @@ export default function AddProductVoiceScreen() {
                   <View style={styles.costLabelCol}>
                     <Ionicons name="color-palette-outline" size={20} color="#3B6029" />
                     <Text style={styles.costName}>
-                      {isHindi ? 'फिनिशिंग और डेवलपिंग खर्च' : 'Developing & Finishing'}
+                      {isHindi ? 'फिनिशिंग व बायो-पॉलिश' : 'Finishing & Bio Polish'}
                     </Text>
                   </View>
-                  <Text style={styles.costValue}>₹150</Text>
+                  <Text style={styles.costValue}>₹50</Text>
                 </View>
 
-                {/* Line Item 4: Packaging & Shipping */}
+                {/* Line Item 4: Market Demand Adjustment */}
                 <View style={styles.costRow}>
                   <View style={styles.costLabelCol}>
-                    <Ionicons name="bus-outline" size={20} color="#3B6029" />
+                    <Ionicons name="trending-up-outline" size={20} color="#3B6029" />
                     <Text style={styles.costName}>
-                      {isHindi ? 'पैकेजिंग व शिपिंग का खर्चा' : 'Packaging & Shipping'}
+                      {isHindi ? 'शहरी बाज़ार मांग व प्रीमियम' : 'Urban Market Demand Premium'}
                     </Text>
                   </View>
-                  <Text style={styles.costValue}>₹100</Text>
+                  <Text style={[styles.costValue, { color: '#3B6029' }]}>+₹150</Text>
                 </View>
 
                 <View style={styles.costDivider} />
 
-                {/* Total Suggested Selling Price */}
+                {/* Total AI Predicted Selling Price */}
                 <View style={styles.totalPriceRow}>
                   <Text style={styles.totalPriceLabel}>
-                    {isHindi ? 'कुल अनुमानित बिक्री मूल्य:' : 'Total Estimated Price:'}
+                    {isHindi ? 'AI अनुमानित अंतिम मूल्य:' : 'Final AI Predicted Price:'}
                   </Text>
-                  <Text style={styles.totalPriceValue}>₹1,050</Text>
+                  <Text style={styles.totalPriceValue}>₹550</Text>
                 </View>
               </View>
 
@@ -431,7 +496,7 @@ export default function AddProductVoiceScreen() {
               >
                 <Ionicons name="checkmark-done" size={22} color="#FFFFFF" style={{ marginRight: 8 }} />
                 <Text style={styles.publishBtnText}>
-                  {isHindi ? 'कैटलॉग में जोड़ें (Publish Product)' : 'Publish to Catalog'}
+                  {isHindi ? 'AI कीमत (₹550) से कैटलॉग में जोड़ें' : 'Publish to Catalog at AI Price (₹550)'}
                 </Text>
               </TouchableOpacity>
 

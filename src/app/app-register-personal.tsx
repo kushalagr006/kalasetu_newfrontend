@@ -77,7 +77,7 @@ export default function AppRegisterPersonalScreen() {
 
   const selectedLang: LangCode =
     (params.lang as LangCode) || (globalLang === 'en' ? 'en' : 'hi');
-  const t = TRANSLATIONS[selectedLang] || TRANSLATIONS.hi;
+  const t = (TRANSLATIONS as any)[selectedLang] || TRANSLATIONS.hi;
 
   const [stateName, setStateName] = useState('');
   const [districtName, setDistrictName] = useState('');
@@ -121,7 +121,7 @@ export default function AppRegisterPersonalScreen() {
       return;
     }
     // All valid - navigate to existing Home dashboard
-    router.push('/home');
+    router.push({ pathname: '/home', params: { lang: selectedLang } });
   };
 
   return (
@@ -251,7 +251,7 @@ export default function AppRegisterPersonalScreen() {
               <Text style={styles.asterisk}> *</Text>
             </Text>
             <View style={styles.categoryWrap}>
-              {t.categories.map((cat) => (
+              {t.categories.map((cat: { key: string; label: string }) => (
                 <TouchableOpacity
                   key={cat.key}
                   style={[

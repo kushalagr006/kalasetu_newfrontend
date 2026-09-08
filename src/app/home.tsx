@@ -15,97 +15,38 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArtisanFloatingNav } from '@/components/ArtisanFloatingNav';
+import { useGlobalLang, setGlobalLang, ALL_LANGUAGES, LangCode } from '@/utils/languageStore';
+import { getUITranslations } from '@/utils/translations';
 
-type LangCode = 'hi' | 'en';
 type ActiveTab = 'home' | 'products' | 'customers' | 'profile';
-
-const LANGUAGES: { code: LangCode; label: string }[] = [
-  { code: 'hi', label: 'हिंदी' },
-  { code: 'en', label: 'English' },
-];
-
-const TRANSLATIONS: Record<LangCode, {
-  greeting: string;
-  addProduct: string;
-  yourProducts: string;
-  totalProducts: string;
-  totalOrders: string;
-  salesTillDate: string;
-  recentOrders: string;
-  viewAll: string;
-  order1Title: string;
-  order1Sub: string;
-  order2Title: string;
-  order2Sub: string;
-  tipTitle: string;
-  tipBody: string;
-  navHome: string;
-  navProducts: string;
-  navCustomers: string;
-  navProfile: string;
-  modalTitle: string;
-  notificationAlert: string;
-  addProductAlert: string;
-}> = {
-  hi: {
-    greeting: 'नमस्ते, सुनीता जी 👋',
-    addProduct: 'नया उत्पाद जोड़ें',
-    yourProducts: 'आपके उत्पाद',
-    totalProducts: 'कुल उत्पाद',
-    totalOrders: 'कुल ऑर्डर',
-    salesTillDate: 'आज तक की बिक्री',
-    recentOrders: 'ऑर्डर्स',
-    viewAll: 'सभी देखें',
-    order1Title: 'सजावटी मिट्टी का घड़ा',
-    order1Sub: 'रमेश कुमार • ₹450 • भुगतान पूरा',
-    order2Title: 'हाथ की कढ़ाई का दुपट्टा',
-    order2Sub: 'प्रिया वर्मा • ₹2,000 • भुगतान पूरा',
-    tipTitle: 'बिक्री बढ़ाने का टिप 💡',
-    tipBody: 'अपने 3 सबसे अच्छे उत्पादों की साफ़ फोटो जोड़ें और 2x ज़्यादा ऑर्डर पाएं!',
-    navHome: 'होम',
-    navProducts: 'उत्पाद',
-    navCustomers: 'ग्राहक',
-    navProfile: 'प्रोफाइल',
-    modalTitle: 'भाषा चुनें / Select Language',
-    notificationAlert: 'आपकी 2 नई बिक्री इंक्वायरी मिली हैं!',
-    addProductAlert: 'नया उत्पाद जोड़ने का फॉर्म खुल रहा है...',
-  },
-  en: {
-    greeting: 'Namaste, Sunita Ji 👋',
-    addProduct: 'Add New Product',
-    yourProducts: 'Your Products',
-    totalProducts: 'Total Products',
-    totalOrders: 'Total Orders',
-    salesTillDate: 'Sales Till Date',
-    recentOrders: 'Orders',
-    viewAll: 'View All',
-    order1Title: 'Decorative Clay Pot',
-    order1Sub: 'Ramesh Kumar • ₹450 • Payment Received',
-    order2Title: 'Handmade Embroidered Dupatta',
-    order2Sub: 'Priya Verma • ₹2,000 • Payment Received',
-    tipTitle: 'Sales Growth Tip 💡',
-    tipBody: 'Add clear photos of your 3 best products to get 2x more orders!',
-    navHome: 'Home',
-    navProducts: 'Products',
-    navCustomers: 'Customers',
-    navProfile: 'Profile',
-    modalTitle: 'Select Language / भाषा चुनें',
-    notificationAlert: 'You have 2 new order inquiries!',
-    addProductAlert: 'Opening Add Product Form...',
-  },
-};
 
 export default function HomeScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ lang?: string }>();
+  const [globalLang] = useGlobalLang();
 
-  const initialLang: LangCode = (params.lang as LangCode) || 'hi';
-  const [selectedLang, setSelectedLang] = useState<LangCode>(initialLang);
+  const initialLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
+  const [selectedLang, setSelectedLangState] = useState<LangCode>(initialLang);
+
+  React.useEffect(() => {
+    if (globalLang) {
+      setSelectedLangState(globalLang);
+    }
+  }, [globalLang]);
+
   const [isLangModalVisible, setIsLangModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
 
-  const t = TRANSLATIONS[selectedLang];
-  const currentLangLabel = LANGUAGES.find((l) => l.code === selectedLang)?.label || 'हिंदी';
+  const t = getUITranslations(selectedLang);
+  const currentLangObj = ALL_LANGUAGES.find((l) => l.code === selectedLang) || ALL_LANGUAGES[1];
+  const currentLangLabel = `${currentLangObj.nativeName} (${currentLangObj.englishName})`;
+
+  const handleLanguageChange = (code: LangCode) => {
+    setSelectedLangState(code);
+    setGlobalLang(code);
+    setIsLangModalVisible(false);
+  };
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -276,7 +217,7 @@ export default function HomeScreen() {
             activeOpacity={1}
           >
             <Ionicons name="document-text-outline" size={20} color="#3B6029" style={{ marginRight: 8 }} />
-            <Text style={styles.viewGovtSchemesBtnText}>View Government Schemes</Text>
+            <Text style={styles.viewGovtSchemesBtnText}>{t.viewGovtSchemes}</Text>
           </TouchableOpacity>
 
           {/* Non-Working Sales Growth Artisan Tip Card */}
@@ -320,9 +261,9 @@ export default function HomeScreen() {
             onPress={() => setIsLangModalVisible(false)}
           >
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>{t.modalTitle}</Text>
+              <Text style={styles.modalTitle}>Select Language / भाषा चुनें</Text>
               <FlatList
-                data={LANGUAGES}
+                data={ALL_LANGUAGES}
                 keyExtractor={(item) => item.code}
                 renderItem={({ item }) => (
                   <TouchableOpacity
@@ -330,10 +271,7 @@ export default function HomeScreen() {
                       styles.langOption,
                       selectedLang === item.code && styles.langOptionSelected,
                     ]}
-                    onPress={() => {
-                      setSelectedLang(item.code);
-                      setIsLangModalVisible(false);
-                    }}
+                    onPress={() => handleLanguageChange(item.code)}
                   >
                     <Text
                       style={[
@@ -341,7 +279,7 @@ export default function HomeScreen() {
                         selectedLang === item.code && styles.langOptionTextSelected,
                       ]}
                     >
-                      {item.label}
+                      {item.nativeName} ({item.englishName})
                     </Text>
                     {selectedLang === item.code && (
                       <Ionicons name="checkmark-circle" size={20} color="#3B6029" />

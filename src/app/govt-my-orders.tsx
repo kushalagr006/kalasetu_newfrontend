@@ -184,7 +184,7 @@ export default function GovtMyOrdersScreen() {
   const [activeTab, setActiveTab] = useState<'all' | 'direct' | 'tender'>('all');
   const [selectedOrder, setSelectedOrder] = useState<typeof ORDERS_LIST[0] | null>(null);
 
-  const t = TRANSLATIONS[selectedLang as keyof typeof TRANSLATIONS];
+  const t = (TRANSLATIONS as any)[selectedLang] || TRANSLATIONS.hi;
   const isHindi = selectedLang === 'hi';
 
   const filteredOrders = ORDERS_LIST.filter((item) => {

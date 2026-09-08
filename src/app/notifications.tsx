@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useGlobalLang } from '@/utils/languageStore';
 
 type LangCode = 'hi' | 'en';
 type FilterCategory = 'all' | 'orders' | 'sales' | 'updates';
@@ -93,8 +94,9 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
 export default function NotificationsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ lang?: string }>();
+  const [globalLang] = useGlobalLang();
 
-  const selectedLang: LangCode = (params.lang as LangCode) || 'hi';
+  const selectedLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
   const [selectedFilter, setSelectedFilter] = useState<FilterCategory>('all');
 

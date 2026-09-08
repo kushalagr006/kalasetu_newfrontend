@@ -9,7 +9,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useGlobalLang } from '@/utils/languageStore';
+import { useGlobalLang, setGlobalLang, ALL_LANGUAGES, LangCode } from '@/utils/languageStore';
+import { getUITranslations } from '@/utils/translations';
 
 export type CustNavKey =
   | 'dashboard'
@@ -26,55 +27,6 @@ export type CustNavKey =
   | 'wishlist'
   | 'messages';
 
-const TRANSLATIONS = {
-  hi: {
-    dashboard: 'डैशबोर्ड',
-    home: 'होम',
-    buyProducts: 'उत्पाद खरीदें',
-    tenders: 'टेंडर',
-    myOrders: 'मेरे ऑर्डर',
-    notifications: 'सूचनाएं',
-    profile: 'प्रोफाइल',
-    settings: 'सेटिंग्स',
-    categories: 'श्रेणियाँ',
-    findArtisans: 'कारीगर खोजें',
-    trackOrder: 'ऑर्डर ट्रैक करें',
-    wishlist: 'मेरी इच्छाएं',
-    messages: 'संदेश',
-    logout: 'लॉगआउट',
-    searchPlaceholder: 'उत्पाद, श्रेणियां खोजें...',
-    searchBtn: 'खोजें',
-    wishlistBadge: 'इच्छाएं',
-    cartBadge: 'कार्ट',
-    userName: 'अमन',
-    userRole: 'ग्राहक',
-    notificationsBadge: 'सूचनाएं',
-  },
-  en: {
-    dashboard: 'Dashboard',
-    home: 'Home',
-    buyProducts: 'Buy Products',
-    tenders: 'Tenders',
-    myOrders: 'My Orders',
-    notifications: 'Notifications',
-    profile: 'Profile',
-    settings: 'Settings',
-    categories: 'Categories',
-    findArtisans: 'Find Artisans',
-    trackOrder: 'Track Order',
-    wishlist: 'My Wishlist',
-    messages: 'Messages',
-    logout: 'Logout',
-    searchPlaceholder: 'Search for products, categories...',
-    searchBtn: 'Search',
-    wishlistBadge: 'Wishlist',
-    cartBadge: 'Cart',
-    userName: 'Aman',
-    userRole: 'Customer',
-    notificationsBadge: 'Notifications',
-  },
-};
-
 interface CustSidebarProps {
   activeKey: CustNavKey;
 }
@@ -82,7 +34,7 @@ interface CustSidebarProps {
 export function CustSidebar({ activeKey }: CustSidebarProps) {
   const router = useRouter();
   const [selectedLang] = useGlobalLang();
-  const t = TRANSLATIONS[selectedLang as keyof typeof TRANSLATIONS] || TRANSLATIONS.en;
+  const t = getUITranslations(selectedLang);
 
   const navItems = [
     {
@@ -195,7 +147,8 @@ export function CustSidebar({ activeKey }: CustSidebarProps) {
 
 export function CustTopHeader() {
   const router = useRouter();
-  const t = TRANSLATIONS.en;
+  const [selectedLang] = useGlobalLang();
+  const t = getUITranslations(selectedLang);
 
   return (
     <View style={headerStyles.headerBar}>

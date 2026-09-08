@@ -150,7 +150,7 @@ export default function GovtMessagesScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [inputMessage, setInputMessage] = useState('');
 
-  const t = TRANSLATIONS[selectedLang as keyof typeof TRANSLATIONS];
+  const t = (TRANSLATIONS as any)[selectedLang] || TRANSLATIONS.hi;
   const isHindi = selectedLang === 'hi';
 
   const activeConv = CONVERSATIONS_LIST.find((c) => c.id === activeConvId) || CONVERSATIONS_LIST[0];
