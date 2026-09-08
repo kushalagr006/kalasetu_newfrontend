@@ -11,12 +11,14 @@ from app.api.v1.endpoints import (
     chat,
     schemes,
     admin,
-    bhashini
+    bhashini,
+    pricing
 )
 
 api_router = APIRouter()
 
 api_router.include_router(bhashini.router, prefix="/bhashini", tags=["BHASHINI AI Speech & NLP"])
+api_router.include_router(pricing.router, prefix="/pricing", tags=["KalaSetu V2 Pricing Engine"])
 
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth & Registration"])
 api_router.include_router(verifications.router, prefix="/verifications", tags=["Mock Verification APIs"])

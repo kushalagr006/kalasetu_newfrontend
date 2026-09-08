@@ -145,9 +145,8 @@ export default function WebGovtDashboard() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= 900;
 
-  const [selectedLang] = useGlobalLang();
-  const t = TRANSLATIONS_GOVT[selectedLang as keyof typeof TRANSLATIONS_GOVT];
-  const isHindi = selectedLang === 'hi';
+  const t = TRANSLATIONS_GOVT.en;
+  const isHindi = false;
 
   return (
     <SafeAreaView style={styles.safeArea}>

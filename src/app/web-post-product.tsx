@@ -161,7 +161,7 @@ export default function WebPostProductScreen() {
   const [stock, setStock] = useState('available');
   const [deliveryTime, setDeliveryTime] = useState('');
 
-  const t = TRANSLATIONS_POST_PRODUCT[selectedLang as keyof typeof TRANSLATIONS_POST_PRODUCT];
+  const t = TRANSLATIONS_POST_PRODUCT[selectedLang as keyof typeof TRANSLATIONS_POST_PRODUCT] || TRANSLATIONS_POST_PRODUCT.en;
   const isHindi = selectedLang === 'hi';
 
   return (

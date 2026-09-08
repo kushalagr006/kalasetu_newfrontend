@@ -211,11 +211,9 @@ export default function GovtMyTendersScreen() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= 900;
 
-  const [selectedLang, setSelectedLang] = useGlobalLang();
   const [activeTab, setActiveTab] = useState<StatusTab>('all');
-
-  const t = TRANSLATIONS_MY_TENDERS[selectedLang as keyof typeof TRANSLATIONS_MY_TENDERS];
-  const isHindi = selectedLang === 'hi';
+  const t = TRANSLATIONS_MY_TENDERS.en;
+  const isHindi = false;
 
   const filteredTenders = ALL_MY_TENDERS.filter((item) => {
     if (activeTab === 'all') return true;

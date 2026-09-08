@@ -106,7 +106,7 @@ export default function WebHelperProfileScreen() {
   const [email, setEmail] = useState('rajesh.kumar@cg.gov.in');
   const [office, setOffice] = useState('जिला पंचायत परिसर, कलेक्ट्रेट रोड, रायपुर (छ.ग.)');
 
-  const t = TRANSLATIONS_HELPER_PROFILE[selectedLang as keyof typeof TRANSLATIONS_HELPER_PROFILE];
+  const t = TRANSLATIONS_HELPER_PROFILE[selectedLang as keyof typeof TRANSLATIONS_HELPER_PROFILE] || TRANSLATIONS_HELPER_PROFILE.en;
   const isHindi = selectedLang === 'hi';
 
   return (

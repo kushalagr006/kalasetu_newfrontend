@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,12 +10,15 @@ import {
   StatusBar,
   useWindowDimensions,
   Platform,
+  Modal,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useGlobalLang } from '@/utils/languageStore';
 import { GovtSidebar, GovtTopHeader } from '@/components/GovtLayout';
+import { useProducts, syncBackendProducts, getMultilingualProductName, ProductItem } from '@/utils/productStore';
 
 const TRANSLATIONS_GOVT_PRODUCTS = {
   hi: {
@@ -33,11 +36,14 @@ const TRANSLATIONS_GOVT_PRODUCTS = {
     officerRole: 'Department Officer',
     breadcrumb: 'Home > Buy Products',
     pageTitle: 'Buy Products',
-    pageSubtitle: 'Purchase authentic Indian handicrafts and products from verified artisans and producer groups.',
+    pageSubtitle: 'Purchase authentic Indian handicrafts directly from verified mobile app artisans and producer groups.',
     searchPlaceholder: 'Search products, artisans or keywords...',
     allCategories: 'All Categories',
     inStock: 'In Stock',
     viewDetails: 'View Details',
+    artisanBadge: '✨ Artisan Mobile Product',
+    noProductsTitle: 'कोई उत्पाद उपलब्ध नहीं है / No Products Listed Yet',
+    noProductsSub: 'कारीगरों द्वारा मोबाइल ऐप पर दर्ज किए गए उत्पाद यहाँ सरकारी खरीद पोर्टल पर लाइव प्रदर्शित होंगे। (Products published by artisans on the mobile app will automatically appear here for government procurement.)',
     showingFooter: (start: number, end: number, total: number) => `Showing ${start} - ${end} of ${total} products`,
   },
   en: {
@@ -55,89 +61,19 @@ const TRANSLATIONS_GOVT_PRODUCTS = {
     officerRole: 'Department Officer',
     breadcrumb: 'Home > Buy Products',
     pageTitle: 'Buy Products',
-    pageSubtitle: 'Purchase authentic Indian handicrafts and products from verified artisans and producer groups.',
+    pageSubtitle: 'Purchase authentic Indian handicrafts directly from verified mobile app artisans and producer groups.',
     searchPlaceholder: 'Search products, artisans or keywords...',
     allCategories: 'All Categories',
     inStock: 'In Stock',
     viewDetails: 'View Details',
+    artisanBadge: '✨ Artisan Mobile Product',
+    noProductsTitle: 'No Products Listed Yet',
+    noProductsSub: 'Products published by artisans via the KalaSetu mobile app will appear here live for government procurement.',
     showingFooter: (start: number, end: number, total: number) => `Showing ${start} - ${end} of ${total} products`,
   },
 };
 
-const PRODUCTS_DATA = [
-  {
-    id: '1',
-    title: 'Bamboo Basket',
-    category: 'Home Decor',
-    price: '450',
-    unit: '/ piece',
-    stock: 500,
-    image: require('@/assets/images/govt_item_basket.png'),
-  },
-  {
-    id: '2',
-    title: 'Wooden Chair',
-    category: 'Furniture',
-    price: '850',
-    unit: '/ piece',
-    stock: 100,
-    image: require('@/assets/images/govt_item_chair.png'),
-  },
-  {
-    id: '3',
-    title: 'Terracotta Lamp',
-    category: 'Home Decor',
-    price: '550',
-    unit: '/ piece',
-    stock: 200,
-    image: require('@/assets/images/govt_item_lampshade.png'),
-  },
-  {
-    id: '4',
-    title: 'Handwoven Mat',
-    category: 'Home Furnishing',
-    price: '350',
-    unit: '/ piece',
-    stock: 300,
-    image: require('@/assets/images/govt_item_mat.png'),
-  },
-  {
-    id: '5',
-    title: 'Jute Handbag',
-    category: 'Accessories',
-    price: '320',
-    unit: '/ piece',
-    stock: 150,
-    image: require('@/assets/images/product_bag.png'),
-  },
-  {
-    id: '6',
-    title: 'Wooden Serving Tray',
-    category: 'Kitchenware',
-    price: '600',
-    unit: '/ piece',
-    stock: 100,
-    image: require('@/assets/images/govt_item_tray.png'),
-  },
-  {
-    id: '7',
-    title: 'Terracotta Cup Set',
-    category: 'Kitchenware',
-    price: '300',
-    unit: '/ set',
-    stock: 250,
-    image: require('@/assets/images/cust_prod_clay.png'),
-  },
-  {
-    id: '8',
-    title: 'Wall Hanging',
-    category: 'Home Decor',
-    price: '700',
-    unit: '/ piece',
-    stock: 50,
-    image: require('@/assets/images/product_macrame.png'),
-  },
-];
+const PRODUCTS_DATA: any[] = [];
 
 export default function WebGovtBuyProductsScreen() {
   const router = useRouter();
@@ -146,10 +82,57 @@ export default function WebGovtBuyProductsScreen() {
 
   const [selectedLang] = useGlobalLang();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedProductModal, setSelectedProductModal] = useState<any | null>(null);
 
-  const t = TRANSLATIONS_GOVT_PRODUCTS[selectedLang as keyof typeof TRANSLATIONS_GOVT_PRODUCTS] || TRANSLATIONS_GOVT_PRODUCTS.en;
+  // Government Portal is strictly 100% English based
+  const t = TRANSLATIONS_GOVT_PRODUCTS.en;
 
-  const filteredProducts = PRODUCTS_DATA.filter((item) =>
+  // Live products published by artisans on mobile app
+  const artisanMobileProducts = useProducts();
+
+  // Active real-time live link to backend database
+  useEffect(() => {
+    syncBackendProducts();
+    const interval = setInterval(() => {
+      syncBackendProducts();
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const artisanFormatted = artisanMobileProducts.map((p) => {
+    const numericPrice = p.price.replace(/[^0-9.]/g, '') || '550';
+    const img = typeof p.image === 'string'
+      ? { uri: p.image }
+      : (p.image && typeof p.image === 'object' && p.image.uri)
+      ? { uri: p.image.uri }
+      : p.image || require('@/assets/images/product_pot.png');
+
+    // Always display Bhashini NMT English translation on the Government Website
+    const englishTitle = p.title_en || p.title || 'Artisan Craft Product';
+    const englishCategory = p.category_en || p.category || 'Handicrafts';
+    const englishMaterial = p.materialUsed_en || p.materialUsed || 'Eco Natural Materials';
+    const englishDescription = p.description_en || p.description || 'Handmade artisan product listed via KalaSetu Voice Wizard.';
+
+    return {
+      id: p.id,
+      title: englishTitle,
+      titleEn: englishTitle,
+      category: englishCategory,
+      materialUsed: englishMaterial,
+      description: englishDescription,
+      price: numericPrice,
+      unit: '/ piece',
+      stock: p.stockQty || 20,
+      image: img,
+      isArtisanLive: true,
+      rawProduct: p,
+    };
+  });
+
+  // Only show products published by artisans on mobile app
+  const combinedProducts = [...artisanFormatted, ...PRODUCTS_DATA];
+
+  const filteredProducts = combinedProducts.filter((item) =>
     item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -201,36 +184,87 @@ export default function WebGovtBuyProductsScreen() {
                 </TouchableOpacity>
               </View>
 
-              {/* 4-Column Product Grid */}
-              <View style={styles.productGrid}>
-                {filteredProducts.map((product) => (
-                  <View style={styles.productCard} key={product.id}>
-                    <View style={styles.cardImageContainer}>
-                      <Image source={product.image} style={styles.productImage} resizeMode="contain" />
-                    </View>
-
-                    <View style={styles.cardContent}>
-                      <Text style={styles.productTitleText}>{product.title}</Text>
-                      <Text style={styles.categorySubtext}>{product.category}</Text>
-
-                      <View style={styles.priceStockRow}>
-                        <Text style={styles.priceText}>
-                          ₹{product.price} <Text style={styles.unitText}>{product.unit}</Text>
-                        </Text>
-                        <View style={styles.stockBadge}>
-                          <Text style={styles.stockBadgeText}>
-                            {t.inStock} ({product.stock})
-                          </Text>
-                        </View>
+              {/* 4-Column Product Grid or Clean Empty State */}
+              {filteredProducts.length > 0 ? (
+                <View style={styles.productGrid}>
+                  {filteredProducts.map((product) => (
+                    <View style={styles.productCard} key={product.id}>
+                      <View style={styles.cardImageContainer}>
+                        {product.isArtisanLive && (
+                          <View style={{
+                            position: 'absolute',
+                            top: 8,
+                            left: 8,
+                            zIndex: 10,
+                            backgroundColor: '#3B6029',
+                            paddingVertical: 3,
+                            paddingHorizontal: 8,
+                            borderRadius: 8,
+                          }}>
+                            <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#FFFFFF' }}>
+                              {t.artisanBadge}
+                            </Text>
+                          </View>
+                        )}
+                        <Image source={product.image} style={styles.productImage} resizeMode="contain" />
                       </View>
 
-                      <TouchableOpacity style={styles.viewDetailsBtn} activeOpacity={0.8}>
-                        <Text style={styles.viewDetailsBtnText}>{t.viewDetails}</Text>
-                      </TouchableOpacity>
+                      <View style={styles.cardContent}>
+                        <Text style={styles.productTitleText} numberOfLines={1}>{product.title}</Text>
+                        <Text style={styles.categorySubtext}>{product.category}</Text>
+
+                        <View style={styles.priceStockRow}>
+                          <Text style={styles.priceText}>
+                            ₹{product.price} <Text style={styles.unitText}>{product.unit}</Text>
+                          </Text>
+                          <View style={styles.stockBadge}>
+                            <Text style={styles.stockBadgeText}>
+                              {t.inStock} ({product.stock})
+                            </Text>
+                          </View>
+                        </View>
+
+                        <TouchableOpacity
+                          style={styles.viewDetailsBtn}
+                          onPress={() => setSelectedProductModal(product)}
+                          activeOpacity={0.8}
+                        >
+                          <Text style={styles.viewDetailsBtnText}>{t.viewDetails}</Text>
+                        </TouchableOpacity>
+                      </View>
                     </View>
+                  ))}
+                </View>
+              ) : (
+                <View style={{
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: 16,
+                  borderWidth: 1,
+                  borderColor: '#E5E7EB',
+                  padding: 48,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginVertical: 20,
+                }}>
+                  <View style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 36,
+                    backgroundColor: '#EBF6EE',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 16,
+                  }}>
+                    <Ionicons name="cube-outline" size={36} color="#3B6029" />
                   </View>
-                ))}
-              </View>
+                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 6 }}>
+                    {t.noProductsTitle}
+                  </Text>
+                  <Text style={{ fontSize: 13, color: '#6B7280', textAlign: 'center', maxWidth: 460, lineHeight: 20 }}>
+                    {t.noProductsSub}
+                  </Text>
+                </View>
+              )}
 
               {/* Footer Pagination Bar */}
               <View style={styles.tableFooterRow}>
@@ -260,6 +294,97 @@ export default function WebGovtBuyProductsScreen() {
           </View>
         </View>
       </View>
+
+      {/* Product Detail & Bulk Purchase Modal */}
+      {selectedProductModal && (
+        <Modal
+          visible={!!selectedProductModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setSelectedProductModal(null)}
+        >
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: 20,
+            }}
+            activeOpacity={1}
+            onPress={() => setSelectedProductModal(null)}
+          >
+            <View
+              style={{
+                backgroundColor: '#FFFFFF',
+                borderRadius: 16,
+                width: '100%',
+                maxWidth: 480,
+                padding: 24,
+                elevation: 5,
+              }}
+            >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', flex: 1 }}>
+                  {selectedProductModal.title}
+                </Text>
+                <TouchableOpacity onPress={() => setSelectedProductModal(null)}>
+                  <Ionicons name="close" size={24} color="#6B7280" />
+                </TouchableOpacity>
+              </View>
+
+              <View style={{ height: 180, backgroundColor: '#F9FAFB', borderRadius: 12, marginBottom: 14, alignItems: 'center', justifyContent: 'center' }}>
+                <Image source={selectedProductModal.image} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="contain" />
+              </View>
+
+              {selectedProductModal.isArtisanLive && (
+                <View style={{ backgroundColor: '#EBF6EE', padding: 8, borderRadius: 8, marginBottom: 10 }}>
+                  <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#3B6029' }}>
+                    ✨ Direct Artisan Mobile Listing (Bhashini AI Verified)
+                  </Text>
+                </View>
+              )}
+
+              <Text style={{ fontSize: 13, color: '#4B5563', marginBottom: 4 }}>
+                <Text style={{ fontWeight: 'bold' }}>Category:</Text> {selectedProductModal.category}
+              </Text>
+              {selectedProductModal.materialUsed && (
+                <Text style={{ fontSize: 13, color: '#4B5563', marginBottom: 4 }}>
+                  <Text style={{ fontWeight: 'bold' }}>Material:</Text> {selectedProductModal.materialUsed}
+                </Text>
+              )}
+              <Text style={{ fontSize: 13, color: '#4B5563', marginBottom: 12 }}>
+                <Text style={{ fontWeight: 'bold' }}>Price:</Text> ₹{selectedProductModal.price} / piece ({t.inStock}: {selectedProductModal.stock} pcs)
+              </Text>
+
+              {selectedProductModal.description && (
+                <View style={{ backgroundColor: '#FAF8F5', padding: 12, borderRadius: 8, marginBottom: 16 }}>
+                  <Text style={{ fontSize: 12, color: '#333333', lineHeight: 18 }}>
+                    "{selectedProductModal.description}"
+                  </Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#3B6029',
+                  borderRadius: 10,
+                  paddingVertical: 12,
+                  alignItems: 'center',
+                }}
+                onPress={() => {
+                  Alert.alert('Order Inquiry Sent', `Direct purchase request for "${selectedProductModal.title}" sent to Artisan via KalaSetu Procurement Portal!`);
+                  setSelectedProductModal(null);
+                }}
+              >
+                <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#FFFFFF' }}>
+                  🛒 Place Govt Procurement Order / Inquiry
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }

@@ -166,7 +166,7 @@ export default function WebHelperDashboardScreen() {
   const [selectedLang, setSelectedLang] = useGlobalLang();
   const [activeMenuIndex, setActiveMenuIndex] = useState(0);
 
-  const t = TRANSLATIONS_HELPER[selectedLang as keyof typeof TRANSLATIONS_HELPER];
+  const t = TRANSLATIONS_HELPER[selectedLang as keyof typeof TRANSLATIONS_HELPER] || TRANSLATIONS_HELPER.en;
   const isHindi = selectedLang === 'hi';
 
   return (

@@ -22,6 +22,7 @@ import {
 } from '@/utils/productQuestions';
 import { startLiveSpeechRecognition, LiveSpeechSession } from '@/services/bhashiniService';
 import { addPublishedProduct } from '@/utils/productStore';
+import { fetchFromBackend } from '@/services/apiClient';
 
 const VOICE_EXTRA_STRINGS: Record<LangCode, {
   listening: string;
@@ -233,6 +234,82 @@ export default function AddProductVoiceScreen() {
   const [photoUri, setPhotoUri] = useState<string | null>(() => getPendingProductPhoto().photoUri);
   const [activeSpeechSession, setActiveSpeechSession] = useState<LiveSpeechSession | null>(null);
 
+  // Dynamic Pricing Engine state
+  const [pricingEstimate, setPricingEstimate] = useState<{
+    suggested_price: number;
+    recommended_min: number;
+    recommended_max: number;
+    artisan_price: number;
+    guidance: { hindi: string; english: string };
+    pricing: { cost_floor: number; market_reference_price: number };
+  } | null>(null);
+  const [selectedPriceOption, setSelectedPriceOption] = useState<'AI' | 'ARTISAN'>('AI');
+  const [isLoadingPricing, setIsLoadingPricing] = useState(false);
+
+  const fetchPricingEstimate = async () => {
+    setIsLoadingPricing(true);
+    try {
+      const rawPriceStr = recordedAnswers[4] || questions[4]?.dummyAnswer || '450';
+      const numPrice = parseFloat(rawPriceStr.replace(/[^0-9.]/g, '')) || 450;
+      const title = recordedAnswers[0] || questions[0]?.dummyAnswer || 'Handmade Craft Product';
+      const description = recordedAnswers[1] || questions[1]?.dummyAnswer || '';
+      const category = recordedAnswers[2] || questions[2]?.dummyAnswer || '';
+      const material = recordedAnswers[3] || questions[3]?.dummyAnswer || '';
+
+      const bodyParams = new URLSearchParams();
+      bodyParams.append('selling_price', String(numPrice));
+      bodyParams.append('product_name', title);
+      bodyParams.append('source_language', globalLang || 'hi');
+      const combinedDesc = `${category} ${material} ${description}`.trim();
+      if (combinedDesc) {
+        bodyParams.append('description', combinedDesc);
+      }
+
+      const res = await fetchFromBackend('/api/v1/pricing/estimate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: bodyParams.toString(),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setPricingEstimate({
+          suggested_price: data.suggested_price || Math.round(numPrice * 1.22),
+          recommended_min: data.recommended_min || Math.round(numPrice * 1.05),
+          recommended_max: data.recommended_max || Math.round(numPrice * 1.45),
+          artisan_price: numPrice,
+          guidance: data.guidance || { hindi: '', english: '' },
+          pricing: data.pricing || { cost_floor: Math.round(numPrice * 0.7), market_reference_price: data.suggested_price || Math.round(numPrice * 1.22) },
+        });
+      } else {
+        throw new Error('Pricing API returned non-200 status');
+      }
+    } catch (err) {
+      console.log('Pricing API estimate fallback:', err);
+      const rawPriceStr = recordedAnswers[4] || questions[4]?.dummyAnswer || '450';
+      const numPrice = parseFloat(rawPriceStr.replace(/[^0-9.]/g, '')) || 450;
+      const suggestedFallback = Math.round((numPrice * 1.22) / 10) * 10;
+      setPricingEstimate({
+        suggested_price: suggestedFallback,
+        recommended_min: Math.round(numPrice * 1.05),
+        recommended_max: Math.round(numPrice * 1.45),
+        artisan_price: numPrice,
+        guidance: {
+          hindi: `सलाह: आप इसे ₹${numPrice} में बेच रहे हैं, जबकि बाज़ार में यह ₹${suggestedFallback} तक बिकता है। आप इसे कम से कम ₹${suggestedFallback} में बेचें। आपको ₹${suggestedFallback - numPrice} का सीधा अतिरिक्त मुनाफ़ा होगा!`,
+          english: `Advise: Artisan sells at ₹${numPrice} vs market ₹${suggestedFallback}. Room to capture +22% margin.`
+        },
+        pricing: {
+          cost_floor: Math.round(numPrice * 0.7),
+          market_reference_price: suggestedFallback
+        }
+      });
+    } finally {
+      setIsLoadingPricing(false);
+    }
+  };
+
   const params = useLocalSearchParams<{ photoUri?: string }>();
   useEffect(() => {
     if (params.photoUri) {
@@ -245,6 +322,12 @@ export default function AddProductVoiceScreen() {
 
   const currentQ = questions[currentStepIndex] || questions[0];
   const totalSteps = questions.length;
+
+  useEffect(() => {
+    if (currentStepIndex === totalSteps && !pricingEstimate && !isLoadingPricing) {
+      fetchPricingEstimate();
+    }
+  }, [currentStepIndex]);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -353,6 +436,7 @@ export default function AddProductVoiceScreen() {
     } else {
       // Advance to final AI Price Estimation screen
       setCurrentStepIndex(totalSteps); // Step 5 (Price summary)
+      fetchPricingEstimate();
     }
   };
 
@@ -375,16 +459,22 @@ export default function AddProductVoiceScreen() {
     const description = recordedAnswers[1] || questions[1]?.dummyAnswer || '';
     const category = recordedAnswers[2] || questions[2]?.dummyAnswer || 'Pottery & Claycraft';
     const materialUsed = recordedAnswers[3] || questions[3]?.dummyAnswer || '';
-    const rawPrice = recordedAnswers[4] || '550';
+
+    const rawPriceStr = recordedAnswers[4] || questions[4]?.dummyAnswer || '450';
+    const artisanPriceNum = parseFloat(rawPriceStr.replace(/[^0-9.]/g, '')) || 450;
+    const aiPriceNum = pricingEstimate?.suggested_price || 550;
+
+    const finalPriceNum = selectedPriceOption === 'AI' ? aiPriceNum : artisanPriceNum;
 
     await addPublishedProduct({
       title,
       description,
       category,
       materialUsed,
-      price: rawPrice,
+      price: String(finalPriceNum),
       image: photoUri || '',
       aiEnhanced: true,
+      sourceLanguage: globalLang,
     });
 
     Alert.alert(
@@ -401,6 +491,19 @@ export default function AddProductVoiceScreen() {
 
   const currentAnswer = recordedAnswers[currentStepIndex];
   const isQuestionScreen = currentStepIndex < totalSteps;
+
+  const rawPriceStr = recordedAnswers[4] || questions[4]?.dummyAnswer || '450';
+  const artisanPriceVal = parseFloat(rawPriceStr.replace(/[^0-9.]/g, '')) || 450;
+  const aiPriceVal = pricingEstimate?.suggested_price || Math.round((artisanPriceVal * 1.22) / 10) * 10;
+  const gainVal = Math.max(0, aiPriceVal - artisanPriceVal);
+  const gainPct = artisanPriceVal > 0 ? Math.round((gainVal / artisanPriceVal) * 100) : 22;
+
+  const chosenFinalPrice = selectedPriceOption === 'AI' ? aiPriceVal : artisanPriceVal;
+
+  const materialEst = Math.round(chosenFinalPrice * 0.30);
+  const laborEst = Math.round(chosenFinalPrice * 0.35);
+  const finishingEst = Math.round(chosenFinalPrice * 0.10);
+  const demandEst = Math.max(0, chosenFinalPrice - (materialEst + laborEst + finishingEst));
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -583,7 +686,7 @@ export default function AddProductVoiceScreen() {
               )}
             </View>
           ) : (
-            /* ================= STEP 6: FINAL AI PRICE PREDICTED DISPLAY SUMMARY ================= */
+            /* ================= STEP 6: DUAL PRICE SELECTION SUMMARY ================= */
             <View>
               {/* AI Prediction Header Banner */}
               <View style={styles.priceHeaderBanner}>
@@ -624,31 +727,119 @@ export default function AddProductVoiceScreen() {
                     🧱 {recordedAnswers[3] || questions[3]?.hint || 'Materials'}
                   </Text>
                   <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#E65100', marginTop: 4 }}>
-                    🗣️ {t.yourQuotedPrice} {recordedAnswers[4] || '₹450'}
+                    🗣️ {t.yourQuotedPrice} ₹{artisanPriceVal}
                   </Text>
                 </View>
               </View>
 
-              {/* Prominent AI Predicted Price Hero Banner */}
-              <View style={{
-                backgroundColor: '#3B6029',
-                borderRadius: 20,
-                padding: 18,
-                marginBottom: 16,
-                alignItems: 'center',
-              }}>
-                <Text style={{ fontSize: 13, color: '#EAF2E8', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 0.8 }}>
-                  {t.aiSellingPrice}
+              {/* Dual Price Selection Cards (Option A vs Option B) */}
+              <View style={{ marginBottom: 16 }}>
+                <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#1A1A1A', marginBottom: 10 }}>
+                  💰 {globalLang === 'hi' ? 'अपनी अंतिम बिक्री कीमत चुनें:' : 'Select Your Selling Price:'}
                 </Text>
-                <Text style={{ fontSize: 34, fontWeight: 'bold', color: '#FFFFFF', marginVertical: 6 }}>
-                  ₹550
-                </Text>
-                <View style={{ backgroundColor: '#EAF2E8', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 }}>
-                  <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#3B6029' }}>
-                    {t.profitBadge}
-                  </Text>
-                </View>
+
+                {/* Option A: AI Fair Market Price (Recommended) */}
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: selectedPriceOption === 'AI' ? '#F4F9F2' : '#FFFFFF',
+                    borderColor: selectedPriceOption === 'AI' ? '#3B6029' : '#EFECE6',
+                    borderWidth: 2,
+                    borderRadius: 16,
+                    padding: 16,
+                    marginBottom: 12,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    elevation: selectedPriceOption === 'AI' ? 3 : 1,
+                  }}
+                  onPress={() => setSelectedPriceOption('AI')}
+                  activeOpacity={0.88}
+                >
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                      <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#3B6029', textTransform: 'uppercase' }}>
+                        ✨ Option A: AI Fair Market Price
+                      </Text>
+                      <View style={{ backgroundColor: '#3B6029', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, marginLeft: 8 }}>
+                        <Text style={{ fontSize: 10, color: '#FFF', fontWeight: 'bold' }}>RECOMMENDED</Text>
+                      </View>
+                    </View>
+                    <Text style={{ fontSize: 30, fontWeight: 'bold', color: '#1A1A1A' }}>
+                      ₹{aiPriceVal}
+                    </Text>
+                    {gainVal > 0 && (
+                      <Text style={{ fontSize: 12, color: '#3B6029', fontWeight: '700', marginTop: 2 }}>
+                        ✨ +₹{gainVal} ({gainPct}%) {globalLang === 'hi' ? 'अतिरिक्त मुनाफ़ा' : 'More Profit'}
+                      </Text>
+                    )}
+                    <Text style={{ fontSize: 11, color: '#666666', marginTop: 4 }}>
+                      Fair market range: ₹{pricingEstimate?.recommended_min || Math.round(artisanPriceVal * 1.05)} – ₹{pricingEstimate?.recommended_max || Math.round(artisanPriceVal * 1.45)}
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name={selectedPriceOption === 'AI' ? 'radio-button-on' : 'radio-button-off'}
+                    size={26}
+                    color={selectedPriceOption === 'AI' ? '#3B6029' : '#CCCCCC'}
+                  />
+                </TouchableOpacity>
+
+                {/* Option B: Artisan Quoted Price */}
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: selectedPriceOption === 'ARTISAN' ? '#FFFDF5' : '#FFFFFF',
+                    borderColor: selectedPriceOption === 'ARTISAN' ? '#E65100' : '#EFECE6',
+                    borderWidth: 2,
+                    borderRadius: 16,
+                    padding: 16,
+                    marginBottom: 12,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    elevation: selectedPriceOption === 'ARTISAN' ? 3 : 1,
+                  }}
+                  onPress={() => setSelectedPriceOption('ARTISAN')}
+                  activeOpacity={0.88}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#E65100', textTransform: 'uppercase', marginBottom: 4 }}>
+                      🗣️ Option B: Your Quoted Price
+                    </Text>
+                    <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#1A1A1A' }}>
+                      ₹{artisanPriceVal}
+                    </Text>
+                    <Text style={{ fontSize: 12, color: '#666666', marginTop: 2 }}>
+                      {globalLang === 'hi' ? 'आपकी द्वारा बताई गई मूल कीमत' : 'Your original self-quoted selling price'}
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name={selectedPriceOption === 'ARTISAN' ? 'radio-button-on' : 'radio-button-off'}
+                    size={26}
+                    color={selectedPriceOption === 'ARTISAN' ? '#E65100' : '#CCCCCC'}
+                  />
+                </TouchableOpacity>
               </View>
+
+              {/* Hindi AI Guidance Banner */}
+              {pricingEstimate?.guidance?.hindi ? (
+                <View style={{
+                  backgroundColor: '#FFF8E7',
+                  borderColor: '#FFE082',
+                  borderWidth: 1,
+                  borderRadius: 14,
+                  padding: 14,
+                  marginBottom: 16,
+                  flexDirection: 'row',
+                  alignItems: 'flex-start',
+                }}>
+                  <Ionicons name="bulb" size={24} color="#E65100" style={{ marginRight: 10, marginTop: 2 }} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#E65100', marginBottom: 2 }}>
+                      💡 KalaSetu AI Market Guidance (बाज़ार सलाह):
+                    </Text>
+                    <Text style={{ fontSize: 13, color: '#424242', lineHeight: 19, fontWeight: '500' }}>
+                      {pricingEstimate.guidance.hindi}
+                    </Text>
+                  </View>
+                </View>
+              ) : null}
 
               {/* Itemized Price Breakdown Card */}
               <View style={styles.priceBreakdownCard}>
@@ -662,7 +853,7 @@ export default function AddProductVoiceScreen() {
                     <MaterialCommunityIcons name="cube-outline" size={20} color="#3B6029" />
                     <Text style={styles.costName}>{t.costRawMaterial}</Text>
                   </View>
-                  <Text style={styles.costValue}>₹150</Text>
+                  <Text style={styles.costValue}>₹{materialEst}</Text>
                 </View>
 
                 {/* Line Item 2: Labor Cost */}
@@ -671,7 +862,7 @@ export default function AddProductVoiceScreen() {
                     <Ionicons name="construct-outline" size={20} color="#3B6029" />
                     <Text style={styles.costName}>{t.costCraftsmanship}</Text>
                   </View>
-                  <Text style={styles.costValue}>₹200</Text>
+                  <Text style={styles.costValue}>₹{laborEst}</Text>
                 </View>
 
                 {/* Line Item 3: Finishing & Bio Polish */}
@@ -680,7 +871,7 @@ export default function AddProductVoiceScreen() {
                     <Ionicons name="color-palette-outline" size={20} color="#3B6029" />
                     <Text style={styles.costName}>{t.costFinishing}</Text>
                   </View>
-                  <Text style={styles.costValue}>₹50</Text>
+                  <Text style={styles.costValue}>₹{finishingEst}</Text>
                 </View>
 
                 {/* Line Item 4: Market Demand Adjustment */}
@@ -689,27 +880,33 @@ export default function AddProductVoiceScreen() {
                     <Ionicons name="trending-up-outline" size={20} color="#3B6029" />
                     <Text style={styles.costName}>{t.costMarketDemand}</Text>
                   </View>
-                  <Text style={[styles.costValue, { color: '#3B6029' }]}>+₹150</Text>
+                  <Text style={[styles.costValue, { color: '#3B6029' }]}>+₹{demandEst}</Text>
                 </View>
 
                 <View style={styles.costDivider} />
 
-                {/* Total AI Predicted Selling Price */}
+                {/* Total Chosen Price */}
                 <View style={styles.totalPriceRow}>
-                  <Text style={styles.totalPriceLabel}>{t.finalPredictedPrice}</Text>
-                  <Text style={styles.totalPriceValue}>₹550</Text>
+                  <Text style={styles.totalPriceLabel}>
+                    {selectedPriceOption === 'AI' ? 'Selected AI Fair Price:' : 'Selected Artisan Price:'}
+                  </Text>
+                  <Text style={[styles.totalPriceValue, { color: selectedPriceOption === 'AI' ? '#3B6029' : '#E65100' }]}>
+                    ₹{chosenFinalPrice}
+                  </Text>
                 </View>
               </View>
 
               {/* Action Buttons */}
               <TouchableOpacity
-                style={styles.publishBtn}
+                style={[styles.publishBtn, selectedPriceOption === 'ARTISAN' && { backgroundColor: '#E65100' }]}
                 onPress={handlePublishCatalog}
                 activeOpacity={0.88}
               >
                 <Ionicons name="checkmark-done" size={22} color="#FFFFFF" style={{ marginRight: 8 }} />
                 <Text style={styles.publishBtnText}>
-                  {t.publishToCatalog}
+                  {globalLang === 'hi'
+                    ? `₹${chosenFinalPrice} कीमत से कैटलॉग में प्रकाशित करें`
+                    : `Publish to Catalog at ₹${chosenFinalPrice}`}
                 </Text>
               </TouchableOpacity>
 

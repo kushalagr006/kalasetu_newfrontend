@@ -147,7 +147,7 @@ export default function WebAddArtisanScreen() {
   const [email, setEmail] = useState('');
   const [bio, setBio] = useState('');
 
-  const t = TRANSLATIONS_ADD_ARTISAN[selectedLang as keyof typeof TRANSLATIONS_ADD_ARTISAN];
+  const t = TRANSLATIONS_ADD_ARTISAN[selectedLang as keyof typeof TRANSLATIONS_ADD_ARTISAN] || TRANSLATIONS_ADD_ARTISAN.en;
   const isHindi = selectedLang === 'hi';
 
   return (

@@ -16,7 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArtisanFloatingNav } from '@/components/ArtisanFloatingNav';
 import { useGlobalLang, setGlobalLang, ALL_LANGUAGES, LangCode } from '@/utils/languageStore';
-import { useProducts } from '@/utils/productStore';
+import { useProducts, getMultilingualProductName } from '@/utils/productStore';
 
 type ActiveTab = 'home' | 'products' | 'customers' | 'profile';
 
@@ -247,7 +247,21 @@ export default function ProductsScreen() {
             /* Product Items List */
             <View style={styles.productListGroup}>
               {productsList.map((item) => {
-                const displayName = item.title || (item.names ? (item.names[selectedLang] || item.names.hi || item.names.en) : 'Product');
+                const displayName = getMultilingualProductName(
+                  item.title,
+                  selectedLang,
+                  item.translations_json,
+                  item.names,
+                  item.title_en
+                );
+                let displayCategory = item.category;
+                let displayMaterial = item.materialUsed;
+
+                if (selectedLang === 'en') {
+                  if (item.category_en) displayCategory = item.category_en;
+                  if (item.materialUsed_en) displayMaterial = item.materialUsed_en;
+                }
+
                 const imageSource =
                   typeof item.image === 'string'
                     ? { uri: item.image }
@@ -268,9 +282,9 @@ export default function ProductsScreen() {
                           </View>
                         </View>
 
-                        {(item.category || item.materialUsed) && (
+                        {(displayCategory || displayMaterial) && (
                           <Text style={{ fontSize: 11, color: '#666666', marginTop: 2 }} numberOfLines={1}>
-                            {item.category ? `📁 ${item.category}` : ''} {item.materialUsed ? `• 🧱 ${item.materialUsed}` : ''}
+                            {displayCategory ? `📁 ${displayCategory}` : ''} {displayMaterial ? `• 🧱 ${displayMaterial}` : ''}
                           </Text>
                         )}
 

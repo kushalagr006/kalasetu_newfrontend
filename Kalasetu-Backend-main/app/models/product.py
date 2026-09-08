@@ -29,6 +29,12 @@ class Product(Base):
     status = Column(String(50), default=ProductStatus.PUBLISHED)
     audio_note_url = Column(String(500), nullable=True)
     ai_enhanced = Column(Boolean, default=False)
+    title_en = Column(String(255), nullable=True)
+    description_en = Column(Text, nullable=True)
+    category_en = Column(String(100), nullable=True)
+    material_used_en = Column(String(100), nullable=True)
+    source_language = Column(String(10), default="hi")
+    translations_json = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 

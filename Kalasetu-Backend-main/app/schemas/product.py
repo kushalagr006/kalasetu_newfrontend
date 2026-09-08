@@ -21,6 +21,11 @@ class ProductCreate(BaseModel):
     stock_quantity: int = 1
     audio_note_url: Optional[str] = None
     primary_image_url: Optional[str] = None
+    source_language: Optional[str] = "hi"
+    title_en: Optional[str] = None
+    description_en: Optional[str] = None
+    category_en: Optional[str] = None
+    material_used_en: Optional[str] = None
 
 
 class ProductUpdate(BaseModel):
@@ -46,6 +51,12 @@ class ProductOut(BaseModel):
     status: str
     audio_note_url: Optional[str] = None
     ai_enhanced: bool
+    source_language: Optional[str] = "hi"
+    title_en: Optional[str] = None
+    description_en: Optional[str] = None
+    category_en: Optional[str] = None
+    material_used_en: Optional[str] = None
+    translations_json: Optional[str] = None
     created_at: datetime
     images: List[ProductImageOut] = []
 

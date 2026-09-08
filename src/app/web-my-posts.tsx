@@ -191,7 +191,7 @@ export default function WebMyPostsScreen() {
   const [activeTab, setActiveTab] = useState<'all' | 'live' | 'review'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const t = TRANSLATIONS_MY_POSTS[selectedLang as keyof typeof TRANSLATIONS_MY_POSTS];
+  const t = TRANSLATIONS_MY_POSTS[selectedLang as keyof typeof TRANSLATIONS_MY_POSTS] || TRANSLATIONS_MY_POSTS.en;
   const isHindi = selectedLang === 'hi';
 
   const filteredPosts = POSTS_LIST.filter((post) => {

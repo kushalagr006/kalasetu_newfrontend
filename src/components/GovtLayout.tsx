@@ -60,8 +60,7 @@ interface GovtSidebarProps {
 
 export function GovtSidebar({ activeKey }: GovtSidebarProps) {
   const router = useRouter();
-  const [selectedLang] = useGlobalLang();
-  const t = TRANSLATIONS[selectedLang as keyof typeof TRANSLATIONS];
+  const t = TRANSLATIONS.en;
 
   const navItems = [
     {

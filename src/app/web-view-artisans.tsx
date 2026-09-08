@@ -174,7 +174,7 @@ export default function WebViewArtisansScreen() {
   const [selectedLang, setSelectedLang] = useGlobalLang();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const t = TRANSLATIONS_VIEW_ARTISANS[selectedLang as keyof typeof TRANSLATIONS_VIEW_ARTISANS];
+  const t = TRANSLATIONS_VIEW_ARTISANS[selectedLang as keyof typeof TRANSLATIONS_VIEW_ARTISANS] || TRANSLATIONS_VIEW_ARTISANS.en;
   const isHindi = selectedLang === 'hi';
 
   const filteredArtisans = ARTISANS_LIST.filter((art) => {

@@ -144,10 +144,8 @@ export default function GovtAwardedTendersScreen() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= 900;
 
-  const [selectedLang] = useGlobalLang();
-
-  const t = TRANSLATIONS_AWARDED[selectedLang as keyof typeof TRANSLATIONS_AWARDED];
-  const isHindi = selectedLang === 'hi';
+  const t = TRANSLATIONS_AWARDED.en;
+  const isHindi = false;
 
   return (
     <SafeAreaView style={styles.safeArea}>

@@ -1,0 +1,22 @@
+{
+  "engine_version": "v2.0_colab_validated",
+  "status": "READY_FOR_DEPLOYMENT",
+  "dataset_rows": 2359,
+  "crafts_supported": [
+    "bastar_dhokra",
+    "channapatna",
+    "madhubani",
+    "sikki",
+    "sujini"
+  ],
+  "verified_features": [
+    "hierarchical_comparable_retrieval",
+    "market_evidence_engine",
+    "cost_floor_safety",
+    "decoupled_suggested_range",
+    "strategic_suggested_price",
+    "bulk_wholesale_gating",
+    "gemini_3.6_flash_multimodal_vision"
+  ],
+  "unit_tests_passed": "5/5 (100%)"
+}

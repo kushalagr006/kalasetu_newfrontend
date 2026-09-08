@@ -132,10 +132,8 @@ export default function GovtBidsReceivedScreen() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= 900;
 
-  const [selectedLang] = useGlobalLang();
-
-  const t = TRANSLATIONS_BIDS[selectedLang as keyof typeof TRANSLATIONS_BIDS];
-  const isHindi = selectedLang === 'hi';
+  const t = TRANSLATIONS_BIDS.en;
+  const isHindi = false;
 
   return (
     <SafeAreaView style={styles.safeArea}>

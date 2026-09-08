@@ -101,6 +101,16 @@ async def create_product(
 
     img_url = payload.primary_image_url or primary_image_url or ""
     rec_price = round(payload.price * 1.15, 2)
+    src_lang = payload.source_language or "hi"
+
+    # Automatically generate Bhashini NMT translations for English (website view) and regional languages
+    trans_data = await bhashini_service.generate_multilingual_product_dict(
+        title=payload.title,
+        description=payload.description,
+        category=payload.category,
+        material=payload.material_used,
+        source_lang=src_lang
+    )
 
     product = Product(
         artisan_id=artisan.id,
@@ -113,6 +123,12 @@ async def create_product(
         stock_quantity=payload.stock_quantity,
         audio_note_url=payload.audio_note_url,
         ai_enhanced=True,
+        source_language=src_lang,
+        title_en=payload.title_en or trans_data["title_en"],
+        description_en=payload.description_en or trans_data["description_en"],
+        category_en=payload.category_en or trans_data["category_en"],
+        material_used_en=payload.material_used_en or trans_data["material_used_en"],
+        translations_json=trans_data["translations_json"],
         status=ProductStatus.PUBLISHED
     )
     db.add(product)
