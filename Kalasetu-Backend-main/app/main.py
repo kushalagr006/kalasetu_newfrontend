@@ -53,6 +53,13 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 from pydantic import BaseModel
 import base64
 
+try:
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from image_enhancer import enhance_image_bytes
+except Exception as e:
+    from app.services.cv_enhancer import enhance_product_bytes as enhance_image_bytes
+
 class ImageBase64Payload(BaseModel):
     image_base64: str
 
@@ -63,25 +70,36 @@ async def enhance_camera_photo_base64(payload: ImageBase64Payload):
         raw_b64 = raw_b64.split(",")[1]
     
     image_bytes = base64.b64decode(raw_b64)
-    print(f"[API SERVER BASE64] Received photo ({len(image_bytes)} bytes) for OpenCV AI Enhancement...")
-    enhanced_jpeg_bytes = enhance_product_bytes(image_bytes)
+    print(f"[API SERVER BASE64] Received photo ({len(image_bytes)} bytes) for AI Enhancement...")
+    enhanced_jpeg_bytes = enhance_image_bytes(image_bytes)
     enhanced_b64 = base64.b64encode(enhanced_jpeg_bytes).decode('utf-8')
-    print(f"[API SERVER BASE64] Enhancement complete! Returning base64 payload.")
-    return {"enhanced_base64": f"data:image/jpeg;base64,{enhanced_b64}", "ai_enhanced": True}
+    print(f"[API SERVER BASE64] Enhancement complete! Saved enhanced_photo.jpg. Returning base64 payload.")
+    return {
+        "enhanced_base64": f"data:image/jpeg;base64,{enhanced_b64}",
+        "ai_enhanced": True,
+        "saved_as": "enhanced_photo.jpg",
+    }
+
+@app.get("/enhanced_photo.jpg", tags=["AI Photo Studio"])
+async def get_enhanced_photo_file():
+    backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    path = os.path.join(backend_dir, "enhanced_photo.jpg")
+    if os.path.exists(path):
+        from fastapi.responses import FileResponse
+        return FileResponse(path, media_type="image/jpeg")
+    return Response(content=b"Photo not found", status_code=404)
 
 @app.post("/api/enhance-camera-photo", tags=["AI Photo Studio"])
 async def enhance_camera_photo(file: UploadFile = File(...)):
     """
-    OpenCV AI Photo Enhancement Endpoint:
-    • Automatic Gray World White Balance
-    • Adaptive CLAHE Contrast Enhancement in LAB Space
-    • HSV Saturation & Brightness Lift
-    • Bilateral Denoising & Unsharp Mask Texture Sharpening
+    AI Photo Enhancement Endpoint:
+    Uses image_enhancer.py from new_image_enhancement to segment background,
+    apply soft shadow, color balance, and save enhanced_photo.jpg.
     """
     contents = await file.read()
-    print(f"[API SERVER] Received photo ({len(contents)} bytes) for OpenCV AI Enhancement...")
-    enhanced_jpeg_bytes = enhance_product_bytes(contents)
-    print(f"[API SERVER] OpenCV AI Enhancement complete! Returning {len(enhanced_jpeg_bytes)} bytes.")
+    print(f"[API SERVER] Received photo ({len(contents)} bytes) for AI Enhancement...")
+    enhanced_jpeg_bytes = enhance_image_bytes(contents)
+    print(f"[API SERVER] AI Enhancement complete! Returning {len(enhanced_jpeg_bytes)} bytes.")
     return Response(content=enhanced_jpeg_bytes, media_type="image/jpeg")
 
 
