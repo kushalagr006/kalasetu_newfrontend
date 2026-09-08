@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArtisanFloatingNav } from '@/components/ArtisanFloatingNav';
 import { useGlobalLang, setGlobalLang, ALL_LANGUAGES, LangCode } from '@/utils/languageStore';
+import { useProducts } from '@/utils/productStore';
 
 type ActiveTab = 'home' | 'products' | 'customers' | 'profile';
 
@@ -263,6 +264,7 @@ export default function ProductsScreen() {
   const initialLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
 
   const [selectedLang, setSelectedLang] = useState<LangCode>(initialLang);
+  const productsList = useProducts();
 
   React.useEffect(() => {
     if (globalLang) {
@@ -276,6 +278,7 @@ export default function ProductsScreen() {
   const t = TRANSLATIONS[selectedLang] || TRANSLATIONS.hi;
   const currentLangObj = ALL_LANGUAGES.find((l) => l.code === selectedLang) || ALL_LANGUAGES[1];
   const currentLangLabel = `${currentLangObj.nativeName} (${currentLangObj.englishName})`;
+  const totalLabel = `${t.totalProducts.split(':')[0]}: ${productsList.length}`;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -312,52 +315,57 @@ export default function ProductsScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Total Count Header */}
-          <Text style={styles.totalCountHeader}>{t.totalProducts}</Text>
+          <Text style={styles.totalCountHeader}>{totalLabel}</Text>
 
           {/* Product Items List */}
           <View style={styles.productListGroup}>
-            {PRODUCTS_LIST.map((item) => (
-              <View key={item.id} style={styles.productCard}>
-                <View style={styles.productMainRow}>
-                  <Image source={item.image} style={styles.productImage} resizeMode="cover" />
+            {productsList.map((item) => {
+              const displayName = item.title || (item.names ? (item.names[selectedLang] || item.names.hi || item.names.en) : 'Product');
+              const imageSource = typeof item.image === 'string' ? { uri: item.image } : item.image;
 
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Text style={styles.productNameText}>{item.names[selectedLang] || item.names.hi || item.names.en}</Text>
-                      <View style={styles.activeStatusBadge}>
-                        <Text style={styles.activeStatusText}>{t.activeStatus}</Text>
+              return (
+                <View key={item.id} style={styles.productCard}>
+                  <View style={styles.productMainRow}>
+                    <Image source={imageSource} style={styles.productImage} resizeMode="cover" />
+
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text style={styles.productNameText}>{displayName}</Text>
+                        <View style={styles.activeStatusBadge}>
+                          <Text style={styles.activeStatusText}>{t.activeStatus}</Text>
+                        </View>
                       </View>
-                    </View>
 
-                    <Text style={styles.productPriceText}>{item.price}</Text>
-                    <Text style={styles.productStockText}>{t.stockPrefix}{item.stockQty}{t.pieceSuffix}</Text>
+                      <Text style={styles.productPriceText}>{item.price}</Text>
+                      <Text style={styles.productStockText}>{t.stockPrefix}{item.stockQty}{t.pieceSuffix}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.cardDividerLine} />
+
+                  <View style={styles.cardActionBar}>
+                    <TouchableOpacity style={styles.cardActionItem} activeOpacity={0.7}>
+                      <Ionicons name="eye-outline" size={16} color="#3B6029" />
+                      <Text style={styles.cardActionText}>{t.actionView}</Text>
+                    </TouchableOpacity>
+
+                    <View style={styles.actionDividerLine} />
+
+                    <TouchableOpacity style={styles.cardActionItem} activeOpacity={0.7}>
+                      <Ionicons name="pencil-outline" size={15} color="#3B6029" />
+                      <Text style={styles.cardActionText}>{t.actionEdit}</Text>
+                    </TouchableOpacity>
+
+                    <View style={styles.actionDividerLine} />
+
+                    <TouchableOpacity style={styles.cardActionItem} activeOpacity={0.7}>
+                      <Ionicons name="ellipsis-horizontal" size={16} color="#3B6029" />
+                      <Text style={styles.cardActionText}>{t.actionMore}</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
-
-                <View style={styles.cardDividerLine} />
-
-                <View style={styles.cardActionBar}>
-                  <TouchableOpacity style={styles.cardActionItem} activeOpacity={0.7}>
-                    <Ionicons name="eye-outline" size={16} color="#3B6029" />
-                    <Text style={styles.cardActionText}>{t.actionView}</Text>
-                  </TouchableOpacity>
-
-                  <View style={styles.actionDividerLine} />
-
-                  <TouchableOpacity style={styles.cardActionItem} activeOpacity={0.7}>
-                    <Ionicons name="pencil-outline" size={15} color="#3B6029" />
-                    <Text style={styles.cardActionText}>{t.actionEdit}</Text>
-                  </TouchableOpacity>
-
-                  <View style={styles.actionDividerLine} />
-
-                  <TouchableOpacity style={styles.cardActionItem} activeOpacity={0.7}>
-                    <Ionicons name="ellipsis-horizontal" size={16} color="#3B6029" />
-                    <Text style={styles.cardActionText}>{t.actionMore}</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
+              );
+            })}
           </View>
 
           {/* Primary Outlined Add Product Button */}

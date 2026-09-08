@@ -20,6 +20,8 @@ import {
   VOICE_STRINGS,
   ProductQuestion,
 } from '@/utils/productQuestions';
+import { startLiveSpeechRecognition, LiveSpeechSession } from '@/services/bhashiniService';
+import { addPublishedProduct } from '@/utils/productStore';
 
 const VOICE_EXTRA_STRINGS: Record<LangCode, {
   listening: string;
@@ -225,9 +227,11 @@ export default function AddProductVoiceScreen() {
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0); // 0..4 for Qs, 5 for Price Summary
   const [isRecording, setIsRecording] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [recordedAnswers, setRecordedAnswers] = useState<Record<number, string>>({});
   const [photoUri, setPhotoUri] = useState<string | null>(() => getPendingProductPhoto().photoUri);
+  const [activeSpeechSession, setActiveSpeechSession] = useState<LiveSpeechSession | null>(null);
 
   const params = useLocalSearchParams<{ photoUri?: string }>();
   useEffect(() => {
@@ -260,23 +264,74 @@ export default function AddProductVoiceScreen() {
     return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
+  const getFieldTypeForStep = (stepIdx: number): string => {
+    switch (stepIdx) {
+      case 0:
+        return 'name';
+      case 1:
+        return 'work';
+      case 2:
+        return 'work';
+      case 3:
+        return 'work';
+      case 4:
+        return 'phone';
+      default:
+        return 'work';
+    }
+  };
+
   const handleMicTap = () => {
-    if (!isRecording) {
-      // Start recording
-      setIsRecording(true);
-      setTimerSeconds(0);
-    } else {
-      // Stop recording & record simulated text in the active language
+    if (isRecording || activeSpeechSession?.isActive()) {
+      setIsProcessing(true);
       setIsRecording(false);
-      const answer = currentQ.dummyAnswer;
-      setRecordedAnswers((prev) => ({
-        ...prev,
-        [currentStepIndex]: answer,
-      }));
+      activeSpeechSession?.stop();
+      setActiveSpeechSession(null);
+    } else {
+      setIsRecording(true);
+      setIsProcessing(false);
+      setTimerSeconds(0);
+      const fieldType = getFieldTypeForStep(currentStepIndex);
+      const session = startLiveSpeechRecognition({
+        fieldType,
+        lang: globalLang,
+        onLiveText: (analyzedText) => {
+          setRecordedAnswers((prev) => ({
+            ...prev,
+            [currentStepIndex]: analyzedText,
+          }));
+        },
+        onStatusChange: (status) => {
+          if (status === 'speaking') {
+            setIsRecording(true);
+            setIsProcessing(false);
+          } else if (status === 'listening') {
+            setIsRecording(false);
+            setIsProcessing(true);
+          } else if (status === 'stopped') {
+            setIsRecording(false);
+            setIsProcessing(false);
+          }
+        },
+        onComplete: (finalText) => {
+          setRecordedAnswers((prev) => ({
+            ...prev,
+            [currentStepIndex]: finalText || prev[currentStepIndex] || '',
+          }));
+          setIsRecording(false);
+          setIsProcessing(false);
+          setActiveSpeechSession(null);
+        },
+      });
+      setActiveSpeechSession(session);
     }
   };
 
   const handleReRecord = () => {
+    if (activeSpeechSession) {
+      activeSpeechSession.stop();
+      setActiveSpeechSession(null);
+    }
     setIsRecording(false);
     setTimerSeconds(0);
     setRecordedAnswers((prev) => {
@@ -287,6 +342,10 @@ export default function AddProductVoiceScreen() {
   };
 
   const handleNextStep = () => {
+    if (activeSpeechSession) {
+      activeSpeechSession.stop();
+      setActiveSpeechSession(null);
+    }
     if (currentStepIndex < totalSteps - 1) {
       setCurrentStepIndex((prev) => prev + 1);
       setIsRecording(false);
@@ -298,6 +357,10 @@ export default function AddProductVoiceScreen() {
   };
 
   const handlePreviousStep = () => {
+    if (activeSpeechSession) {
+      activeSpeechSession.stop();
+      setActiveSpeechSession(null);
+    }
     if (currentStepIndex > 0) {
       setCurrentStepIndex((prev) => prev - 1);
       setIsRecording(false);
@@ -307,7 +370,23 @@ export default function AddProductVoiceScreen() {
     }
   };
 
-  const handlePublishCatalog = () => {
+  const handlePublishCatalog = async () => {
+    const title = recordedAnswers[0] || questions[0]?.dummyAnswer || 'Handmade Craft Product';
+    const description = recordedAnswers[1] || questions[1]?.dummyAnswer || '';
+    const category = recordedAnswers[2] || questions[2]?.dummyAnswer || 'Pottery & Claycraft';
+    const materialUsed = recordedAnswers[3] || questions[3]?.dummyAnswer || '';
+    const rawPrice = recordedAnswers[4] || '550';
+
+    await addPublishedProduct({
+      title,
+      description,
+      category,
+      materialUsed,
+      price: rawPrice,
+      image: photoUri || '',
+      aiEnhanced: true,
+    });
+
     Alert.alert(
       t.summaryTitle,
       t.confirmAndPublish,
@@ -434,6 +513,8 @@ export default function AddProductVoiceScreen() {
                 <Text style={styles.micInstructionText}>
                   {isRecording
                     ? t.listening
+                    : isProcessing
+                    ? '⏳ Processing & transcribing your voice... / अनुवाद हो रहा है...'
                     : currentAnswer
                     ? t.recorded
                     : t.tapMic}

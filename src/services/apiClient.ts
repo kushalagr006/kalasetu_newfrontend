@@ -92,3 +92,36 @@ export async function enhanceCameraPhotoBase64(rawUri: string): Promise<string |
   }
   return null;
 }
+
+export async function fetchFromBackend(path: string, options?: RequestInit): Promise<Response> {
+  const hostCandidates = UNIQUE_BASE_URLS.map((u) => u.replace('/api/v1', ''));
+  let lastError: any = null;
+
+  for (const host of hostCandidates) {
+    try {
+      const url = `${host}${path.startsWith('/') ? path : '/' + path}`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const res = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'bypass-tunnel-reminder': 'true',
+          'Bypass-Tunnel-Reminder': 'true',
+          ...(options?.headers || {}),
+        },
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        return res;
+      }
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error(`Failed to connect to backend server for ${path}`);
+}

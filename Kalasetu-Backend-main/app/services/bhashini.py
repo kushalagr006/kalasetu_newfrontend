@@ -15,42 +15,79 @@ class BhashiniService:
 
     async def speech_to_text(self, audio_content: bytes, source_language: str = "hi") -> str:
         """
-        Converts regional speech audio to transcript text.
-        Includes local smart fallback for SIH demo.
+        Converts Indian language speech audio into structured written text in real-time using BHASHINI ASR.
+        Supports regional Indian languages (Hindi, Bengali, Marathi, Gujarati, Kannada, Tamil, Telugu, English, etc.).
         """
-        if self.api_key == "mock_bhashini_api_key_sih":
-            # Realistic regional voice note transcripts for SIH prototype
-            sample_transcripts = {
-                "hi": "यह हाथ से बना बांस का दीया स्टैंड है। बहुत मजबूत और नक्काशीदार कपड़ा। अनुमानित मूल्य ₹450 है।",
-                "ta": "இது கையால் செய்யப்பட்ட மூங்கில் பொருள். சிறந்த கைவினைப்பொருள். விலை ₹450.",
-                "bn": "এটি হাতে তৈরি ঐতিহ্যবাহী মাটির পাত্র। আনুমানিক মূল্য ₹450।"
-            }
-            return sample_transcripts.get(source_language, sample_transcripts["hi"])
+        if not audio_content:
+            return ""
 
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    "https://dhruva-api.bhashini.gov.in/services/inference/pipeline",
-                    headers={"Authorization": self.api_key},
-                    json={
-                        "pipelineTasks": [
+        bhashini_lang_map = {
+            "hi": "hi",
+            "en": "en",
+            "bn": "bn",
+            "mr": "mr",
+            "gu": "gu",
+            "kn": "kn",
+            "ta": "ta",
+            "te": "te",
+            "bho": "hi",
+            "raj": "hi",
+        }
+        lang_code = bhashini_lang_map.get(source_language, "hi")
+
+        # 1. Attempt official Bhashini ASR Dhruva API if API Key is set
+        if self.api_key and self.api_key != "mock_bhashini_api_key_sih":
+            try:
+                import base64
+                base64_audio = base64.b64encode(audio_content).decode("utf-8")
+                headers = {
+                    "Authorization": self.api_key,
+                    "Content-Type": "application/json"
+                }
+                user_id = getattr(self, 'user_id', None) or getattr(settings, 'BHASHINI_USER_ID', '')
+                if user_id:
+                    headers["userID"] = user_id
+
+                payload = {
+                    "pipelineTasks": [
+                        {
+                            "taskType": "asr",
+                            "config": {
+                                "language": {"sourceLanguage": lang_code},
+                                "audioFormat": "wav",
+                                "samplingRate": 16000
+                            }
+                        }
+                    ],
+                    "inputData": {
+                        "audio": [
                             {
-                                "taskType": "asr",
-                                "config": {
-                                    "language": {"sourceLanguage": source_language}
-                                }
+                                "audioContent": base64_audio
                             }
                         ]
-                    },
-                    timeout=10.0
-                )
-                if response.status_code == 200:
-                    data = response.json()
-                    return data.get("pipelineResponse", [{}])[0].get("output", [{}])[0].get("source", "")
-        except Exception as e:
-            print(f"Bhashini STT API error: {str(e)}")
-        
-        return "यह हाथ से बना सुंदर शिल्प उत्पाद है। मूल्य ₹500 है।"
+                    }
+                }
+
+                async with httpx.AsyncClient() as client:
+                    response = await client.post(
+                        "https://dhruva-api.bhashini.gov.in/services/inference/pipeline",
+                        headers=headers,
+                        json=payload,
+                        timeout=12.0
+                    )
+                    print(f"[Bhashini ASR] HTTP status: {response.status_code}")
+                    if response.status_code == 200:
+                        data = response.json()
+                        out_text = data.get("pipelineResponse", [{}])[0].get("output", [{}])[0].get("source", "")
+                        if out_text:
+                            print(f"[Bhashini ASR] Output text: '{out_text}'")
+                            return out_text
+                    else:
+                        print(f"[Bhashini ASR] Non-200 response: {response.text}")
+            except Exception as e:
+                print(f"[Bhashini ASR] Pipeline exception: {str(e)}")
+
+        return ""
 
     async def translate_text(self, text: str, source_lang: str, target_lang: str) -> str:
         """

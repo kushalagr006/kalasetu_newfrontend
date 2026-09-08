@@ -1,7 +1,6 @@
 import { Platform } from 'react-native';
 import { LangCode } from '@/utils/languageStore';
-
-const BACKEND_URL = 'http://localhost:8000';
+import { fetchFromBackend } from './apiClient';
 
 export const LANG_LOCALE_MAP: Record<LangCode, string> = {
   en: 'en-IN',
@@ -48,7 +47,7 @@ const SPOKEN_DIGIT_MAP: Record<string, string> = {
 
   // Indic Numerals
   '०': '0', '१': '1', '२': '2', '३': '3', '४': '4', '५': '5', '६': '6', '७': '7', '८': '8', '९': '9',
-  '০': '0', '১': '1', '২': '2', '৩': '3', '৪': '4', '৫': '5', '६': '6', '৭': '7', '৮': '8', '৯': '9',
+  '০': '0', '১': '1', '২': '2', '৩': '3', '৪': '4', '৫': '5', '৬': '6', '৭': '7', '৮': '8', '৯': '9',
   '૦': '0', '૧': '1', '૨': '2', '૩': '3', '૪': '4', '૫': '5', '૬': '6', '૭': '7', '૮': '8', '૯': '9',
   '೦': '0', '೧': '1', '೨': '2', '೩': '3', '೪': '4', '೫': '5', '೬': '6', '೭': '7', '೮': '8', '೯': '9',
 };
@@ -385,7 +384,7 @@ function startWebSpeechStreaming({
     clearTimeout(silenceTimer);
     silenceTimer = setTimeout(() => {
       stopSession();
-    }, 3500);
+    }, 15000);
   };
 
   const SpeechRecognition =
@@ -397,11 +396,12 @@ function startWebSpeechStreaming({
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
-    recognition.lang = LANG_LOCALE_MAP[lang] || 'hi-IN';
+    recognition.lang = lang === 'en' ? 'en-US' : (LANG_LOCALE_MAP[lang] || 'en-US');
 
     recognition.onstart = () => {
       if (!isRunning) return;
       onStatusChange?.('listening');
+      resetSilenceTimer();
     };
 
     recognition.onspeechstart = () => {
@@ -422,14 +422,16 @@ function startWebSpeechStreaming({
       }
 
       const raw = fullTranscript.trim();
-      const analyzed = analyzeLiveSpeech(raw, fieldType, lang);
-      lastAnalyzedText = analyzed;
-      onLiveText(analyzed, raw);
+      if (raw) {
+        lastAnalyzedText = raw;
+        onLiveText(raw, raw);
+      }
     };
 
     recognition.onerror = (event: any) => {
       console.log('WebSpeech error:', event.error);
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        onError?.('Microphone permission denied. Please allow microphone access in your browser settings.');
         stopSession();
       }
     };
@@ -440,17 +442,32 @@ function startWebSpeechStreaming({
       }
     };
 
-    recognition.start();
+    // Prompt for audio media permissions if available before starting recognition
+    if (typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(() => {
+        if (isRunning) {
+          try {
+            recognition.start();
+          } catch (e) {
+            console.log('Recognition start error:', e);
+          }
+        }
+      }).catch((err) => {
+        console.warn('Microphone permission warning:', err);
+        // Start recognition directly as fallback
+        if (isRunning) {
+          try {
+            recognition.start();
+          } catch {}
+        }
+      });
+    } else {
+      recognition.start();
+    }
   } catch (e: any) {
     console.error('Failed to start WebSpeech:', e);
-    return startMobileSimulatedRecognition({
-      fieldType,
-      lang,
-      onLiveText,
-      onStatusChange,
-      onError,
-      onComplete,
-    });
+    onError?.('Speech recognition not available on this browser.');
+    stopSession();
   }
 
   return {
@@ -513,9 +530,8 @@ function startAudioRecorderFallback({
       reader.onloadend = async () => {
         try {
           const base64Audio = (reader.result as string).split(',')[1];
-          const res = await fetch(`${BACKEND_URL}/api/v1/bhashini/speech-to-text`, {
+          const res = await fetchFromBackend('/api/v1/bhashini/speech-to-text', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               field_type: fieldType,
               language: lang,
@@ -534,19 +550,11 @@ function startAudioRecorderFallback({
           console.warn('Backend audio transcribe error:', e);
         }
 
-        const fallback = BHASHINI_LOCAL_SAMPLES[fieldType]?.[lang] || '';
-        if (fallback) {
-          onLiveText(fallback, fallback);
-          onComplete?.(fallback);
-        }
+        onComplete?.('');
       };
       reader.readAsDataURL(wavBlob);
     } else {
-      const fallback = BHASHINI_LOCAL_SAMPLES[fieldType]?.[lang] || '';
-      if (fallback) {
-        onLiveText(fallback, fallback);
-        onComplete?.(fallback);
-      }
+      onComplete?.('');
     }
   };
 
@@ -555,14 +563,8 @@ function startAudioRecorderFallback({
     !navigator.mediaDevices ||
     typeof navigator.mediaDevices.getUserMedia !== 'function'
   ) {
-    return startMobileSimulatedRecognition({
-      fieldType,
-      lang,
-      onLiveText,
-      onStatusChange,
-      onError,
-      onComplete,
-    });
+    onComplete?.('');
+    return { stop: () => {}, isActive: () => false };
   }
 
   navigator.mediaDevices
@@ -592,10 +594,8 @@ function startAudioRecorderFallback({
     })
     .catch((err) => {
       console.warn('Audio capture warning:', err);
-      // Fallback smoothly without showing any browser permission errors on mobile
-      const sample = BHASHINI_LOCAL_SAMPLES[fieldType]?.[lang] || '';
-      onLiveText(sample, sample);
-      onComplete?.(sample);
+      onError?.('Microphone permission denied or audio device not available.');
+      onComplete?.('');
       stopSession();
     });
 
@@ -605,17 +605,52 @@ function startAudioRecorderFallback({
   };
 }
 
+async function readAudioFileAsBase64(uri: string, fileSystemLegacy: any): Promise<string> {
+  if (!uri) return '';
+
+  // 1. Try Legacy FileSystem readAsStringAsync (works seamlessly in Expo SDK 57)
+  if (fileSystemLegacy && typeof fileSystemLegacy.readAsStringAsync === 'function') {
+    try {
+      const encoding = fileSystemLegacy.EncodingType?.Base64 || 'base64';
+      const base64 = await fileSystemLegacy.readAsStringAsync(uri, { encoding });
+      if (base64) return base64;
+    } catch (err) {
+      console.warn('readAsStringAsync error:', err);
+    }
+  }
+
+  // 2. Fetch Blob fallback (works on Web and Native)
+  try {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    return new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = (reader.result as string) || '';
+        const base64 = result.includes(',') ? result.split(',')[1] : result;
+        resolve(base64 || '');
+      };
+      reader.onerror = () => resolve('');
+      reader.readAsDataURL(blob);
+    });
+  } catch (err) {
+    console.warn('Fetch blob base64 conversion error:', err);
+  }
+
+  return '';
+}
+
 /**
- * Engine 3: Mobile Native & In-App Voice Engine:
- * Specially designed for mobile devices (Android/iOS Expo Go, webviews, and LAN environments).
- * NEVER prompts for browser permissions! Immediately provides active recording visuals and
- * live streams the localized field text into the input box in real time.
+ * Engine 3: Mobile Native Voice Engine (Expo Go Android/iOS):
+ * Uses native expo-audio Recording & system permissions.
+ * Prompts native Android/iOS microphone permission and sends recorded audio to Speech-to-Text.
  */
-function startMobileSimulatedRecognition({
+function startMobileAudioRecorder({
   fieldType,
   lang,
   onLiveText,
   onStatusChange,
+  onError,
   onComplete,
 }: {
   fieldType: string;
@@ -626,48 +661,134 @@ function startMobileSimulatedRecognition({
   onComplete?: (finalText: string) => void;
 }): LiveSpeechSession {
   let isRunning = true;
-  let timer1: any = null;
-  let timer2: any = null;
+  let recorderObject: any = null;
 
-  const targetText = BHASHINI_LOCAL_SAMPLES[fieldType]?.[lang] || '';
+  let ExpoAudio: any = null;
+  let FileSystem: any = null;
 
-  const stopSession = () => {
-    if (!isRunning) return;
-    isRunning = false;
-    clearTimeout(timer1);
-    clearTimeout(timer2);
-    onStatusChange?.('stopped');
-    onLiveText(targetText, targetText);
-    onComplete?.(targetText);
-  };
+  try {
+    ExpoAudio = require('expo-audio');
+  } catch (e) {
+    console.warn('expo-audio module not found:', e);
+  }
 
-  onStatusChange?.('listening');
+  try {
+    FileSystem = require('expo-file-system/legacy');
+  } catch (e) {
+    try {
+      FileSystem = require('expo-file-system');
+    } catch (e2) {
+      console.warn('expo-file-system module not found:', e2);
+    }
+  }
 
-  // After 400ms transition to speaking and live stream into the input box
-  timer1 = setTimeout(() => {
-    if (!isRunning) return;
-    onStatusChange?.('speaking');
+  const startRecording = async () => {
+    if (!ExpoAudio) {
+      onError?.('Native Audio recording module not loaded.');
+      onStatusChange?.('stopped');
+      isRunning = false;
+      return;
+    }
 
-    let idx = 0;
-    const step = Math.max(1, Math.ceil(targetText.length / 5));
-    const interval = setInterval(() => {
-      if (!isRunning) {
-        clearInterval(interval);
+    try {
+      const permission = await ExpoAudio.requestRecordingPermissionsAsync();
+      if (!permission.granted) {
+        onError?.('Microphone permission is required to record audio on your mobile device.');
+        onStatusChange?.('stopped');
+        isRunning = false;
         return;
       }
-      idx += step;
-      if (idx >= targetText.length) {
-        clearInterval(interval);
-        onLiveText(targetText, targetText);
-        timer2 = setTimeout(() => {
-          stopSession();
-        }, 500);
-      } else {
-        const slice = targetText.slice(0, idx);
-        onLiveText(slice, slice);
+
+      try {
+        await ExpoAudio.setAudioModeAsync({
+          playsInSilentMode: true,
+          allowsBackgroundRecording: false,
+        });
+      } catch (audioModeErr) {
+        console.warn('setAudioModeAsync warning:', audioModeErr);
       }
-    }, 110);
-  }, 400);
+
+      const options = ExpoAudio.RecordingPresets?.HIGH_QUALITY || {
+        extension: '.wav',
+        sampleRate: 16000,
+        numberOfChannels: 1,
+        bitRate: 128000,
+      };
+
+      const AudioRecorderClass = ExpoAudio.AudioModule?.AudioRecorder || ExpoAudio.AudioRecorder;
+
+      if (AudioRecorderClass) {
+        recorderObject = new AudioRecorderClass(options);
+        await recorderObject.prepareToRecordAsync(options);
+        recorderObject.record();
+        onStatusChange?.('speaking');
+      } else {
+        throw new Error('AudioRecorder not available');
+      }
+    } catch (err: any) {
+      console.warn('Mobile audio record error:', err);
+      onError?.(err?.message || 'Could not start mobile audio recording.');
+      onStatusChange?.('stopped');
+      isRunning = false;
+    }
+  };
+
+  startRecording();
+
+  const stopSession = async () => {
+    if (!isRunning) return;
+    isRunning = false;
+
+    try {
+      if (recorderObject) {
+        await recorderObject.stop();
+        let uri = recorderObject.uri || recorderObject.url;
+        if (!uri && typeof recorderObject.getStatus === 'function') {
+          try {
+            const status = recorderObject.getStatus();
+            uri = status?.url || status?.uri;
+          } catch (stErr) {}
+        }
+
+        recorderObject = null;
+
+        if (uri) {
+          onStatusChange?.('listening'); // indicating processing/transcribing
+          const base64Audio = await readAudioFileAsBase64(uri, FileSystem);
+
+          if (base64Audio) {
+            // Transcribe via STT API
+            try {
+              const res = await fetchFromBackend('/api/v1/bhashini/speech-to-text', {
+                method: 'POST',
+                body: JSON.stringify({
+                  field_type: fieldType,
+                  language: lang,
+                  audio_base64: base64Audio,
+                }),
+              });
+              if (res.ok) {
+                const data = await res.json();
+                if (data.text) {
+                  onLiveText(data.text, data.text);
+                  onStatusChange?.('stopped');
+                  onComplete?.(data.text);
+                  return;
+                }
+              }
+            } catch (e) {
+              console.warn('Backend STT request error:', e);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Stop recording error:', e);
+    }
+
+    onStatusChange?.('stopped');
+    onComplete?.('');
+  };
 
   return {
     stop: stopSession,
@@ -677,8 +798,7 @@ function startMobileSimulatedRecognition({
 
 /**
  * Universal Unified Voice Input Entry Point:
- * Works on Mobile Native (Android/iOS), Mobile WebViews, Desktop Chrome, Edge, Firefox, and Safari.
- * NEVER throws "browser permission" or "browser not supported" errors on mobile!
+ * Works on Mobile Native (Android/iOS Expo Go), Mobile WebViews, Desktop Chrome, Edge, Firefox, and Safari.
  */
 export function startLiveSpeechRecognition(options: {
   fieldType: string;
@@ -690,7 +810,7 @@ export function startLiveSpeechRecognition(options: {
 }): LiveSpeechSession {
   // If running on Native Mobile (Android/iOS) OR server-side rendering
   if (Platform.OS !== 'web' || typeof window === 'undefined') {
-    return startMobileSimulatedRecognition(options);
+    return startMobileAudioRecorder(options);
   }
 
   const SpeechRecognition =
@@ -715,8 +835,8 @@ export function startLiveSpeechRecognition(options: {
     return startAudioRecorderFallback(options);
   }
 
-  // 3. Fallback for mobile browser / webview without audio capture
-  return startMobileSimulatedRecognition(options);
+  // 3. Fallback for mobile native audio capture
+  return startMobileAudioRecorder(options);
 }
 
 /**
@@ -735,15 +855,15 @@ export async function transcribeWithBhashini(
         result = text;
       },
       onComplete: (finalText) => {
-        resolve(finalText || result || BHASHINI_LOCAL_SAMPLES[fieldType]?.[lang] || '');
+        resolve(finalText || result || '');
       },
       onError: () => {
-        resolve(BHASHINI_LOCAL_SAMPLES[fieldType]?.[lang] || '');
+        resolve('');
       },
     });
 
     setTimeout(() => {
       session.stop();
-    }, 4500);
+    }, 5000);
   });
 }

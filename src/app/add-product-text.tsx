@@ -18,6 +18,7 @@ import { getPendingProductPhoto } from '@/utils/photoStore';
 import { useGlobalLang } from '@/utils/languageStore';
 import TopLangSelector from '@/components/TopLangSelector';
 import { TEXT_STRINGS } from '@/utils/productQuestions';
+import { addPublishedProduct } from '@/utils/productStore';
 
 export default function AddProductTextScreen() {
   const router = useRouter();
@@ -32,11 +33,22 @@ export default function AddProductTextScreen() {
   const [category, setCategory] = useState(t.labelCategory);
   const [location, setLocation] = useState('');
 
-  const handleSaveProduct = () => {
+  const handleSaveProduct = async () => {
     if (!productName.trim()) {
       Alert.alert('Notice', t.errNameAlert);
       return;
     }
+    const pendingPhoto = getPendingProductPhoto();
+    await addPublishedProduct({
+      title: productName,
+      description: description,
+      category: category || 'Handicrafts',
+      materialUsed: features,
+      price: price || '450',
+      stockQty: parseInt(stock, 10) || 20,
+      image: pendingPhoto.photoUri || '',
+      aiEnhanced: true,
+    });
     Alert.alert(
       'Success',
       t.successAlert,

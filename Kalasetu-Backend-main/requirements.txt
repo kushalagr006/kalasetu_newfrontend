@@ -17,3 +17,5 @@ numpy>=1.26.3
 websockets>=12.0
 pytest>=8.0.0
 pytest-asyncio>=0.23.5
+SpeechRecognition>=3.10.0
+pydub>=0.25.1
