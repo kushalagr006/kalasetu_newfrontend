@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,12 +10,14 @@ import {
   Alert,
   Modal,
   FlatList,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArtisanFloatingNav } from '@/components/ArtisanFloatingNav';
 import { useGlobalLang, setGlobalLang, ALL_LANGUAGES, LangCode } from '@/utils/languageStore';
+import { getAuthUser, fetchFreshUserProfile, clearAuthSession } from '@/utils/authStore';
 
 type ActiveTab = 'home' | 'products' | 'customers' | 'profile';
 
@@ -46,6 +48,13 @@ const TRANSLATIONS: Record<LangCode, {
   navCustomers: string;
   navProfile: string;
   modalTitle: string;
+  identityHeader: string;
+  aadhaarLabel: string;
+  panLabel: string;
+  gstLabel: string;
+  statusLabel: string;
+  verifiedText: string;
+  pendingText: string;
 }> = {
   hi: {
     headerTitle: 'प्रोफ़ाइल',
@@ -62,7 +71,7 @@ const TRANSLATIONS: Record<LangCode, {
     shgHeader: 'प्रोफ़ाइल विवरण',
     craftLabel: 'हस्तशिल्प प्रकार',
     craftVal: 'हैंडिक्राफ्ट आइटम',
-    memberCountLabel: 'अनुभव',
+    memberCountLabel: 'अनुभव / श्रेणी',
     aboutLabel: 'हमारे बारे में',
     aboutVal: 'हम सुंदर और गुणवत्तापूर्ण हस्तनिर्मित उत्पाद बनाते हैं।',
     logoutBtn: 'लॉग आउट (Log Out)',
@@ -74,6 +83,13 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'ग्राहक',
     navProfile: 'प्रोफ़ाइल',
     modalTitle: 'भाषा चुनें / Select Language',
+    identityHeader: 'पहचान एवं दस्तावेज (KYC Details)',
+    aadhaarLabel: 'आधार कार्ड (Aadhaar)',
+    panLabel: 'पैन कार्ड (PAN Card)',
+    gstLabel: 'जीएसटी (GSTIN)',
+    statusLabel: 'प्रोफ़ाइल स्थिति',
+    verifiedText: 'सत्यापित (VERIFIED ✓)',
+    pendingText: 'सत्यापन लंबित (PENDING ⏳)',
   },
   en: {
     headerTitle: 'Profile',
@@ -90,7 +106,7 @@ const TRANSLATIONS: Record<LangCode, {
     shgHeader: 'Profile Details',
     craftLabel: 'Craft Type',
     craftVal: 'Handicraft Items',
-    memberCountLabel: 'Experience',
+    memberCountLabel: 'Experience / Category',
     aboutLabel: 'About Us',
     aboutVal: 'We craft beautiful, high-quality handmade products.',
     logoutBtn: 'Log Out',
@@ -102,6 +118,13 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'Customers',
     navProfile: 'Profile',
     modalTitle: 'Select Language / भाषा चुनें',
+    identityHeader: 'KYC & Identity Documents',
+    aadhaarLabel: 'Aadhaar Card',
+    panLabel: 'PAN Card',
+    gstLabel: 'GSTIN',
+    statusLabel: 'Verification Status',
+    verifiedText: 'VERIFIED ✓',
+    pendingText: 'PENDING ⏳',
   },
   bn: {
     headerTitle: 'প্রোফাইল',
@@ -118,7 +141,7 @@ const TRANSLATIONS: Record<LangCode, {
     shgHeader: 'প্রোফাইল বিবরণ',
     craftLabel: 'হস্তশিল্পের ধরন',
     craftVal: 'হস্তশিল্প সামগ্রী',
-    memberCountLabel: 'অভিজ্ঞতা',
+    memberCountLabel: 'অভিজ্ঞতা / বিভাগ',
     aboutLabel: 'আমাদের সম্পর্কে',
     aboutVal: 'আমরা সুন্দর এবং উচ্চমানের হাতে তৈরি পণ্য তৈরি করি।',
     logoutBtn: 'লগ আউট (Log Out)',
@@ -130,6 +153,13 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'গ্রাহক',
     navProfile: 'প্রোফাইল',
     modalTitle: 'ভাষা নির্বাচন করুন / Select Language',
+    identityHeader: 'পরিচয় ও কেওয়াইসি (KYC Details)',
+    aadhaarLabel: 'আধার কার্ড',
+    panLabel: 'প্যান কার্ড',
+    gstLabel: 'জিএসটি',
+    statusLabel: 'স্ট্যাটাস',
+    verifiedText: 'যাচাইকৃত (VERIFIED ✓)',
+    pendingText: 'অপেক্ষমাণ (PENDING ⏳)',
   },
   bho: {
     headerTitle: 'प्रोफाइल',
@@ -158,6 +188,13 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'ग्राहक',
     navProfile: 'प्रोफाइल',
     modalTitle: 'भाषा चुनीं / Select Language',
+    identityHeader: 'पहचान आ दस्तावेज (KYC)',
+    aadhaarLabel: 'आधार कार्ड',
+    panLabel: 'पैन कार्ड',
+    gstLabel: 'जीएसटी',
+    statusLabel: 'स्थिति',
+    verifiedText: 'सत्यापित (VERIFIED ✓)',
+    pendingText: 'लंबित (PENDING ⏳)',
   },
   mr: {
     headerTitle: 'प्रोफाइल',
@@ -186,6 +223,13 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'ग्राहक',
     navProfile: 'प्रोफाइल',
     modalTitle: 'भाषा निवडा / Select Language',
+    identityHeader: 'ओळख आणि कागदपत्रे (KYC)',
+    aadhaarLabel: 'आधार कार्ड',
+    panLabel: 'पॅन कार्ड',
+    gstLabel: 'जीएसटी',
+    statusLabel: 'स्थिती',
+    verifiedText: 'सत्यापित (VERIFIED ✓)',
+    pendingText: 'लंबित (PENDING ⏳)',
   },
   gu: {
     headerTitle: 'પ્રોફાઇલ',
@@ -214,6 +258,13 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'ગ્રાહકો',
     navProfile: 'પ્રોફાઇલ',
     modalTitle: 'ભાષા પસંદ કરો / Select Language',
+    identityHeader: 'ઓળખ અને કેવાયસી (KYC)',
+    aadhaarLabel: 'આધાર કાર્ડ',
+    panLabel: 'પાન કાર્ડ',
+    gstLabel: 'જીએસટી',
+    statusLabel: 'સ્થિતિ',
+    verifiedText: 'ચકાસાયેલ (VERIFIED ✓)',
+    pendingText: 'પેન્ડિંગ (PENDING ⏳)',
   },
   raj: {
     headerTitle: 'प्रोफाइल',
@@ -242,6 +293,13 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'ग्राहक',
     navProfile: 'प्रोफाइल',
     modalTitle: 'भाषा चूणो / Select Language',
+    identityHeader: 'पहचान अर कागजात (KYC)',
+    aadhaarLabel: 'आधार कार्ड',
+    panLabel: 'पैन कार्ड',
+    gstLabel: 'जीएसटी',
+    statusLabel: 'स्थिती',
+    verifiedText: 'सत्यापित (VERIFIED ✓)',
+    pendingText: 'बाकी (PENDING ⏳)',
   },
   kn: {
     headerTitle: 'ಪ್ರೊಫೈಲ್',
@@ -270,6 +328,13 @@ const TRANSLATIONS: Record<LangCode, {
     navCustomers: 'ಗ್ರಾಹಕರು',
     navProfile: 'ಪ್ರೊಫೈಲ್',
     modalTitle: 'ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ / Select Language',
+    identityHeader: 'ಗುರುತು ಮತ್ತು ಕೆವೈಸಿ (KYC)',
+    aadhaarLabel: 'ಆಧಾರ್ ಕಾರ್ಡ್',
+    panLabel: 'ಪ್ಯಾನ್ ಕಾರ್ಡ್',
+    gstLabel: 'ಜಿಎಸ್‌ಟಿ',
+    statusLabel: 'ಸ್ಥಿತಿ',
+    verifiedText: 'ಪರಿಶೀಲಿಸಲಾಗಿದೆ (VERIFIED ✓)',
+    pendingText: 'ಬಕಿ ಇದೆ (PENDING ⏳)',
   },
 };
 
@@ -280,6 +345,25 @@ export default function ProfileScreen() {
   const initialLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
 
   const [selectedLang, setSelectedLang] = useState<LangCode>(initialLang);
+  const [userSession, setUserSession] = useState<any>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadUserData = async () => {
+    const cached = await getAuthUser();
+    if (cached) setUserSession(cached);
+    const fresh = await fetchFreshUserProfile();
+    if (fresh) setUserSession(fresh);
+  };
+
+  useEffect(() => {
+    loadUserData();
+  }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadUserData();
+    setRefreshing(false);
+  };
 
   React.useEffect(() => {
     if (globalLang) {
@@ -288,11 +372,29 @@ export default function ProfileScreen() {
   }, [globalLang]);
 
   const [isLangModalVisible, setIsLangModalVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState<ActiveTab>('profile');
-
   const t = TRANSLATIONS[selectedLang] || TRANSLATIONS.hi;
   const currentLangObj = ALL_LANGUAGES.find((l) => l.code === selectedLang) || ALL_LANGUAGES[1];
   const currentLangLabel = `${currentLangObj.nativeName} (${currentLangObj.englishName})`;
+
+  const artisanProf = userSession?.artisan_profile || {};
+  const displayName = userSession?.full_name || t.shgName;
+  const displayPhone = userSession?.phone_number ? `+91 ${userSession.phone_number}` : '+91 98765 43210';
+  
+  const locationParts = [artisanProf.city, artisanProf.district, artisanProf.state].filter(Boolean);
+  const displayLocation = locationParts.length > 0 ? locationParts.join(', ') : t.location;
+  const displayAddress = locationParts.length > 0 ? locationParts.join(',\n') : t.addressVal;
+  
+  const displayCraft = artisanProf.craft_type || artisanProf.craft_category || t.craftVal;
+  const displayCategory = artisanProf.craft_category ? artisanProf.craft_category.toUpperCase() : 'ARTISAN';
+  const displayAadhaar = artisanProf.aadhaar_number ? `XXXX-XXXX-${artisanProf.aadhaar_number.slice(-4)}` : null;
+  const displayPan = artisanProf.pan_number || null;
+  const displayGst = artisanProf.gstin || null;
+  const isVerified = userSession?.is_verified || artisanProf.verification_status === 'VERIFIED';
+
+  const handleLogoutPerform = async () => {
+    await clearAuthSession();
+    router.replace('/app-login' as any);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -327,38 +429,42 @@ export default function ProfileScreen() {
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#3B6029']} />
+          }
         >
           {/* Top Profile Hero Card */}
           <View style={styles.profileHeroCard}>
             <View style={styles.heroTopRow}>
               <View style={styles.womenAvatarGroupCircle}>
-                <Ionicons name="people" size={38} color="#3B6029" />
+                <Ionicons name="person" size={36} color="#3B6029" />
               </View>
 
               <View style={{ flex: 1 }}>
-                <Text style={styles.shgTitleText}>{t.shgName}</Text>
+                <Text style={styles.shgTitleText}>{displayName}</Text>
 
                 <View style={styles.infoMetaRow}>
                   <Ionicons name="location-outline" size={14} color="#3B6029" />
-                  <Text style={styles.infoMetaText}>{t.location}</Text>
+                  <Text style={styles.infoMetaText}>{displayLocation}</Text>
                 </View>
 
                 <View style={styles.infoMetaRow}>
-                  <Ionicons name="people-outline" size={14} color="#3B6029" />
-                  <Text style={styles.infoMetaText}>{t.members}</Text>
+                  <Ionicons name="briefcase-outline" size={14} color="#3B6029" />
+                  <Text style={styles.infoMetaText}>{displayCraft}</Text>
                 </View>
 
                 <View style={styles.infoMetaRow}>
-                  <Ionicons name="calendar-outline" size={14} color="#3B6029" />
-                  <Text style={styles.infoMetaText}>{t.joined}</Text>
+                  <Ionicons
+                    name={isVerified ? 'checkmark-circle' : 'time-outline'}
+                    size={14}
+                    color={isVerified ? '#2E7D32' : '#E65100'}
+                  />
+                  <Text style={[styles.infoMetaText, { color: isVerified ? '#2E7D32' : '#E65100', fontWeight: 'bold' }]}>
+                    {isVerified ? t.verifiedText : t.pendingText}
+                  </Text>
                 </View>
               </View>
             </View>
-
-            <TouchableOpacity style={styles.editProfileBtn} activeOpacity={0.8}>
-              <Ionicons name="pencil-outline" size={15} color="#3B6029" />
-              <Text style={styles.editProfileBtnText}>{t.editBtn}</Text>
-            </TouchableOpacity>
           </View>
 
           {/* संपर्क जानकारी Section */}
@@ -367,7 +473,7 @@ export default function ProfileScreen() {
             <View style={styles.infoRowItem}>
               <Ionicons name="call-outline" size={20} color="#3B6029" style={styles.rowIcon} />
               <Text style={styles.rowLabelText}>{t.phoneLabel}</Text>
-              <Text style={styles.rowValueText}>+91 98765 43210</Text>
+              <Text style={styles.rowValueText}>{displayPhone}</Text>
             </View>
 
             <View style={styles.rowDividerLine} />
@@ -375,7 +481,7 @@ export default function ProfileScreen() {
             <View style={styles.infoRowItem}>
               <Ionicons name="mail-outline" size={20} color="#3B6029" style={styles.rowIcon} />
               <Text style={styles.rowLabelText}>{t.emailLabel}</Text>
-              <Text style={styles.rowValueText}>sakhi.shg@gmail.com</Text>
+              <Text style={styles.rowValueText}>{userSession?.email || 'N/A'}</Text>
             </View>
 
             <View style={styles.rowDividerLine} />
@@ -383,25 +489,64 @@ export default function ProfileScreen() {
             <View style={styles.infoRowItem}>
               <Ionicons name="location-outline" size={20} color="#3B6029" style={styles.rowIcon} />
               <Text style={styles.rowLabelText}>{t.addressLabel}</Text>
-              <Text style={styles.rowValueAddressText}>{t.addressVal}</Text>
+              <Text style={styles.rowValueAddressText}>{displayAddress}</Text>
             </View>
           </View>
 
-          {/* SHG विवरण Section */}
-          <Text style={styles.sectionHeaderTitle}>{t.shgHeader}</Text>
+          {/* पहचान एवं दस्तावेज (KYC Details) Section */}
+          <Text style={styles.sectionHeaderTitle}>{t.identityHeader}</Text>
           <View style={styles.infoCardBox}>
             <View style={styles.infoRowItem}>
-              <Ionicons name="basket-outline" size={20} color="#3B6029" style={styles.rowIcon} />
-              <Text style={styles.rowLabelText}>{t.craftLabel}</Text>
-              <Text style={styles.rowValueText}>{t.craftVal}</Text>
+              <Ionicons name="card-outline" size={20} color="#3B6029" style={styles.rowIcon} />
+              <Text style={styles.rowLabelText}>{t.aadhaarLabel}</Text>
+              <Text style={styles.rowValueText}>{displayAadhaar || 'Not Provided'}</Text>
             </View>
 
             <View style={styles.rowDividerLine} />
 
             <View style={styles.infoRowItem}>
-              <Ionicons name="people-outline" size={20} color="#3B6029" style={styles.rowIcon} />
+              <Ionicons name="document-text-outline" size={20} color="#3B6029" style={styles.rowIcon} />
+              <Text style={styles.rowLabelText}>{t.panLabel}</Text>
+              <Text style={styles.rowValueText}>{displayPan || 'Not Provided'}</Text>
+            </View>
+
+            {displayGst ? (
+              <>
+                <View style={styles.rowDividerLine} />
+                <View style={styles.infoRowItem}>
+                  <Ionicons name="business-outline" size={20} color="#3B6029" style={styles.rowIcon} />
+                  <Text style={styles.rowLabelText}>{t.gstLabel}</Text>
+                  <Text style={styles.rowValueText}>{displayGst}</Text>
+                </View>
+              </>
+            ) : null}
+
+            <View style={styles.rowDividerLine} />
+
+            <View style={styles.infoRowItem}>
+              <Ionicons name="shield-checkmark-outline" size={20} color="#3B6029" style={styles.rowIcon} />
+              <Text style={styles.rowLabelText}>{t.statusLabel}</Text>
+              <Text style={[styles.rowValueText, { color: isVerified ? '#2E7D32' : '#E65100' }]}>
+                {isVerified ? t.verifiedText : t.pendingText}
+              </Text>
+            </View>
+          </View>
+
+          {/* प्रोफ़ाइल विवरण Section */}
+          <Text style={styles.sectionHeaderTitle}>{t.shgHeader}</Text>
+          <View style={styles.infoCardBox}>
+            <View style={styles.infoRowItem}>
+              <Ionicons name="basket-outline" size={20} color="#3B6029" style={styles.rowIcon} />
+              <Text style={styles.rowLabelText}>{t.craftLabel}</Text>
+              <Text style={styles.rowValueText}>{displayCraft}</Text>
+            </View>
+
+            <View style={styles.rowDividerLine} />
+
+            <View style={styles.infoRowItem}>
+              <Ionicons name="pricetag-outline" size={20} color="#3B6029" style={styles.rowIcon} />
               <Text style={styles.rowLabelText}>{t.memberCountLabel}</Text>
-              <Text style={styles.rowValueText}>12</Text>
+              <Text style={styles.rowValueText}>{displayCategory}</Text>
             </View>
 
             <View style={styles.rowDividerLine} />
@@ -419,7 +564,7 @@ export default function ProfileScreen() {
             onPress={() => {
               if (Platform.OS === 'web') {
                 if (window.confirm(t.logoutMsg)) {
-                  router.replace('/');
+                  handleLogoutPerform();
                 }
               } else {
                 Alert.alert(
@@ -427,7 +572,7 @@ export default function ProfileScreen() {
                   t.logoutMsg,
                   [
                     { text: t.cancel, style: 'cancel' },
-                    { text: t.logoutBtn, style: 'destructive', onPress: () => router.replace('/') },
+                    { text: t.logoutBtn, style: 'destructive', onPress: handleLogoutPerform },
                   ]
                 );
               }
@@ -605,25 +750,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#3B6029',
   },
-  editProfileBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'flex-end',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#3B6029',
-    borderRadius: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    gap: 6,
-    marginTop: -10,
-  },
-  editProfileBtnText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#3B6029',
-  },
 
   /* Section Title */
   sectionHeaderTitle: {
@@ -697,41 +823,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
     color: '#D32F2F',
-  },
-
-  /* Floating Bottom Navigation Bar */
-  bottomNavContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    height: 64,
-    marginHorizontal: 16,
-    marginBottom: 10,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    borderWidth: 1,
-    borderColor: '#F0EFEA',
-  },
-  navTab: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 6,
-  },
-  navTabText: {
-    fontSize: 11,
-    color: '#666666',
-    marginTop: 3,
-    fontWeight: '500',
-  },
-  navTabTextActiveProfile: {
-    color: '#1976D2',
-    fontWeight: 'bold',
   },
 
   /* Modal Styles */

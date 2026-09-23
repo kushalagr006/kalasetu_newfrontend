@@ -18,6 +18,8 @@ import { ArtisanFloatingNav } from '@/components/ArtisanFloatingNav';
 import { useGlobalLang, setGlobalLang, ALL_LANGUAGES, LangCode } from '@/utils/languageStore';
 import { getUITranslations } from '@/utils/translations';
 
+import { getAuthUser } from '@/utils/authStore';
+
 type ActiveTab = 'home' | 'products' | 'customers' | 'profile';
 
 export default function HomeScreen() {
@@ -27,6 +29,15 @@ export default function HomeScreen() {
 
   const initialLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
   const [selectedLang, setSelectedLangState] = useState<LangCode>(initialLang);
+  const [userName, setUserName] = useState<string>('');
+
+  React.useEffect(() => {
+    getAuthUser().then((user) => {
+      if (user?.full_name) {
+        setUserName(user.full_name);
+      }
+    });
+  }, []);
 
   React.useEffect(() => {
     if (globalLang) {
@@ -48,6 +59,12 @@ export default function HomeScreen() {
   };
 
 
+  const formatGreeting = (baseGreeting: string, name?: string) => {
+    if (!name || !name.trim()) return baseGreeting;
+    const cleanBase = baseGreeting.replace('👋', '').trim();
+    return `${cleanBase}, ${name.trim()} 👋`;
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" translucent={false} />
@@ -60,7 +77,7 @@ export default function HomeScreen() {
           {/* Top Header: Greeting, Notification Bell, Language Selector */}
           <View style={styles.headerRow}>
             <View style={styles.headerLeft}>
-              <Text style={styles.greetingText}>{t.greeting}</Text>
+              <Text style={styles.greetingText}>{formatGreeting(t.greeting, userName)}</Text>
               <TouchableOpacity
                 style={styles.langSelector}
                 onPress={() => setIsLangModalVisible(true)}
