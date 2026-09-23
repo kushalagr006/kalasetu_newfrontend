@@ -20,6 +20,7 @@ import {
   startLiveSpeechRecognition,
   LiveSpeechSession,
 } from '@/services/bhashiniService';
+import { registerArtisan } from '@/services/apiClient';
 
 const TRANSLATIONS: Record<LangCode, {
   title: string;
@@ -352,6 +353,13 @@ export default function AppRegisterPersonalScreen() {
         currentSessionRef.current = null;
       },
       onComplete: (finalText) => {
+        if (finalText && finalText.trim()) {
+          const clean = finalText.trim();
+          if (field === 'state') setStateName(clean);
+          else if (field === 'district') setDistrictName(clean);
+          else if (field === 'city') setCityName(clean);
+          else if (field === 'work') setWorkType(clean);
+        }
         setActiveMicField(null);
         setLiveRawSpeech('');
         currentSessionRef.current = null;
@@ -361,7 +369,7 @@ export default function AppRegisterPersonalScreen() {
     currentSessionRef.current = session;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentSessionRef.current) {
       currentSessionRef.current.stop();
       currentSessionRef.current = null;
@@ -384,13 +392,32 @@ export default function AppRegisterPersonalScreen() {
       return;
     }
 
-    // Direct mock registration flow - navigate straight to Home dashboard
-    Alert.alert('KalaSetu', t.regSuccess, [
-      {
-        text: 'OK',
-        onPress: () => router.replace({ pathname: '/home', params: { lang: selectedLang } }),
-      },
-    ]);
+    try {
+      const payload = {
+        phone_number: params.phone || '',
+        full_name: params.fullName || '',
+        aadhaar_number: params.aadhaar || '',
+        pan_number: params.pan || '',
+        gstin: params.gst || undefined,
+        state: stateName.trim(),
+        district: districtName.trim(),
+        city: cityName.trim(),
+        craft_category: selectedCategory,
+        craft_type: workType.trim(),
+        preferred_language: selectedLang,
+      };
+
+      await registerArtisan(payload);
+
+      Alert.alert('KalaSetu', 'Registration Successful. Please Login.', [
+        {
+          text: 'OK',
+          onPress: () => router.replace({ pathname: '/app-login', params: { lang: selectedLang } }),
+        },
+      ]);
+    } catch (err: any) {
+      Alert.alert('Registration Error', err.message || 'Registration failed. Please try again.');
+    }
   };
 
   return (

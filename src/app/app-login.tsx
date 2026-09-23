@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useGlobalLang, ALL_LANGUAGES, LangCode } from '@/utils/languageStore';
+import { requestLoginOtp } from '@/services/apiClient';
 
 const LANGUAGES = ALL_LANGUAGES;
 
@@ -429,15 +430,25 @@ export default function AppLoginScreen() {
     setIsLangModalVisible(false);
   };
 
-  const handleContinue = () => {
+  const [unregError, setUnregError] = useState<string | null>(null);
+
+  const handleContinue = async () => {
+    setUnregError(null);
     if (phoneNumber.length < 10) {
       alert(t.alertError);
       return;
     }
-    router.push({
-      pathname: '/otp',
-      params: { phone: phoneNumber, lang: selectedLang },
-    });
+    try {
+      const res = await requestLoginOtp(phoneNumber);
+      router.push({
+        pathname: '/otp',
+        params: { phone: phoneNumber, demo_otp: res.demo_otp || '', lang: selectedLang },
+      });
+    } catch (err: any) {
+      const errMsg = err.message || 'This mobile number is not registered. Please register first.';
+      setUnregError(errMsg);
+      alert(errMsg);
+    }
   };
 
   const handleRegisterSubmit = () => {
@@ -457,9 +468,18 @@ export default function AppLoginScreen() {
       alert(t.errPan);
       return;
     }
-    // GSTIN is not mandatory!
     setIsRegisterModalVisible(false);
-    router.push('/home');
+    router.push({
+      pathname: '/app-register-personal',
+      params: {
+        lang: selectedLang,
+        fullName: regFullName.trim(),
+        phone: regMobile.trim(),
+        aadhaar: regAadhaar.trim(),
+        pan: regPan.trim(),
+        gst: regGstin.trim(),
+      },
+    });
   };
 
   const currentLangObj = LANGUAGES.find((l) => l.code === selectedLang) || LANGUAGES[1];

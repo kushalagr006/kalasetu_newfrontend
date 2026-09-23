@@ -662,14 +662,29 @@ function startMobileAudioRecorder({
 }): LiveSpeechSession {
   let isRunning = true;
   let recorderObject: any = null;
+  let activeEngine: 'expo-audio' | 'expo-av' | 'fallback' = 'fallback';
 
   let ExpoAudio: any = null;
+  let ExpoAV: any = null;
   let FileSystem: any = null;
 
   try {
     ExpoAudio = require('expo-audio');
-  } catch (e) {
-    console.warn('expo-audio module not found:', e);
+    if (ExpoAudio && (ExpoAudio.AudioRecorder || ExpoAudio.AudioModule?.AudioRecorder)) {
+      activeEngine = 'expo-audio';
+    }
+  } catch (e) {}
+
+  if (activeEngine === 'fallback') {
+    try {
+      const { NativeModules } = require('react-native');
+      if (NativeModules && (NativeModules.ExponentAV || NativeModules.ExpoAV)) {
+        ExpoAV = require('expo-av');
+        if (ExpoAV && ExpoAV.Audio) {
+          activeEngine = 'expo-av';
+        }
+      }
+    } catch (e) {}
   }
 
   try {
@@ -677,53 +692,83 @@ function startMobileAudioRecorder({
   } catch (e) {
     try {
       FileSystem = require('expo-file-system');
-    } catch (e2) {
-      console.warn('expo-file-system module not found:', e2);
+    } catch (e2) {}
+  }
+
+  if (activeEngine === 'fallback') {
+    const SpeechRecognition =
+      typeof window !== 'undefined'
+        ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+        : null;
+
+    if (SpeechRecognition) {
+      try {
+        return startWebSpeechStreaming({ fieldType, lang, onLiveText, onStatusChange, onError, onComplete });
+      } catch (e) {}
     }
+
+    if (
+      typeof navigator !== 'undefined' &&
+      navigator.mediaDevices &&
+      typeof navigator.mediaDevices.getUserMedia === 'function'
+    ) {
+      return startAudioRecorderFallback({ fieldType, lang, onLiveText, onStatusChange, onError, onComplete });
+    }
+
+    onStatusChange?.('speaking');
+    return { stop: () => { onStatusChange?.('stopped'); onComplete?.(''); }, isActive: () => isRunning };
   }
 
   const startRecording = async () => {
-    if (!ExpoAudio) {
-      onError?.('Native Audio recording module not loaded.');
-      onStatusChange?.('stopped');
-      isRunning = false;
-      return;
-    }
-
     try {
-      const permission = await ExpoAudio.requestRecordingPermissionsAsync();
-      if (!permission.granted) {
-        onError?.('Microphone permission is required to record audio on your mobile device.');
-        onStatusChange?.('stopped');
-        isRunning = false;
-        return;
-      }
+      if (activeEngine === 'expo-audio') {
+        const reqPermission = ExpoAudio.requestRecordingPermissionsAsync || ExpoAudio.AudioModule?.requestRecordingPermissionsAsync;
+        if (typeof reqPermission === 'function') {
+          const perm = await reqPermission();
+          if (!perm.granted) {
+            onError?.('Microphone permission is required to record audio.');
+            onStatusChange?.('stopped');
+            isRunning = false;
+            return;
+          }
+        }
 
-      try {
-        await ExpoAudio.setAudioModeAsync({
-          playsInSilentMode: true,
-          allowsBackgroundRecording: false,
-        });
-      } catch (audioModeErr) {
-        console.warn('setAudioModeAsync warning:', audioModeErr);
-      }
+        const options = ExpoAudio.RecordingPresets?.HIGH_QUALITY || {
+          extension: '.wav',
+          sampleRate: 16000,
+          numberOfChannels: 1,
+          bitRate: 128000,
+        };
 
-      const options = ExpoAudio.RecordingPresets?.HIGH_QUALITY || {
-        extension: '.wav',
-        sampleRate: 16000,
-        numberOfChannels: 1,
-        bitRate: 128000,
-      };
-
-      const AudioRecorderClass = ExpoAudio.AudioModule?.AudioRecorder || ExpoAudio.AudioRecorder;
-
-      if (AudioRecorderClass) {
-        recorderObject = new AudioRecorderClass(options);
-        await recorderObject.prepareToRecordAsync(options);
-        recorderObject.record();
+        const RecorderClass = ExpoAudio.AudioRecorder || ExpoAudio.AudioModule?.AudioRecorder;
+        const recorder = new RecorderClass(options);
+        if (typeof recorder.prepareToRecordAsync === 'function') {
+          await recorder.prepareToRecordAsync(options);
+        }
+        recorder.record();
+        recorderObject = recorder;
         onStatusChange?.('speaking');
-      } else {
-        throw new Error('AudioRecorder not available');
+      } else if (activeEngine === 'expo-av') {
+        const permission = await ExpoAV.Audio.requestPermissionsAsync();
+        if (!permission.granted) {
+          onError?.('Microphone permission is required to record audio.');
+          onStatusChange?.('stopped');
+          isRunning = false;
+          return;
+        }
+
+        await ExpoAV.Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+        });
+
+        const { Recording, RecordingOptionsPresets } = ExpoAV.Audio;
+        const recording = new Recording();
+        const preset = RecordingOptionsPresets?.HIGH_QUALITY || {};
+        await recording.prepareToRecordAsync(preset);
+        await recording.startAsync();
+        recorderObject = recording;
+        onStatusChange?.('speaking');
       }
     } catch (err: any) {
       console.warn('Mobile audio record error:', err);
@@ -741,23 +786,26 @@ function startMobileAudioRecorder({
 
     try {
       if (recorderObject) {
-        await recorderObject.stop();
-        let uri = recorderObject.uri || recorderObject.url;
-        if (!uri && typeof recorderObject.getStatus === 'function') {
-          try {
-            const status = recorderObject.getStatus();
-            uri = status?.url || status?.uri;
-          } catch (stErr) {}
+        onStatusChange?.('listening');
+        let uri = '';
+
+        if (activeEngine === 'expo-audio') {
+          if (typeof recorderObject.stop === 'function') {
+            await recorderObject.stop();
+          }
+          await new Promise((r) => setTimeout(r, 200));
+          uri = recorderObject.uri || recorderObject.url || '';
+        } else if (activeEngine === 'expo-av') {
+          await recorderObject.stopAndUnloadAsync();
+          uri = recorderObject.getURI() || '';
         }
 
         recorderObject = null;
 
         if (uri) {
-          onStatusChange?.('listening'); // indicating processing/transcribing
           const base64Audio = await readAudioFileAsBase64(uri, FileSystem);
 
           if (base64Audio) {
-            // Transcribe via STT API
             try {
               const res = await fetchFromBackend('/api/v1/bhashini/speech-to-text', {
                 method: 'POST',
@@ -769,10 +817,10 @@ function startMobileAudioRecorder({
               });
               if (res.ok) {
                 const data = await res.json();
-                if (data.text) {
-                  onLiveText(data.text, data.text);
+                if (data.text && data.text.trim()) {
+                  onLiveText(data.text.trim(), data.text.trim());
                   onStatusChange?.('stopped');
-                  onComplete?.(data.text);
+                  onComplete?.(data.text.trim());
                   return;
                 }
               }
@@ -808,16 +856,12 @@ export function startLiveSpeechRecognition(options: {
   onError?: (errMessage: string) => void;
   onComplete?: (finalText: string) => void;
 }): LiveSpeechSession {
-  // If running on Native Mobile (Android/iOS) OR server-side rendering
-  if (Platform.OS !== 'web' || typeof window === 'undefined') {
-    return startMobileAudioRecorder(options);
-  }
-
   const SpeechRecognition =
-    (window as any).SpeechRecognition ||
-    (window as any).webkitSpeechRecognition;
+    typeof window !== 'undefined'
+      ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+      : null;
 
-  // 1. If native Web Speech API exists (Chrome, Edge), use live streaming
+  // 1. If native Web Speech API exists (Chrome, Edge, Webviews), use live streaming
   if (SpeechRecognition) {
     try {
       return startWebSpeechStreaming(options);
@@ -826,7 +870,7 @@ export function startLiveSpeechRecognition(options: {
     }
   }
 
-  // 2. If getUserMedia exists on web (Firefox, Brave), use Audio Recorder
+  // 2. If getUserMedia exists on web/mobile browsers, use Audio Recorder
   if (
     typeof navigator !== 'undefined' &&
     navigator.mediaDevices &&

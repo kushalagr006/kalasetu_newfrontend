@@ -20,6 +20,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useGlobalLang, setGlobalLang, ALL_LANGUAGES, LangCode } from '@/utils/languageStore';
+import { verifyLoginOtp } from '@/services/apiClient';
+import { saveAuthSession } from '@/utils/authStore';
 
 const LANGUAGES = ALL_LANGUAGES;
 
@@ -162,10 +164,11 @@ const TRANSLATIONS: Record<LangCode, {
 
 export default function OtpScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ phone?: string; lang?: string; role?: string }>();
+  const params = useLocalSearchParams<{ phone?: string; lang?: string; role?: string; demo_otp?: string }>();
   const [globalLang, setGlobalLangState] = useGlobalLang();
 
-  const rawPhone = params.phone || '98765 43210';
+  const rawPhone = params.phone || '9876543210';
+  const demoOtp = params.demo_otp || '';
   const selectedLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
 
   const [isLangModalVisible, setIsLangModalVisible] = useState(false);
@@ -196,7 +199,7 @@ export default function OtpScreen() {
     return `${pad(mins)} : ${pad(secs)}`;
   };
 
-  const handleOtpChange = (text: string, index: number) => {
+  const handleOtpChange = async (text: string, index: number) => {
     const digit = text.replace(/[^0-9]/g, '').slice(-1);
     const newOtp = [...otp];
     newOtp[index] = digit;
@@ -207,13 +210,21 @@ export default function OtpScreen() {
     }
 
     if (newOtp.every((d) => d !== '')) {
-      setTimeout(() => {
+      const fullOtp = newOtp.join('');
+      try {
+        const res = await verifyLoginOtp(rawPhone, fullOtp);
+        await saveAuthSession(res.access_token, res);
+        alert(t.verifySuccess);
         if (params.role === 'shg') {
           router.replace('/shg-platform' as any);
         } else {
           router.replace({ pathname: '/home', params: { lang: selectedLang } });
         }
-      }, 150);
+      } catch (err: any) {
+        alert(err.message || 'Invalid OTP. Please try again.');
+        setOtp(['', '', '', '', '', '']);
+        inputRefs.current[0]?.focus();
+      }
     }
   };
 
@@ -325,6 +336,13 @@ export default function OtpScreen() {
               );
             })}
           </View>
+
+          {demoOtp ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 14, backgroundColor: '#FFF3E0', paddingVertical: 6, paddingHorizontal: 16, borderRadius: 20, alignSelf: 'center', borderWidth: 1, borderColor: '#FFE0B2' }}>
+              <Ionicons name="key" size={16} color="#E65100" />
+              <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#E65100', marginLeft: 6 }}>Demo OTP: {demoOtp}</Text>
+            </View>
+          ) : null}
 
           {/* Security Badge */}
           <View style={styles.securityBadgeRow}>

@@ -2,11 +2,23 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 const getExpoHostIp = (): string | null => {
-  const hostUri = Constants.expoConfig?.hostUri || Constants.manifest2?.extra?.expoGo?.developer?.manifest?.debuggerHost;
-  if (hostUri) {
-    const ip = hostUri.split(':')[0];
-    if (ip && ip !== 'localhost' && ip !== '127.0.0.1') {
-      return ip;
+  const candidateHostUris = [
+    Constants.expoConfig?.hostUri,
+    (Constants as any).developer?.manifest?.debuggerHost,
+    Constants.manifest2?.extra?.expoGo?.developer?.manifest?.debuggerHost,
+    (Constants as any).manifest?.debuggerHost,
+    (Constants as any).manifest?.hostUri,
+    (Constants as any).experienceUrl,
+    (Constants as any).linkingUri,
+  ];
+
+  for (const rawUri of candidateHostUris) {
+    if (typeof rawUri === 'string' && rawUri) {
+      const cleaned = rawUri.replace(/^exp:\/\//, '').replace(/^http:\/\//, '').replace(/^https:\/\//, '');
+      const ip = cleaned.split(':')[0].split('/')[0];
+      if (ip && ip !== 'localhost' && ip !== '127.0.0.1' && ip !== '0.0.0.0') {
+        return ip;
+      }
     }
   }
   return null;
@@ -16,13 +28,17 @@ const hostIp = getExpoHostIp();
 
 const CANDIDATE_BASE_URLS: string[] = [];
 
+if (hostIp) {
+  CANDIDATE_BASE_URLS.push(`http://${hostIp}:8000/api/v1`);
+}
+
+// Machine local LAN IPs for physical device connections over Wi-Fi
+CANDIDATE_BASE_URLS.push('http://192.168.29.242:8000/api/v1');
+CANDIDATE_BASE_URLS.push('http://10.54.178.243:8000/api/v1');
+
 if (Platform.OS === 'web') {
   CANDIDATE_BASE_URLS.push('http://localhost:8000/api/v1');
   CANDIDATE_BASE_URLS.push('http://127.0.0.1:8000/api/v1');
-}
-
-if (hostIp) {
-  CANDIDATE_BASE_URLS.push(`http://${hostIp}:8000/api/v1`);
 }
 
 if (Platform.OS === 'android') {
@@ -31,7 +47,6 @@ if (Platform.OS === 'android') {
 
 CANDIDATE_BASE_URLS.push('http://localhost:8000/api/v1');
 CANDIDATE_BASE_URLS.push('http://127.0.0.1:8000/api/v1');
-CANDIDATE_BASE_URLS.push('http://192.168.29.242:8000/api/v1');
 
 const UNIQUE_BASE_URLS = Array.from(new Set(CANDIDATE_BASE_URLS));
 
@@ -93,18 +108,22 @@ export async function enhanceCameraPhotoBase64(rawUri: string): Promise<string |
   return null;
 }
 
-export async function fetchFromBackend(path: string, options?: RequestInit): Promise<Response> {
+export async function fetchFromBackend(path: string, options?: RequestInit & { timeoutMs?: number }): Promise<Response> {
   const hostCandidates = UNIQUE_BASE_URLS.map((u) => u.replace('/api/v1', ''));
   let lastError: any = null;
+  const timeoutMs = options?.timeoutMs || (path.includes('speech-to-text') || path.includes('pricing') || path.includes('enhance') ? 60000 : 30000);
 
   for (const host of hostCandidates) {
     try {
       const url = `${host}${path.startsWith('/') ? path : '/' + path}`;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+      const fetchOptions = { ...options };
+      delete (fetchOptions as any).timeoutMs;
 
       const res = await fetch(url, {
-        ...options,
+        ...fetchOptions,
         signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
@@ -117,11 +136,133 @@ export async function fetchFromBackend(path: string, options?: RequestInit): Pro
 
       if (res.ok) {
         return res;
+      } else {
+        // Server responded with HTTP error status (4xx / 5xx) -> stop looping and return response
+        return res;
       }
-    } catch (err) {
+    } catch (err: any) {
       lastError = err;
     }
   }
 
   throw lastError || new Error(`Failed to connect to backend server for ${path}`);
 }
+
+export async function checkPhoneRegistered(phone: string): Promise<{ is_registered: boolean; user_id?: string; full_name?: string }> {
+  const res = await fetchFromBackend('/api/v1/auth/check-phone', {
+    method: 'POST',
+    body: JSON.stringify({ phone_number: phone }),
+  });
+  return await res.json();
+}
+
+export async function requestLoginOtp(phone: string): Promise<{ message: string; phone_number: string; demo_otp?: string }> {
+  const hostCandidates = UNIQUE_BASE_URLS.map((u) => u.replace('/api/v1', ''));
+  let lastError: any = null;
+
+  for (const host of hostCandidates) {
+    try {
+      const url = `${host}/api/v1/auth/request-otp`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone_number: phone }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || 'Failed to request OTP');
+      }
+      return data;
+    } catch (err: any) {
+      lastError = err;
+      // If server returned a business logic error (e.g. 404 Unregistered or 400), throw immediately
+      if (err.message && !err.name?.includes('AbortError') && !err.message.includes('canceled') && !err.message.includes('failed to fetch')) {
+        throw err;
+      }
+    }
+  }
+  if (lastError && (lastError.name?.includes('AbortError') || lastError.message?.includes('canceled'))) {
+    throw new Error('Backend connection timed out. Please check if backend server is running on http://localhost:8000');
+  }
+  throw lastError || new Error('Failed to request OTP');
+}
+
+export async function verifyLoginOtp(phone: string, otpCode: string): Promise<any> {
+  const hostCandidates = UNIQUE_BASE_URLS.map((u) => u.replace('/api/v1', ''));
+  let lastError: any = null;
+
+  for (const host of hostCandidates) {
+    try {
+      const url = `${host}/api/v1/auth/verify-otp-login`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone_number: phone, otp_code: otpCode }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || 'Invalid OTP. Please try again.');
+      }
+      return data;
+    } catch (err: any) {
+      lastError = err;
+      if (err.message && !err.name?.includes('AbortError') && !err.message.includes('canceled') && !err.message.includes('failed to fetch')) {
+        throw err;
+      }
+    }
+  }
+  if (lastError && (lastError.name?.includes('AbortError') || lastError.message?.includes('canceled'))) {
+    throw new Error('Backend connection timed out. Please check if backend server is running on http://localhost:8000');
+  }
+  throw lastError || new Error('Failed to verify OTP');
+}
+
+export async function registerArtisan(payload: any): Promise<any> {
+  const hostCandidates = UNIQUE_BASE_URLS.map((u) => u.replace('/api/v1', ''));
+  let lastError: any = null;
+
+  for (const host of hostCandidates) {
+    try {
+      const url = `${host}/api/v1/auth/signup/artisan/register`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || 'Registration failed');
+      }
+      return data;
+    } catch (err: any) {
+      lastError = err;
+      if (err.message && !err.name?.includes('AbortError') && !err.message.includes('canceled') && !err.message.includes('failed to fetch')) {
+        throw err;
+      }
+    }
+  }
+  if (lastError && (lastError.name?.includes('AbortError') || lastError.message?.includes('canceled'))) {
+    throw new Error('Backend connection timed out. Please check if backend server is running on http://localhost:8000');
+  }
+  throw lastError || new Error('Registration failed');
+}
+
+

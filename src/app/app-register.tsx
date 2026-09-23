@@ -327,6 +327,14 @@ export default function AppRegisterScreen() {
         currentSessionRef.current = null;
       },
       onComplete: (finalText) => {
+        if (finalText && finalText.trim()) {
+          const clean = finalText.trim();
+          if (field === 'name') setFullName(clean);
+          else if (field === 'phone') setPhoneNumber(clean);
+          else if (field === 'aadhaar') setAadhaarNumber(clean);
+          else if (field === 'pan') setPanNumber(clean);
+          else if (field === 'gst') setGstNumber(clean);
+        }
         setActiveMicField(null);
         setLiveRawSpeech('');
         currentSessionRef.current = null;

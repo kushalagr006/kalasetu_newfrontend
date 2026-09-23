@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import (
     verify_firebase_otp_token,
@@ -13,6 +14,12 @@ from app.core.security import (
 from app.models.user import User, ArtisanProfile, BuyerProfile, UserRole, VerificationStatus
 from app.schemas.auth import (
     Token,
+    PhoneCheckRequest,
+    PhoneCheckResponse,
+    OTPRequestPayload,
+    OTPRequestResponse,
+    OTPVerifyLoginPayload,
+    ArtisanRegistrationRequest,
     ArtisanSignupStep1,
     ArtisanSignupStep2,
     CustomerB2CSignup,
@@ -25,6 +32,210 @@ from app.schemas.user import UserOut
 from app.services.verification import verify_aadhaar_mock, verify_pan_mock, verify_gstin_mock
 
 router = APIRouter()
+
+
+def normalize_phone(phone: str) -> str:
+    cleaned = phone.strip().replace(" ", "").replace("-", "")
+    if cleaned.startswith("+91"):
+        cleaned = cleaned[3:]
+    elif cleaned.startswith("91") and len(cleaned) == 12:
+        cleaned = cleaned[2:]
+    return cleaned
+
+
+@router.post("/check-phone", response_model=PhoneCheckResponse)
+async def check_phone(payload: PhoneCheckRequest, db: AsyncSession = Depends(get_db)):
+    """
+    Optional UX endpoint to check if a phone number is registered.
+    (Not used as the security/auth authority).
+    """
+    phone = normalize_phone(payload.phone_number)
+    result = await db.execute(select(User).where(User.phone_number == phone))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return {"is_registered": False, "user_id": None, "full_name": None}
+
+    return {"is_registered": True, "user_id": user.id, "full_name": user.full_name}
+
+
+@router.post("/request-otp", response_model=OTPRequestResponse)
+async def request_otp(payload: OTPRequestPayload, db: AsyncSession = Depends(get_db)):
+    """
+    Independently checks database for registered user and issues OTP request.
+    If unregistered: Returns HTTP 404 (No OTP generated/sent).
+    In Dev Mode: Returns demo_otp "123456".
+    In Prod Mode: Fails closed if real OTP provider is not configured.
+    """
+    phone = normalize_phone(payload.phone_number)
+    result = await db.execute(select(User).where(User.phone_number == phone))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="This mobile number is not registered. Please register first."
+        )
+
+    is_dev = settings.ENVIRONMENT.lower() != "production"
+
+    if is_dev:
+        return {
+            "message": "OTP sent successfully.",
+            "phone_number": phone,
+            "demo_otp": "123456"
+        }
+
+    # Production mode check: Fail closed if real SMS provider is not configured
+    raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="SMS service unavailable. Real OTP provider is not configured."
+    )
+
+
+@router.post("/verify-otp-login", response_model=Token)
+async def verify_otp_login(payload: OTPVerifyLoginPayload, db: AsyncSession = Depends(get_db)):
+    """
+    Verifies login OTP, issues JWT access token, and returns user profile details.
+    In Dev Mode: Validates fixed Mock OTP "123456".
+    In Prod Mode: Validates via real OTP provider (fails closed if unconfigured).
+    """
+    phone = normalize_phone(payload.phone_number)
+    result = await db.execute(select(User).where(User.phone_number == phone))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="This mobile number is not registered. Please register first."
+        )
+
+    is_dev = settings.ENVIRONMENT.lower() != "production"
+
+    if is_dev:
+        if payload.otp_code.strip() != "123456":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid OTP. Please try again."
+            )
+    else:
+        # Production fail closed
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="SMS service unavailable. Real OTP provider is not configured."
+        )
+
+    token = create_access_token({"sub": user.id, "role": user.role})
+
+    artisan_prof = None
+    if user.role == UserRole.ARTISAN:
+        prof_res = await db.execute(select(ArtisanProfile).where(ArtisanProfile.user_id == user.id))
+        profile = prof_res.scalar_one_or_none()
+        if profile:
+            artisan_prof = {
+                "id": profile.id,
+                "state": profile.state,
+                "district": profile.district,
+                "city": profile.city,
+                "craft_category": profile.craft_category,
+                "craft_type": profile.craft_type,
+                "verification_status": profile.verification_status
+            }
+
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user_id": user.id,
+        "role": user.role,
+        "full_name": user.full_name,
+        "is_verified": user.is_verified,
+        "artisan_profile": artisan_prof
+    }
+
+
+@router.post("/signup/artisan/register")
+async def register_artisan_complete(
+    payload: ArtisanRegistrationRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Registers a new Artisan in the database with is_verified=False and ArtisanProfile.
+    """
+    phone = normalize_phone(payload.phone_number)
+
+    # Check if already registered
+    existing_res = await db.execute(select(User).where(User.phone_number == phone))
+    if existing_res.scalar_one_or_none():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Mobile number is already registered. Please login."
+        )
+
+    # Validate Aadhaar & PAN format/mock check
+    aadhaar_res = verify_aadhaar_mock(payload.aadhaar_number)
+    if not aadhaar_res["is_valid"]:
+        raise HTTPException(status_code=400, detail=aadhaar_res["message"])
+
+    pan_res = verify_pan_mock(payload.pan_number)
+    if not pan_res["is_valid"]:
+        raise HTTPException(status_code=400, detail=pan_res["message"])
+
+    if payload.gstin:
+        gst_res = verify_gstin_mock(payload.gstin)
+        if not gst_res["is_valid"]:
+            raise HTTPException(status_code=400, detail=gst_res["message"])
+
+    # Create User record with is_verified=False (Registration does NOT mean KYC verification)
+    user = User(
+        phone_number=phone,
+        full_name=payload.full_name,
+        role=UserRole.ARTISAN,
+        preferred_language=payload.preferred_language,
+        is_verified=False
+    )
+    db.add(user)
+    await db.flush()
+
+    # Bhashini NMT Translation: Translate regional language registration details into English for database storage
+    state_en = payload.state
+    district_en = payload.district
+    city_en = payload.city
+    craft_category_en = payload.craft_category
+    craft_type_en = payload.craft_type
+
+    pref_lang = payload.preferred_language or "hi"
+    if pref_lang != "en":
+        try:
+            if payload.state:
+                state_en = await bhashini_service.translate_text(payload.state, source_lang=pref_lang, target_lang="en")
+            if payload.district:
+                district_en = await bhashini_service.translate_text(payload.district, source_lang=pref_lang, target_lang="en")
+            if payload.city:
+                city_en = await bhashini_service.translate_text(payload.city, source_lang=pref_lang, target_lang="en")
+            if payload.craft_category:
+                craft_category_en = await bhashini_service.translate_text(payload.craft_category, source_lang=pref_lang, target_lang="en")
+            if payload.craft_type:
+                craft_type_en = await bhashini_service.translate_text(payload.craft_type, source_lang=pref_lang, target_lang="en")
+        except Exception as trans_err:
+            print(f"[Bhashini Auth NMT Translation Warning]: {trans_err}")
+
+    # Create ArtisanProfile record with PENDING verification
+    profile = ArtisanProfile(
+        user_id=user.id,
+        aadhaar_number=payload.aadhaar_number,
+        pan_number=payload.pan_number,
+        gstin=payload.gstin,
+        state=state_en,
+        district=district_en,
+        city=city_en,
+        craft_category=craft_category_en,
+        craft_type=craft_type_en,
+        verification_status=VerificationStatus.PENDING
+    )
+    db.add(profile)
+    await db.commit()
+
+    return {"message": "Registration Successful. Please Login.", "user_id": user.id}
 
 
 @router.post("/verify-otp", response_model=Token)
@@ -55,6 +266,7 @@ async def verify_otp(payload: FirebaseOTPVerifyRequest, db: AsyncSession = Depen
         "token_type": "bearer",
         "user_id": user.id,
         "role": user.role,
+        "full_name": user.full_name,
         "is_verified": user.is_verified
     }
 
@@ -138,7 +350,6 @@ async def artisan_signup_step2(
 
     user.full_name = payload.full_name
     user.preferred_language = payload.preferred_language
-    user.is_verified = True
 
     prof_res = await db.execute(select(ArtisanProfile).where(ArtisanProfile.user_id == user.id))
     profile = prof_res.scalar_one_or_none()
@@ -151,7 +362,6 @@ async def artisan_signup_step2(
     profile.city = payload.city
     profile.craft_category = payload.craft_category
     profile.craft_type = payload.craft_type
-    profile.verification_status = VerificationStatus.VERIFIED
 
     await db.commit()
 
@@ -161,6 +371,7 @@ async def artisan_signup_step2(
         "token_type": "bearer",
         "user_id": user.id,
         "role": user.role,
+        "full_name": user.full_name,
         "is_verified": user.is_verified
     }
 
@@ -212,6 +423,7 @@ async def customer_b2c_signup(
         "token_type": "bearer",
         "user_id": user.id,
         "role": user.role,
+        "full_name": user.full_name,
         "is_verified": user.is_verified
     }
 
@@ -224,7 +436,6 @@ async def customer_bulk_signup(
     """
     Bulk Buyer (NGO / Retailer / Exporter / Corporate) Signup
     """
-    # Validate identity documents
     aadhaar_res = verify_aadhaar_mock(payload.aadhaar_number)
     if not aadhaar_res["is_valid"]:
         raise HTTPException(status_code=400, detail=aadhaar_res["message"])
@@ -274,6 +485,7 @@ async def customer_bulk_signup(
         "token_type": "bearer",
         "user_id": user.id,
         "role": user.role,
+        "full_name": user.full_name,
         "is_verified": user.is_verified
     }
 
@@ -296,7 +508,7 @@ async def customer_govt_signup(
             full_name=payload.full_name,
             role=UserRole.CUSTOMER_GOVT,
             preferred_language=payload.preferred_language,
-            is_verified=False  # Requires Admin Approval
+            is_verified=False
         )
         db.add(user)
         await db.flush()
@@ -323,6 +535,7 @@ async def customer_govt_signup(
         "token_type": "bearer",
         "user_id": user.id,
         "role": user.role,
+        "full_name": user.full_name,
         "is_verified": user.is_verified
     }
 

@@ -36,7 +36,7 @@ class BhashiniService:
         lang_code = bhashini_lang_map.get(source_language, "hi")
 
         # 1. Attempt official Bhashini ASR Dhruva API if API Key is set
-        if self.api_key and self.api_key != "mock_bhashini_api_key_sih":
+        if self.api_key:
             try:
                 import base64
                 base64_audio = base64.b64encode(audio_content).decode("utf-8")
@@ -99,7 +99,7 @@ class BhashiniService:
             return text.strip()
 
         # 1. Attempt official Bhashini NMT Dhruva API if API Key is set
-        if self.api_key and self.api_key != "mock_bhashini_api_key_sih":
+        if self.api_key:
             try:
                 headers = {"Authorization": self.api_key, "Content-Type": "application/json"}
                 src = source_lang if source_lang != "auto" else "hi"
