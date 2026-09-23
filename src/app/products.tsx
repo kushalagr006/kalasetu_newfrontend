@@ -310,6 +310,8 @@ const TRANSLATIONS: Record<LangCode, {
   },
 };
 
+import { getAuthUser } from '@/utils/authStore';
+
 export default function ProductsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ lang?: string }>();
@@ -317,7 +319,20 @@ export default function ProductsScreen() {
   const initialLang: LangCode = (params.lang as LangCode) || globalLang || 'hi';
 
   const [selectedLang, setSelectedLang] = useState<LangCode>(initialLang);
-  const productsList = useProducts();
+  const [artisanUserId, setArtisanUserId] = useState<string | undefined>(undefined);
+  const rawProductsList = useProducts(artisanUserId);
+
+  React.useEffect(() => {
+    getAuthUser().then((user) => {
+      if (user) {
+        setArtisanUserId(user.user_id || user.id);
+      }
+    });
+  }, []);
+
+  const productsList = artisanUserId
+    ? rawProductsList.filter((p) => !p.artisanId || p.artisanId === artisanUserId)
+    : rawProductsList;
 
   React.useEffect(() => {
     if (globalLang) {

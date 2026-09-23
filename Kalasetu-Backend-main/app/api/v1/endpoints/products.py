@@ -74,30 +74,50 @@ async def upload_product_photo(
     }
 
 
+import jwt
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query, Header
+from app.core.config import settings
+
 @router.post("/", response_model=ProductOut)
 async def create_product(
     payload: ProductCreate,
     primary_image_url: Optional[str] = None,
+    authorization: Optional[str] = Header(None),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Publish Product to Artisan Catalog.
     Supports voice wizard and camera photo publishing.
     """
-    # 1. Fetch or auto-create default artisan user if needed
-    res = await db.execute(select(User).where(User.role == UserRole.ARTISAN))
-    artisan = res.scalars().first()
-    if not artisan:
-        artisan = User(
-            id="artisan_001",
-            full_name="Ramesh Prajapati",
-            phone="9876543210",
-            role=UserRole.ARTISAN,
-            state="Rajasthan",
-            city="Jaipur"
-        )
-        db.add(artisan)
-        await db.flush()
+    artisan_id = None
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization.split(" ")[1]
+        try:
+            decoded = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+            user_id = decoded.get("sub")
+            if user_id:
+                res = await db.execute(select(User).where(User.id == user_id))
+                user = res.scalar_one_or_none()
+                if user:
+                    artisan_id = user.id
+        except Exception as e:
+            print(f"[Create Product Auth Token Decode Info]: {e}")
+
+    if not artisan_id:
+        res = await db.execute(select(User).where(User.role == UserRole.ARTISAN))
+        artisan = res.scalars().first()
+        if not artisan:
+            artisan = User(
+                id="artisan_001",
+                full_name="Ramesh Prajapati",
+                phone="9876543210",
+                role=UserRole.ARTISAN,
+                state="Rajasthan",
+                city="Jaipur"
+            )
+            db.add(artisan)
+            await db.flush()
+        artisan_id = artisan.id
 
     img_url = payload.primary_image_url or primary_image_url or ""
     rec_price = round(payload.price * 1.15, 2)
@@ -113,7 +133,7 @@ async def create_product(
     )
 
     product = Product(
-        artisan_id=artisan.id,
+        artisan_id=artisan_id,
         title=payload.title,
         description=payload.description,
         category=payload.category,

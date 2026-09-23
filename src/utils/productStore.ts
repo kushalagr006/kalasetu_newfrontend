@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LangCode } from '@/utils/languageStore';
 import { fetchFromBackend } from '@/services/apiClient';
+import { getAuthUser, getAuthToken } from '@/utils/authStore';
 
 export interface ProductItem {
   id: string;
@@ -27,9 +28,8 @@ export interface ProductItem {
   artisanPrice?: number;
   aiSuggestedPrice?: number;
   guidanceText?: string;
+  artisanId?: string;
 }
-
-const DEFAULT_PRODUCTS: ProductItem[] = [];
 
 let globalProducts: ProductItem[] = [];
 const listeners = new Set<() => void>();
@@ -65,9 +65,13 @@ export async function addPublishedProduct(newProduct: {
     : `₹${newProduct.price}`;
 
   const srcLang = newProduct.sourceLanguage || 'hi';
+  const user = await getAuthUser();
+  const token = await getAuthToken();
+  const activeArtisanId = user?.user_id || user?.id || '';
 
   const createdItem: ProductItem = {
     id: `prod_${Date.now()}`,
+    artisanId: activeArtisanId,
     title: newProduct.title,
     description: newProduct.description || '',
     category: newProduct.category || 'Handicrafts',
@@ -101,6 +105,9 @@ export async function addPublishedProduct(newProduct: {
     const numericPrice = parseFloat(newProduct.price.replace(/[^0-9.]/g, '')) || 550;
     fetchFromBackend('/api/v1/products/', {
       method: 'POST',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify({
         title: newProduct.title,
         description: newProduct.description || '',
@@ -115,16 +122,20 @@ export async function addPublishedProduct(newProduct: {
       .then(async (res: any) => {
         if (res && res.ok) {
           const data = await res.json();
-          if (data && data.translations_json) {
-            createdItem.title_en = data.title_en;
-            createdItem.description_en = data.description_en;
-            createdItem.category_en = data.category_en;
-            createdItem.materialUsed_en = data.material_used_en;
-            createdItem.translations_json = data.translations_json;
-            try {
-              const parsed = typeof data.translations_json === 'string' ? JSON.parse(data.translations_json) : data.translations_json;
-              createdItem.names = { ...createdItem.names, ...parsed };
-            } catch (e) {}
+          if (data) {
+            if (data.id) createdItem.id = data.id;
+            if (data.artisan_id) createdItem.artisanId = data.artisan_id;
+            if (data.translations_json) {
+              createdItem.title_en = data.title_en;
+              createdItem.description_en = data.description_en;
+              createdItem.category_en = data.category_en;
+              createdItem.materialUsed_en = data.material_used_en;
+              createdItem.translations_json = data.translations_json;
+              try {
+                const parsed = typeof data.translations_json === 'string' ? JSON.parse(data.translations_json) : data.translations_json;
+                createdItem.names = { ...createdItem.names, ...parsed };
+              } catch (e) {}
+            }
             notifyListeners();
           }
         }
@@ -146,7 +157,6 @@ export function getMultilingualProductName(
   names?: Partial<Record<LangCode, string>>,
   title_en?: string
 ): string {
-  // 1. Try parsed translations_json first
   if (translations_json) {
     try {
       const parsed = typeof translations_json === 'string' ? JSON.parse(translations_json) : translations_json;
@@ -156,12 +166,10 @@ export function getMultilingualProductName(
     } catch (e) {}
   }
 
-  // 2. Try names object
   if (names && names[selectedLang] && typeof names[selectedLang] === 'string' && names[selectedLang]!.trim()) {
     return names[selectedLang]!;
   }
 
-  // 3. If selectedLang is English and title_en exists
   if (selectedLang === 'en' && title_en && title_en.trim()) {
     return title_en;
   }
@@ -173,7 +181,6 @@ export function getMultilingualProductName(
     return title_en || cleanTitle;
   }
 
-  // Dynamic English -> Regional translation dictionary fallback
   const lower = cleanTitle.toLowerCase();
   const translationsMap: Record<string, Record<LangCode, string>> = {
     pot: { hi: 'मिट्टी का घड़ा', en: 'Earthen Pot', bn: 'মাটির পাত্র', bho: 'मिट्टी के घड़ा', mr: 'मातीचे भांडे', gu: 'માટીનું વાસણ', raj: 'माटी रो घड़ो', kn: 'ಮಣ್ಣಿನ ಪಾತ್ರೆ' },
@@ -183,7 +190,7 @@ export function getMultilingualProductName(
     basket: { hi: 'बांस की टोकरी', en: 'Bamboo Basket', bn: 'বাঁশের ঝুড়ি', bho: 'बांस के दौरा', mr: 'बांबूची टोपली', gu: 'વાંસની ટોપલી', raj: 'बांस री टोकरी', kn: 'ಬಿದಿರಿನ ಬುಟ್ಟಿ' },
     lamp: { hi: 'हस्तनिर्मित दीपक', en: 'Handmade Lamp', bn: 'হাতে তৈরি প্রদীপ', bho: 'हाथ के दिया', mr: 'हस्तनिर्मित दिवा', gu: 'હાથથી બનાવેલ દીવો', raj: 'हाथ रो दीयो', kn: 'ಹಸ್ತಚಾಲಿತ ದೀಪ' },
     wood: { hi: 'काष्ठ शिल्प', en: 'Wood Craft', bn: 'কাষ্ঠ শিল্প', bho: 'लकड़ी शिल्प', mr: 'काष्ठ कला', gu: 'લાકડાનું શિલ્પ', raj: 'काष्ठ शिल्प', kn: 'ಮರದ ಕರಕುಶಲ' },
-    wooden: { hi: 'लकड़ी की कलाकृति', en: 'Wooden Craft', bn: 'কাঠের শিল্পবস্ত্র', bho: 'लकड़ी के सामान', mr: 'लाकडी वस्तू', gu: 'લાકડાની બનાવટ', raj: 'लाकડી सामान', kn: 'ಮರದ ವಸ್ತು' },
+    wooden: { hi: 'लकड़ी की कलाकृति', en: 'Wooden Craft', bn: 'কাঠের শিল্পবস্ত্র', bho: 'लकડી के सामान', mr: 'लाकडी वस्तू', gu: 'લાકડાની બનાવટ', raj: 'लाकड़ी सामान', kn: 'ಮರದ ವಸ್ತು' },
     mat: { hi: 'हथकरघा चटाई', en: 'Handwoven Mat', bn: 'হাতে বোনা মাদুর', bho: 'हाथ के चटाई', mr: 'हातमाग चटई', gu: 'હાથ વણેલી શેતરંજી', raj: 'हाथ री चटाई', kn: 'ಹಸ್ತಚಾಲಿತ ಚಾಪೆ' },
     saree: { hi: 'हथकरघा साड़ी', en: 'Handloom Saree', bn: 'তাঁতের শাড়ি', bho: 'हथकरघा साड़ी', mr: 'हातमाग साडी', gu: 'હાથ વણાટ સાડી', raj: 'हथकरघा साड़ी', kn: 'ಮಗ್ಗದ ಸೀರೆ' },
     bag: { hi: 'जूट का थैला', en: 'Jute Bag', bn: 'পাট ব্যাগ', bho: 'पटुआ के झोला', mr: 'ज्यूट पिशवी', gu: 'શણની થેલી', raj: 'पटुआ रो थैलो', kn: 'ಸೆಣಬಿನ ಚೀಲ' },
@@ -198,9 +205,19 @@ export function getMultilingualProductName(
   return cleanTitle;
 }
 
-export async function syncBackendProducts(): Promise<ProductItem[]> {
+export async function syncBackendProducts(artisanIdFilter?: string): Promise<ProductItem[]> {
   try {
-    const res = await fetchFromBackend('/api/v1/products/');
+    let targetArtisanId = artisanIdFilter;
+    if (!targetArtisanId) {
+      const user = await getAuthUser();
+      targetArtisanId = user?.user_id || user?.id;
+    }
+
+    const endpoint = targetArtisanId
+      ? `/api/v1/products/?artisan_id=${targetArtisanId}`
+      : '/api/v1/products/';
+
+    const res = await fetchFromBackend(endpoint);
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data)) {
@@ -211,6 +228,7 @@ export async function syncBackendProducts(): Promise<ProductItem[]> {
 
           return {
             id: item.id,
+            artisanId: item.artisan_id,
             title: item.title,
             title_en: item.title_en,
             description: item.description,
@@ -229,9 +247,10 @@ export async function syncBackendProducts(): Promise<ProductItem[]> {
           };
         });
 
-        // Replace globalProducts with fresh backend items while keeping unsynced local pending items
         const fetchedIds = new Set(fetchedItems.map((f) => f.id));
-        const pendingLocal = globalProducts.filter((p) => p.id.startsWith('prod_') && !fetchedIds.has(p.id));
+        const pendingLocal = globalProducts.filter(
+          (p) => p.id.startsWith('prod_') && !fetchedIds.has(p.id) && (!targetArtisanId || p.artisanId === targetArtisanId)
+        );
         globalProducts = [...pendingLocal, ...fetchedItems];
         notifyListeners();
       }
@@ -242,19 +261,32 @@ export async function syncBackendProducts(): Promise<ProductItem[]> {
   return globalProducts;
 }
 
-export function useProducts(): ProductItem[] {
+export function useProducts(filterArtisanId?: string): ProductItem[] {
   const [products, setProducts] = useState<ProductItem[]>(globalProducts);
+  const [currentArtisanId, setCurrentArtisanId] = useState<string | undefined>(filterArtisanId);
 
   useEffect(() => {
-    // Initial backend sync
-    syncBackendProducts();
+    const initSync = async () => {
+      let targetId = filterArtisanId;
+      if (!targetId) {
+        const user = await getAuthUser();
+        targetId = user?.user_id || user?.id;
+      }
+      setCurrentArtisanId(targetId);
+      await syncBackendProducts(targetId);
+    };
+    initSync();
 
     const handleChange = () => setProducts([...globalProducts]);
     listeners.add(handleChange);
     return () => {
       listeners.delete(handleChange);
     };
-  }, []);
+  }, [filterArtisanId]);
+
+  if (currentArtisanId) {
+    return products.filter((p) => p.artisanId === currentArtisanId || p.id.startsWith('prod_'));
+  }
 
   return products;
 }
